@@ -8,6 +8,6 @@ https://www.figma.com/file/7MYcOTyrKp69eeh8qOzWSL/music-popsong-education?type=d
 
 시스템 아키텍처
 
-![시스템아키텍처](https://github.com/lushlife99/24CapstoneDesign/assets/101994803/3b4659fe-5cd5-4947-a2bc-2fc11fe0f6fa)
+![시스템아키텍처](https://github.com/lushlife99/24CapstoneDesign/assets/101994803/5d180253-6868-457d-9b5e-3079bd13b530)
 
 
