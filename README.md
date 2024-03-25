@@ -5,8 +5,7 @@
 |      정찬       |          이효민         |       문영호       |          김동욱         |                                                                                                         
 | :------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------: |
 |  <img width="160px" src="https://avatars.githubusercontent.com/lushlife99"/> | <img width="160px" src="https://avatars.githubusercontent.com/hyomin1"/> |  <img width="160px" src="https://avatars.githubusercontent.com/Hodu-moon"/> |  <img width="160px" src="https://avatars.githubusercontent.com/DDOONNGGUK"/> |
-|   [@lushlife99](https://github.com/lushlife99)   |    [@hyomin1](https://github.com/hyomin1)  |  [@Hodu-moon](https://github.com/Hodu-moon)  
-| [@DDOONNGGUK](https://github.com/DDOONNGGUK)  |
+|   [@lushlife99](https://github.com/lushlife99)   | [@hyomin1](https://github.com/hyomin1)  | [@Hodu-moon](https://github.com/Hodu-moon) | [@DDOONNGGUK](https://github.com/DDOONNGGUK) | 
 | 백엔드 | 프론트엔드 | 프론트엔드 | AI |
 -------
 
