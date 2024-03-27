@@ -1,4 +1,4 @@
-package com.example.melearnbe.enums;
+package com.example.melLearnBE.enums;
 
 public enum ProbType {
     GRAMMAR,

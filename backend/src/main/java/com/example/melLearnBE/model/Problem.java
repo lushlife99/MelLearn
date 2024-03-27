@@ -1,6 +1,6 @@
-package com.example.melearnbe.model;
+package com.example.melLearnBE.model;
 
-import com.example.melearnbe.enums.ProbType;
+import com.example.melLearnBE.enums.ProbType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

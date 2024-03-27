@@ -1,4 +1,4 @@
-package com.example.melearnbe;
+package com.example.melLearnBE;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

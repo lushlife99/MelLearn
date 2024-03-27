@@ -1,4 +1,4 @@
-package com.example.melearnbe.model;
+package com.example.melLearnBE.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
