@@ -1,4 +1,4 @@
-package com.example.melearnbe.model;
+package com.example.melLearnBE.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

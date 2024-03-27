@@ -1,13 +1,13 @@
-package com.example.melearnbe;
+package com.example.melLearnBE;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class MeLearnBeApplication {
+public class MelLearnBeApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(MeLearnBeApplication.class, args);
+		SpringApplication.run(MelLearnBeApplication.class, args);
 	}
 
 }

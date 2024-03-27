@@ -1,7 +1,7 @@
-package com.example.melearnbe.model;
+package com.example.melLearnBE.model;
 
 
-import com.example.melearnbe.enums.Language;
+import com.example.melLearnBE.enums.Language;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
