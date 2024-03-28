@@ -1,6 +1,7 @@
 package com.example.melLearnBE.model;
 
 import com.example.melLearnBE.enums.Language;
+import com.example.melLearnBE.enums.LearningLevel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,7 +28,8 @@ public class Member implements UserDetails {
     private String memberId;
     private String name;
     private String password;
-    private int level;
+    @Enumerated(value = EnumType.ORDINAL)
+    private LearningLevel level;
     @Enumerated(value = EnumType.ORDINAL)
     private Language langType;
     private Long spotifyAccountId;

@@ -1,7 +1,7 @@
 jwt:
   secret: VlwEyVBsYt9V7zq57TejMnVUyzblYcfPQye08f7MGVA9XkHa
-  refresh-expiration-time: 1209600
-  access-expiration-time: 43200
+  refresh-expiration-time: 259200000 # 3days
+  access-expiration-time: 3600000 # 1hour
 
 spring:
   data:
