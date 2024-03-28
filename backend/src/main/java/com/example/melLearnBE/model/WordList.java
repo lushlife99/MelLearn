@@ -21,7 +21,8 @@ public class WordList {
     @OneToMany(mappedBy = "wordList")
     @Builder.Default
     private List<Word> words = new ArrayList<>();
-
+    @ManyToOne
+    private Member member;
     @Enumerated(EnumType.ORDINAL)
     private Language langType;
 

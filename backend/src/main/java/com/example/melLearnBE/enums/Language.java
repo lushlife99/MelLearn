@@ -11,5 +11,5 @@ public enum Language {
 
     ;
 
-    private final String iso639;
+    private final String iso639Value;
 }

@@ -1,6 +1,5 @@
 package com.example.melLearnBE.model;
 
-
 import com.example.melLearnBE.enums.Language;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,45 +7,57 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
-public class User implements UserDetails {
+public class Member implements UserDetails {
 
     @Id @GeneratedValue
     private Long id;
-    private String userId;
-    private String username;
+    private String memberId;
+    private String name;
     private String password;
     private int level;
     @Enumerated(value = EnumType.ORDINAL)
     private Language langType;
     private Long spotifyAccountId;
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<History> history;
-    @OneToMany
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<WordList> wordLists;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Builder.Default
+    private List<String> roles = new ArrayList<>();
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        List<SimpleGrantedAuthority> collect = this.roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+
+        return collect;
     }
+
 
     @Override
     public String getPassword() {
-        return null;
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return null;
+        return memberId;
     }
 
     @Override
@@ -69,4 +80,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
 }
