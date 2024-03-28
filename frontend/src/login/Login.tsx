@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import axiosApi from "../api";
+import BgCircle from "../components/BgCircle";
+import { Link } from "react-router-dom";
 
 interface Input {
-  id: string;
+  user_id: string;
   password: string;
 }
 function Login() {
@@ -21,13 +23,7 @@ function Login() {
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
       <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col px-8">
-        <div className="absolute w-[521px] h-[667px] top-[157px] left-[-140px]">
-          <div className="absolute w-[500px] h-[500px] top-0 left-0 bg-[#d1faff2b] rounded-[250px]" />
-          <div className="absolute w-[170px] h-[170px] top-[497px] left-[351px] bg-[#a4d8e9] rounded-[85px]" />
-        </div>
-        <div className="absolute w-[216px] h-[162px] top-[-20px] left-[-22px]">
-          <div className="absolute w-[139px] h-[139px] top-0 left-0 bg-[#a4d8e9] rounded-[69.5px]" />
-        </div>
+        <BgCircle />
 
         <div className="z-10 mt-24">
           <div className="text-[#007aff] font-extrabold text-[40px] whitespace-normal">
@@ -44,11 +40,11 @@ function Login() {
           className="z-10 flex flex-col justify-center align-middle mt-28"
         >
           <input
-            {...register("id", { required: true })}
+            {...register("user_id", { required: true })}
             placeholder="아이디"
-            className="mb-3 rounded-[30px] h-[45px] shadow-[0px_4px_4px_#00000040] px-4"
+            className="mb-3 rounded-[30px] h-[45px] shadow-[0px_4px_4px_#00000040] px-4 border focus:border-blue-500"
           />
-          {errors.id && (
+          {errors.user_id && (
             <span className="text-center text-[red] font-bold">
               아이디를 입력해주세요
             </span>
@@ -64,7 +60,7 @@ function Login() {
               비밀번호를 입력해주세요
             </span>
           )}
-          <button className="mt-6 rounded-[30px] bg-[#495867] h-[45px] text-[white] ">
+          <button className="mt-6 rounded-[30px] bg-[#495867] h-[45px] text-[white] hover:bg-[gray] hover:text-[#495867]">
             로그인
           </button>
         </form>
@@ -75,7 +71,12 @@ function Login() {
           </span>
           <div className="flex flex-wrap items-center justify-center ">
             <div className="h-[2px] bg-white w-32"></div>
-            <span className="text-[#007AFF] font-bold mx-2">회원가입</span>
+            <Link
+              to="/join"
+              className="text-[#007AFF] font-bold mx-2 hover:text-[#87ceeb]"
+            >
+              회원가입
+            </Link>
             <div className="h-[2px] bg-white w-32"></div>
           </div>
         </div>

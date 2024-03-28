@@ -19,12 +19,14 @@ const handleRequestInterceptor = (
   return config;
 };
 
-const handleResponseInterceptor = (
+const handleResponseInterceptor = async (
   error: AxiosError
 ): Promise<AxiosResponse> => {
   if (error.response?.status === 401) {
     window.location.href = "/login";
   } else if (error.response?.status === 403) {
+    const res = await axiosApi.get("/reIssueJwt");
+    console.log(res.data);
   } else if (error.response?.status === 404) {
     console.error("404err");
   } else {

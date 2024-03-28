@@ -7,7 +7,7 @@ import Join from "./login/Join";
 
 function App() {
   return (
-    <div>
+    <div className="">
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Login />}></Route>
