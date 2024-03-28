@@ -28,11 +28,12 @@ public class Member implements UserDetails {
     private String memberId;
     private String name;
     private String password;
+    private int levelPoint;
     @Enumerated(value = EnumType.ORDINAL)
     private LearningLevel level;
     @Enumerated(value = EnumType.ORDINAL)
     private Language langType;
-    private Long spotifyAccountId;
+    private String spotifyAccountId;
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<History> history;
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)

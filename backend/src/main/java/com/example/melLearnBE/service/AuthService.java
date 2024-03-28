@@ -9,6 +9,8 @@ import com.example.melLearnBE.error.ErrorCode;
 import com.example.melLearnBE.jwt.JwtTokenProvider;
 import com.example.melLearnBE.model.Member;
 import com.example.melLearnBE.repository.MemberRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -50,5 +52,16 @@ public class AuthService {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getMemberId(), loginRequest.getPassword());
         Authentication authentication = authenticationManagerBuilder.authenticate(authenticationToken);
         return jwtTokenProvider.generateToken(authentication, response);
+    }
+
+    public TokenInfo reIssueToken(HttpServletRequest request, HttpServletResponse response) {
+        Cookie[] cookies = request.getCookies();
+        String refreshToken = "";
+
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals("refreshToken"))
+                refreshToken = cookie.getValue();
+        }
+        return jwtTokenProvider.reissueToken(refreshToken, response);
     }
 }

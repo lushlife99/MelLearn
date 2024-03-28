@@ -12,6 +12,7 @@ public class MemberDto {
     private Long id;
     private String memberId;
     private String name;
+    private int levelPoint;
     private LearningLevel level;
     private String langType;
 
@@ -21,5 +22,6 @@ public class MemberDto {
         this.name = member.getName();
         this.level = member.getLevel();
         this.langType = member.getLangType().getIso639Value();
+        this.levelPoint = member.getLevelPoint();
     }
 }
