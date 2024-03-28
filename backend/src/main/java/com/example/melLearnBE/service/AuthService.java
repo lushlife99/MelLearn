@@ -36,7 +36,7 @@ public class AuthService {
             throw new CustomException(ErrorCode.ALREADY_EXIST_USERID);
         }
 
-        Member joinMember = Member.builder().memberId(joinRequest.getMemberId()).level(LearningLevel.Beginner.getLevel()).langType(Language.ENGLISH)
+        Member joinMember = Member.builder().memberId(joinRequest.getMemberId()).level(LearningLevel.Beginner).langType(Language.ENGLISH)
                 .roles(Collections.singletonList("ROLE_USER")).name(joinRequest.getName()).password(encoder.encode(joinRequest.getPassword())).build();
         memberRepository.save(joinMember);
     }
