@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,6 +22,13 @@ public class MemberController {
     @Operation(summary = "멤버 정보 조회", description = "멤버 정보 조회")
     public MemberDto getMemberInfo(HttpServletRequest request) {
         return memberService.getMemberProfile(request);
+    }
+
+    @PostMapping("/spotifyAccount")
+    @Operation(summary = "스포티파이 계정 id 등록", description = "스포티파이 계정 id 등록")
+    public ResponseEntity updateSpotifyId(@RequestParam String accountId, HttpServletRequest request) {
+        memberService.updateSpotifyAccount(accountId, request);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @PutMapping("/info")

@@ -40,4 +40,12 @@ public class MemberService {
 
         return new MemberDto(member);
     }
+
+    @Transactional
+    public void updateSpotifyAccount(String accountId, HttpServletRequest request) {
+        Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
+        if(StringUtils.hasText(accountId)) {
+            member.setSpotifyAccountId(accountId);
+        }
+    }
 }
