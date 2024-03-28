@@ -24,7 +24,7 @@ public class Ranking {
             name = "score_list",
             joinColumns = @JoinColumn(name = "musicId")
     )
-    @MapKeyColumn(name = "userId")
+    @MapKeyColumn(name = "memberId")
     @Column(name = "score")
     @Builder.Default
     private Map<Long, Double> score_list = new HashMap<>();
