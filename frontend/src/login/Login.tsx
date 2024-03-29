@@ -43,7 +43,7 @@ function Login() {
           <input
             {...register("user_id", { required: true })}
             placeholder="아이디"
-            className="mb-3 rounded-[30px] h-[45px] shadow-[0px_4px_4px_#00000040] px-4 border focus:border-blue-500"
+            className="mb-3 rounded-[30px] h-[45px] shadow-[0px_4px_4px_#00000040] px-4  focus:outline-none focus:border-sky-500 focus:ring-2"
           />
           {errors.user_id && (
             <span className="text-center text-[red] font-bold">
@@ -54,7 +54,7 @@ function Login() {
             {...register("password", { required: true })}
             type="password"
             placeholder="비밀번호"
-            className="mt-3 mb-3 rounded-[30px] h-[45px] shadow-[0px_4px_4px_#00000040] px-4"
+            className="mt-3 mb-3 rounded-[30px] h-[45px] shadow-[0px_4px_4px_#00000040] px-4  focus:outline-none focus:border-sky-500 focus:ring-2"
           />
           {errors.password && (
             <span className="text-center text-[red] font-bold">

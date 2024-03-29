@@ -3,6 +3,7 @@ import BgCircle from "../components/BgCircle";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import axiosApi from "../api";
 
 interface Input {
   username: string;
@@ -20,7 +21,7 @@ function Join() {
     setError,
     setValue,
   } = useForm<Input>();
-  const goBack = () => {
+  const goLogin = () => {
     navigate("/");
   };
   const onSubmit = async (data: Input) => {
@@ -37,8 +38,16 @@ function Join() {
       setValue("user_id", "");
       setValue("password", "");
       setValue("confirmPassword", "");
-      //const res = await axiosApi.post("/join");
-      //console.log(res.data);
+      const res = await axiosApi.post("/join", {
+        username,
+        user_id,
+        password,
+      });
+      console.log(res.data, res.status);
+      if (res.status === 200) {
+        //회원가입 성공한 경우
+        goLogin();
+      }
     }
   };
 
@@ -46,8 +55,12 @@ function Join() {
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
       <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col px-8">
         <BgCircle />
-        <div onClick={goBack} className="z-10 mt-8">
-          <IoIosArrowRoundBack className="w-12 h-12 text-black hover:text-gray-300" />
+
+        <div className="relative z-10 w-12 h-12 px-0 mt-8 hover:text-gray-300">
+          <IoIosArrowRoundBack
+            onClick={goLogin}
+            className="absolute top-0 w-full h-full right-2"
+          />
         </div>
 
         <span className="z-10 text-[36px] text-[#007AFF] font-extrabold mt-28">
@@ -61,7 +74,7 @@ function Join() {
           <input
             {...register("username", { required: true })}
             placeholder="이름"
-            className="mb-3 rounded-[30px] h-[45px] shadow-[0px_4px_4px_#00000040] px-4"
+            className="mb-3 rounded-[30px] h-[45px] shadow-[0px_4px_4px_#00000040] px-4  focus:outline-none focus:border-sky-500 focus:ring-2"
           />
           {errors.username && (
             <span className="text-center text-[red] font-bold">
@@ -71,7 +84,7 @@ function Join() {
           <input
             {...register("user_id", { required: true })}
             placeholder="아이디"
-            className="my-3 rounded-[30px] h-[45px] shadow-[0px_4px_4px_#00000040] px-4"
+            className="my-3 rounded-[30px] h-[45px] shadow-[0px_4px_4px_#00000040] px-4  focus:outline-none focus:border-sky-500 focus:ring-2"
           />
           {errors.user_id && (
             <span className="text-center text-[red] font-bold">
@@ -83,7 +96,7 @@ function Join() {
             {...register("password", { required: true })}
             placeholder="비밀번호"
             type="password"
-            className="my-3 rounded-[30px] h-[45px] shadow-[0px_4px_4px_#00000040] px-4"
+            className="my-3 rounded-[30px] h-[45px] shadow-[0px_4px_4px_#00000040] px-4  focus:outline-none focus:border-sky-500 focus:ring-2"
           />
           {errors.password && (
             <span className="text-center text-[red] font-bold">
@@ -95,7 +108,7 @@ function Join() {
             {...register("confirmPassword", { required: true })}
             placeholder="비밀번호 확인"
             type="password"
-            className="my-3 rounded-[30px] h-[45px] shadow-[0px_4px_4px_#00000040] px-4"
+            className="my-3 rounded-[30px] h-[45px] shadow-[0px_4px_4px_#00000040] px-4  focus:outline-none focus:border-sky-500 focus:ring-2"
           />
 
           {errors.confirmPassword && (
