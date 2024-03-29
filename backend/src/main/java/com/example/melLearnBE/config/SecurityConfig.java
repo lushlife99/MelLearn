@@ -29,7 +29,6 @@ public class SecurityConfig  {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    private final static String SUBSCRIBE_HEADER = "SUBSCRIBE-ID";
     private final MemberAuthenticationService memberAuthenticationService;
     @Bean
     public BCryptPasswordEncoder encodePwd() {
@@ -62,7 +61,6 @@ public class SecurityConfig  {
         configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("HEAD","POST","GET","DELETE","PUT"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setExposedHeaders(Arrays.asList(SUBSCRIBE_HEADER));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
