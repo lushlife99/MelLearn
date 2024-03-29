@@ -15,11 +15,12 @@ function Login() {
     formState: { errors },
   } = useForm<Input>();
   const onSubmit = async (data: Input) => {
-    console.log(data);
-    //const res = await axiosApi.post("/login");
-    //console.log(res.data);
+    //const { user_id, password } = data;
+    const res = await axiosApi.post("/login", data);
+    const accessToken = res.data.access_token;
+    localStorage.setItem("accessToken", accessToken);
   };
-  console.log(errors);
+
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
       <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col px-8">

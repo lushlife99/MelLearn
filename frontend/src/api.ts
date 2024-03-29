@@ -5,14 +5,14 @@ import axios, {
 } from "axios";
 
 const axiosApi = axios.create({
-  baseURL: "localhost:8080",
+  baseURL: "http://localhost:8080",
   withCredentials: true,
 });
 
 const handleRequestInterceptor = (
   config: InternalAxiosRequestConfig
 ): InternalAxiosRequestConfig => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("accessToken");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -26,11 +26,13 @@ const handleResponseInterceptor = async (
     window.location.href = "/login";
   } else if (error.response?.status === 403) {
     const res = await axiosApi.get("/reIssueJwt");
+    const accessToken = res.data.access_token;
     console.log(res.data);
+    localStorage.setItem("access_token", accessToken);
   } else if (error.response?.status === 404) {
     console.error("404err");
   } else {
-    console.error("errr");
+    console.error("errrsss");
   }
   return Promise.reject(error.toJSON());
 };
