@@ -39,11 +39,12 @@ function Join() {
       setValue("password", "");
       setValue("confirmPassword", "");
       const res = await axiosApi.post("/join", {
-        username,
-        user_id,
+        name: username,
+        memberId: user_id,
         password,
       });
       console.log(res.data, res.status);
+
       if (res.status === 200) {
         //회원가입 성공한 경우
         goLogin();

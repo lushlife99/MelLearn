@@ -23,12 +23,12 @@ const handleResponseInterceptor = async (
   error: AxiosError
 ): Promise<AxiosResponse> => {
   if (error.response?.status === 401) {
-    window.location.href = "/login"; //로그인 창으로 리다이렉션
+    window.location.href = "/"; //로그인 창으로 리다이렉션
   } else if (error.response?.status === 403) {
     const res = await axiosApi.get("/reIssueJwt"); //토큰 재발급
-    const accessToken = res.data.access_token;
-    console.log(res.data);
-    localStorage.setItem("access_token", accessToken);
+    const accessToken = res.data.accessToken;
+
+    localStorage.setItem("accessToken", accessToken);
   } else if (error.response?.status === 404) {
     console.error("404err");
   } else {

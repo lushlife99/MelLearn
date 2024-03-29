@@ -15,9 +15,14 @@ function Login() {
     formState: { errors },
   } = useForm<Input>();
   const onSubmit = async (data: Input) => {
-    //const { user_id, password } = data;
-    const res = await axiosApi.post("/login", data);
-    const accessToken = res.data.access_token;
+    const { user_id, password } = data;
+
+    const res = await axiosApi.post("/login", {
+      memberId: user_id,
+      password,
+    });
+    console.log(res.data);
+    const accessToken = res.data.accessToken;
     localStorage.setItem("accessToken", accessToken);
   };
 
