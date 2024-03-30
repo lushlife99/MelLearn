@@ -1,6 +1,8 @@
 package com.example.melLearnBE.jwt;
 
 import com.example.melLearnBE.dto.model.TokenInfo;
+import com.example.melLearnBE.model.Member;
+import com.example.melLearnBE.repository.MemberRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -24,6 +26,7 @@ import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -37,18 +40,27 @@ public class JwtTokenProvider {
     private final int accessExpirationTime;
 
     private final int refreshExpirationTime;
+    private final MemberRepository memberRepository;
+
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey,
                             @Value("${jwt.access-expiration-time}") int accessExpirationTime,
                             @Value("${jwt.refresh-expiration-time}") int refreshExpirationTime,
-                            RedisTemplate<String, Object> redisTemplate) {
+                            RedisTemplate<String, Object> redisTemplate,
+                            MemberRepository memberRepository) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.redisTemplate = redisTemplate;
         this.accessExpirationTime = accessExpirationTime;
         this.refreshExpirationTime = refreshExpirationTime;
+        this.memberRepository = memberRepository;
     }
 
+    public Optional<Member> getMember(HttpServletRequest request) {
+        String accessToken = resolveToken(request);
+        Authentication authentication = getAuthentication(accessToken);
+        return memberRepository.findByMemberId(authentication.getName());
+    }
 
     public TokenInfo generateToken(Authentication authentication, HttpServletResponse response) {
         String accessToken = generateAccessToken(authentication);
@@ -137,14 +149,9 @@ public class JwtTokenProvider {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            log.info("잘못된 JWT 서명입니다.");
         } catch (ExpiredJwtException e) {
-            log.info("만료된 JWT 토큰입니다.");
         } catch (UnsupportedJwtException e) {
-            log.info("지원되지 않는 JWT 토큰입니다.");
         } catch (IllegalArgumentException e) {
-            log.info("JWT 토큰이 잘못되었습니다.");
-            log.info(token);
         }
         return false;
     }

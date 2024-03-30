@@ -19,7 +19,7 @@ public class History {
     private Long id;
     private double score;
     @ManyToOne(fetch = FetchType.LAZY)
-    private User user;
+    private Member member;
     @OneToOne
     private ProblemList problemList;
     @CreationTimestamp
