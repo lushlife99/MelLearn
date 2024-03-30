@@ -38,8 +38,8 @@ public class MemberService {
         if(memberDto.getLevel() != null) {
             member.setLevel(memberDto.getLevel());
         }
-        if(StringUtils.hasText(memberDto.getLangType()) && Language.valueOf(memberDto.getLangType()) != null) {
-            member.setLangType(Language.valueOf(memberDto.getLangType()));
+        if(StringUtils.hasText(memberDto.getLangType()) && Language.valueOfIso(memberDto.getLangType()) != null) {
+            member.setLangType(Language.valueOfIso(memberDto.getLangType()));
         }
 
         return new MemberDto(member);
