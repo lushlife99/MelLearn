@@ -1,6 +1,7 @@
 package com.example.melLearnBE.service;
 
 import com.example.melLearnBE.dto.model.MemberDto;
+import com.example.melLearnBE.enums.Language;
 import com.example.melLearnBE.error.CustomException;
 import com.example.melLearnBE.error.ErrorCode;
 import com.example.melLearnBE.jwt.JwtTokenProvider;
@@ -36,6 +37,9 @@ public class MemberService {
         }
         if(memberDto.getLevel() != null) {
             member.setLevel(memberDto.getLevel());
+        }
+        if(StringUtils.hasText(memberDto.getLangType()) && Language.valueOf(memberDto.getLangType()) != null) {
+            member.setLangType(Language.valueOf(memberDto.getLangType()));
         }
 
         return new MemberDto(member);
