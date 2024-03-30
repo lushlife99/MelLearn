@@ -5,8 +5,9 @@ import "./App.css";
 import Login from "./login/Login";
 import Join from "./login/Join";
 import Setting from "./setting/Setting";
-import {SpotifyLogo} from "./setting/SpotifyLogo";
+import { SpotifyLogo } from "./setting/SpotifyLogo";
 import Callback from "./callback/Callback";
+import MusicHome from "./musichome/MusicHome";
 
 function App() {
   return (
@@ -18,7 +19,7 @@ function App() {
           <Route path="/join" element={<Join />}></Route>
           <Route path="/spotify" element={<SpotifyLogo />}></Route>
           <Route path="/callback" element={<Callback />}></Route>
-          {/*<Route path="/callback/:error" element={<Callback />}></Route>*/}
+          <Route path="/home" element={<MusicHome />}></Route>
         </Routes>
       </BrowserRouter>
     </div>
