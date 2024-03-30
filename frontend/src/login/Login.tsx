@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import axiosApi from "../api";
 import BgCircle from "../components/BgCircle";
-import { Link } from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 
 interface Input {
   user_id: string;
@@ -14,6 +14,8 @@ function Login() {
     handleSubmit,
     formState: { errors },
   } = useForm<Input>();
+
+  const navigate = useNavigate();
   const onSubmit = async (data: Input) => {
     const { user_id, password } = data;
 
@@ -24,6 +26,9 @@ function Login() {
     console.log(res.data);
     const accessToken = res.data.accessToken;
     localStorage.setItem("accessToken", accessToken);
+    navigate("/spotify");
+
+
   };
 
   return (
