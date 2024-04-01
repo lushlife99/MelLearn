@@ -11,7 +11,7 @@ const options = {
   method: "GET",
   url: "https://spotify-scraper.p.rapidapi.com/v1/chart/tracks/top?region=us",
   headers: {
-    "X-RapidAPI-Key": "API_KEY",
+    "X-RapidAPI-Key": "7255ad630cmshdf9fda3f9dea3b0p1e9379jsn615bba3b42d1",
     "X-RapidAPI-Host": "spotify-scraper.p.rapidapi.com",
   },
 };
