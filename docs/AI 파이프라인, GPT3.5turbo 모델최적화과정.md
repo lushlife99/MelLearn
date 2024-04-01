@@ -136,7 +136,7 @@ gpt모델에 사용자의 학습 레벨에 따라서 난이도를 조절해주�
 > 
 > 문제를 푸는 사용자는 노래의 대략적인 분위기 정도만 파악했다고 전제한다. (사용자는 가사의 의미, 문맥 등의 세부 정보를 알지 못함)
 >> #### 빈칸의 정답과 option 불일치
-'''' 
+
 
             question": "I've been reading books of old The legends and the myths The moon and its ___",
 
@@ -148,11 +148,11 @@ gpt모델에 사용자의 학습 레벨에 따라서 난이도를 조절해주�
             ],
             "answer": "2",
             "comment": "이 문장에서 'The moon and its eclipse'는 '달과 그 음모들'을 의미합니다. 'moon'과 관련이 있는 'sun', 'stars', 'galaxy'는 여기에 적절하지 않습니다. 'sun'은 해와 관련이 있고, 'stars'는 별들과, 'galaxy'는 은하와 관련이 있습니다. 'moon'과 일치하지 않습니다."
-''''
+
 
 >> #### 중복 정답
 >> 사용자는 곡의 전체적인 분위기는 파악하고 있다고 가정한다. 따라서 ordinary를 제외한 모든 단어가 정답이 될 수 있다.
-''''
+
 
            "question": "I'm not lookin' for somebody With some ___ gifts",
             "options": [
@@ -165,11 +165,10 @@ gpt모델에 사용자의 학습 레벨에 따라서 난이도를 조절해주�
             "comment": "이 문장에서 'With some mysterious gifts'는 '어떤 수수께끼같은 선물을 가진 사람을 찾고 있지 않아'라는 뜻입니다. 'mysterious'가 가장 적합한 단어이며, 'ordinary', 'superhuman', 'magical'은 여기에 적합하지 않습니다. 'ordinary'는 평범한, 'superhuman'은 초능력을 갖춘, 'magical'은 마법 같은 단어이지만, 'mysterious'와는 맞지 않습니다."
 
 
-''''
+
 
 >> #### 생성된 question의 빈칸이 모호함.
 >> 빈칸이 한정적인 단어가 아닌 대부분의 단어로 대체될 수 있다.
-''''
 
             "question": "Superman unrolls A suit before he ___",
             "options": [
@@ -180,11 +179,11 @@ gpt모델에 사용자의 학습 레벨에 따라서 난이도를 조절해주�
             ],
             "answer": "3",
             "comment": "이 문장에서 'Superman unrolls A suit before he lifts'는 'Superman은 올리기 전에 의상을 펼칩니다.'라는 뜻입니다. 'lifts'와 관련이 있는 'flies', 'jumps', 'paints'는 여기에 어울리지 않습니다. 'flies'는 날다, 'jumps'는 뛰다, 'paints'는 그리는 행위를 의미하는데, 'lifts'와 의미가 맞지 않습니다."
-''''
+
 >>> #### 해결방법 : 정확한 문제 생성 기준을 제공. (빈칸을 뚫는 구체적 지침을 제공)
 
 >> #### 선택지의 모호함.
-'''' 이 문제는 생성된 question의 빈칸이 모호한 경우에도 포함되지만, 선택지를 보면 기준이 모호한 것을 볼 수 있다. 선택지는 반의어 관계처럼 확실하게 뜻이 다르거나, 문맥 상 유추할 수 있는 단어여야 한다.
+이 문제는 생성된 question의 빈칸이 모호한 경우에도 포함되지만, 선택지를 보면 기준이 모호한 것을 볼 수 있다. 선택지는 반의어 관계처럼 확실하게 뜻이 다르거나, 문맥 상 유추할 수 있는 단어여야 한다.
 
             "question": "Superman unrolls A suit before he ___",
             "options": [
@@ -196,10 +195,10 @@ gpt모델에 사용자의 학습 레벨에 따라서 난이도를 조절해주�
             "answer": "3",
             "comment": "이 문장에서 'Superman unrolls A suit before he lifts'는 'Superman은 올리기 전에 의상을 펼칩니다.'라는 뜻입니다. 'lifts'와 관련이 있는 'flies', 'jumps', 'paints'는 여기에 어울리지 않습니다. 'flies'는 날다, 'jumps'는 뛰다, 'paints'는 그리는 행위를 의미하는데, 'lifts'와 의미가 맞지 않습니다."
 
-''''
+
 
 >> #### 의미 없는 멜로디, 전치사에 관한 문제를 출제
-''''
+
 
              "question": "I want something just like this Do ___-doo, doo-doo",
             "options": [
@@ -211,22 +210,9 @@ gpt모델에 사용자의 학습 레벨에 따라서 난이도를 조절해주�
             "answer": "1",
             "comment": "이 문장에서 'Do re-doo, doo-doo'는 가사에서 나오는 멜로디 일부를 반복하는 부분입니다. 're'가 문맥적으로 가장 적합한 단어이며, 'mi', 'sol', 'la'는 여기에 맞지 않습니다. 'mi', 'sol', 'la'는 멜로디 중 다른 음향을 대표하는 단어이지만, 're'와는 관련이 없습니다."
 
-'''' 
 
->> #### 의미 없는 멜로디, 전치사에 관한 문제를 출제
-''''
 
-             "question": "I want something just like this Do ___-doo, doo-doo",
-            "options": [
-                "mi",
-                "re",
-                "sol",
-                "la"
-            ],
-            "answer": "1",
-            "comment": "이 문장에서 'Do re-doo, doo-doo'는 가사에서 나오는 멜로디 일부를 반복하는 부분입니다. 're'가 문맥적으로 가장 적합한 단어이며, 'mi', 'sol', 'la'는 여기에 맞지 않습니다. 'mi', 'sol', 'la'는 멜로디 중 다른 음향을 대표하는 단어이지만, 're'와는 관련이 없습니다."
 
-'''' 
 
 
 ### Grammar 문제 생성 파이프라인
