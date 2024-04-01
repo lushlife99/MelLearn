@@ -1,51 +1,53 @@
-import React, {useEffect, useState} from "react";
-import axios from "axios";
-import Card from "@mui/material/Card";
-import CardContent from '@mui/material/CardContent';
-import CardMedia from '@mui/material/CardMedia';
-import Typography from '@mui/material/Typography';
-import { CardActionArea } from '@mui/material';
-import {useSelector} from "react-redux";
-import {RootState} from "../redux/store";
-
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
+import { useNavigate } from "react-router-dom";
+import { IoIosArrowRoundBack } from "react-icons/io";
 
 export const Main2 = (): JSX.Element => {
+  const { chartData } = useSelector((state: RootState) => state.chart);
+  const navigation = useNavigate();
 
-    const { chartData, chartLoading, chartError } = useSelector(
-        (state: RootState) => state.chart
-    );
+  const goHome = () => {
+    navigation("/home");
+  };
 
-    return (
-        <div className="container mx-auto px-4 ">
-            <div className="bg-black  m-auto h-24 flex justify-center items-center  ">
-            <h1 className="text-3xl font-semibold mb-4 mt-8 text-center text-white">인기 음악 </h1>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 bg-black">
-                {chartData.tracks.map((track: any) => (
-
-                <Card sx={{ maxWidth: 250, backgroundColor: "black" }}>
-                    <CardActionArea>
-                        <CardMedia
-                            component="img"
-                            height="140"
-                            image={track.album.cover[0].url}
-                            alt=""
-                        />
-                        <CardContent>
-                            <Typography gutterBottom variant="h5" color="white" component="div">
-                                {track.name}
-                            </Typography>
-                            <Typography variant="body2" color="white">
-                                {track.artists[0].name}
-                            </Typography>
-                        </CardContent>
-                    </CardActionArea>
-                </Card>
-                ))}
-
-                    </div>
+  return (
+    <div className="container flex justify-center w-full overflow-y-auto">
+      <div className="flex  flex-col items-center w-full  bg-black max-w-[450px] h-full px-3 ">
+        <div className="flex items-center justify-between w-full py-2 mb-3">
+          <div className="w-[33%] h-10 flex justify-start items-center ">
+            <IoIosArrowRoundBack
+              onClick={goHome}
+              className="w-12 h-12 fill-white hover:fill-gray-500"
+            />
+          </div>
+          <span className="text-[18px] font-bold  text-white w-[33%] border border-black">
+            인기 음악 목록
+          </span>
+          <div className="w-[33%]"></div>
         </div>
 
-    );
+        <div className="grid w-full h-full grid-cols-3 gap-4 ">
+          {chartData.tracks.slice(0, 21).map((track, index) => (
+            <div
+              key={index}
+              className="flex flex-col items-start hover:opacity-60"
+            >
+              <img
+                alt="Artist Cover"
+                src={track.album.cover[0].url}
+                className="w-[125px] h-[125px] rounded-md "
+              />
+              <span className="text-[white] font-bold mt-2 overflow-hidden overflow-ellipsis ">
+                {track.name}
+              </span>
+              <span className="text-bold text-[gray] text-[12px]">
+                {track.artists[0].name}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 };

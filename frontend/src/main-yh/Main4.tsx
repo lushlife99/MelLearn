@@ -1,124 +1,94 @@
-import React, {useEffect, useState} from 'react';
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
-import CardMedia from "@mui/material/CardMedia";
-import axios from "axios";
+import { useQuery } from "react-query";
+import { axiosSpotify } from "../api";
+import { useLocation } from "react-router-dom";
 
-
+interface ArtistImg {
+  visuals: {
+    avatar: { url: string }[];
+  };
+}
+interface ArtistAlbum {
+  albums: {
+    items: { id: string; name: string; cover: { url: string }[] }[];
+  };
+}
 
 export const Main4 = (): JSX.Element => {
-    //     7255ad630cmshdf9fda3f9dea3b0p1e9379jsn615bba3b42d1
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const artistId = searchParams.get("artistId");
+  const artistName = searchParams.get("artistName");
 
-    const [albums, setAlbums] = useState([]);
-    const [artistName, setArtistName] = useState('');
-    const [artistImg, setArtisImg] = useState('');
+  //Artist 커버 이미지 조회  -> 근데 확인해보니까 우리가 원래가지고있던 이미지랑 같아서 이것도 그냥 넘겨줄예정
+  const getArtistImg = async () => {
+    const response = await axiosSpotify.get("/artist/search", {
+      params: {
+        name: artistName,
+      },
+    });
+    return response.data;
+  };
 
+  //Artist Album 조회
+  const getArtistAlbum = async () => {
+    const response = await axiosSpotify.get("/artist/albums", {
+      params: {
+        artistId,
+      },
+    });
+    return response.data;
+  };
+  const { data: artistImg, isLoading: artistLoading } = useQuery<ArtistImg>(
+    ["artistImg", artistId],
+    () => getArtistImg()
+  );
 
-    //TODO 지울것 테스트용
-    const artistId = {
-        method: 'GET',
-        url: 'https://spotify-scraper.p.rapidapi.com/v1/artist/search',
-        params: {name: 'IU'},
-        headers: {
-            'X-RapidAPI-Key': '7255ad630cmshdf9fda3f9dea3b0p1e9379jsn615bba3b42d1',
-            'X-RapidAPI-Host': 'spotify-scraper.p.rapidapi.com'
-        }
-    };
+  const { data: artistAlbum, isLoading: artistAlbumLoading } =
+    useQuery<ArtistAlbum>(["artistAlbum", artistId], () => getArtistAlbum());
+  console.log(artistAlbum);
+  return (
+    <div className="flex justify-center w-full overflow-y-auto">
+      <div className="flex flex-col items-center w-full bg-black max-w-[450px] h-full px-3 py-4">
+        {/* Artist 커버 이미지, 이름*/}
+        <div className="flex flex-col items-center justify-center">
+          {artistAlbumLoading ? (
+            <div>로딩중</div>
+          ) : (
+            <img
+              className="w-[200px] h-[200px] rounded-md"
+              src={artistImg?.visuals.avatar[0].url}
+              alt="Artist Cover"
+            />
+          )}
 
-    const getData = async () => {
-        try {
-            const response = await axios.request(artistId);
-            // console.log(response.data)
-            // console.log(response.data.name)
-            // console.log(response.data.visuals.avatar[0].url)
-            setArtistName(response.data.name)
-            setArtisImg(response.data.visuals.avatar[0].url)
+          <span className="font-bold text-[white] text-3xl mt-4">
+            {artistName}
+          </span>
+        </div>
 
-            const id = response.data.id
+        {/* Artist 앨범 목록 */}
 
-            const listArtistAlbums = {
-                method: 'GET',
-                url: 'https://spotify-scraper.p.rapidapi.com/v1/artist/albums',
-                params: {
-                    artistId: id
-                },
-                headers: {
-                    'X-RapidAPI-Key': '7255ad630cmshdf9fda3f9dea3b0p1e9379jsn615bba3b42d1',
-                    'X-RapidAPI-Host': 'spotify-scraper.p.rapidapi.com'
-                }
-            };
-
-            const response2 = await axios.request(listArtistAlbums);
-            console.log(response2.data)
-            setAlbums(response2.data.albums.items)
-
-            return response2.data;
-            // return response.data;
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    useEffect(() => {
-        // 아티스트가 작업한 곡들 가져오기
-          const data =  getData();
-    }, [])
-
-    return (
-        <>
-            <div style={{backgroundColor : 'black'}}>
-            <div style={{display: 'flex', justifyContent: 'center', alignItems: 'flex-start', paddingTop: '80px'}}>
-                <Card sx={{maxWidth: 500, maxHeight: 500, backgroundColor: "black", marginBottom: '5px'}}>
-                    <CardMedia
-                        sx={{height: 300, width: 350, borderRadius: '14px'}}
-                        image={artistImg}
-                        title=""
-                    />
-                    <CardContent sx={{textAlign: 'center'}}>
-                        <Typography gutterBottom
-                                    variant="h5"
-                                    color="white"
-                                    borderColor="black"
-                                    component="div">
-                            {artistName}
-                        </Typography>
-                    </CardContent>
-                </Card>
+        <div className="mt-16">
+          {artistAlbum?.albums.items.map((album, index) => (
+            <div
+              key={album.id}
+              className="flex items-center mb-3 hover:opacity-60"
+            >
+              <img
+                className="w-[70px] h-[70px] rounded-md"
+                src={album.cover[0].url}
+                alt="Album Cover"
+              />
+              <div className="flex flex-col ml-3">
+                <span className="text-[white] font-semibold">{album.name}</span>
+                <span className="text-[gray] font-semibold">
+                  {artistName} 곡 재생 시간
+                </span>
+              </div>
             </div>
-
-            <div className="container mx-auto px-2 flex flex-col items-center justify-center h-screen">
-
-                {albums.map((album: any, index : number) => (
-
-                    <Card key = {index} sx={{maxWidth: 500, backgroundColor: "black", display: 'flex' , marginBottom: '20px'}}>
-                        <CardMedia
-                            sx={{height: 120, width: 120, flex: '1 1 auto', borderRadius: '8px'}} // 이미지가 왼쪽에 오도록 flex 속성 추가
-                            image={album.cover[0].url}
-                            title=""
-                        />
-                        <CardContent
-                            sx={{width: 400, textAlign: 'left', flex: '1 1 auto'}}> {/* 텍스트가 오른쪽에 오도록 flex 속성 추가 */}
-                            <Typography gutterBottom
-                                        variant="h5"
-                                        color="white"
-                                        borderColor="black"
-                                        component="div">
-                                {album.name}
-                            </Typography>
-                            <Typography gutterBottom
-                                        variant="h6"
-                                        color="white"
-                                        borderColor="black"
-                                        component="div">
-                                {artistName}
-                            </Typography>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-            </div>
-        </>
-    );
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 };
-

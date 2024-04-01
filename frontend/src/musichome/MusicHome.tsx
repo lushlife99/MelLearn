@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-
+import React, { useState } from "react";
 import BgCircle from "../components/BgCircle";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import BottomNavigation from "@mui/material/BottomNavigation";
@@ -14,27 +13,47 @@ import { Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "../css/slider.css";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchChartData } from "../redux/chart/chartAction";
-import { RootState } from "../redux/store";
-import { UnknownAction } from "redux";
+import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import Spinner from "react-bootstrap/Spinner";
 import axios from "axios";
 import { fetchArtistData } from "../redux/artist/artistAction";
+import { useQuery } from "react-query";
+import { setArtistData } from "../redux/artist/artistSlice";
+import { fetchChartData } from "../redux/chart/chartAction";
+import { setChartData } from "../redux/chart/chartSlice";
+
+interface Artist {
+  id: string;
+  type: string;
+  name: string;
+  shareUrl: string;
+}
 
 function MusicHome() {
   const [page, setPage] = useState(0);
   const navigation = useNavigate();
-
   const dispatch = useDispatch();
-  const { chartData, chartLoading, chartError } = useSelector(
-    (state: RootState) => state.chart
+
+  const { data: chartData, isLoading: chartLoading } = useQuery(
+    "chart",
+    fetchChartData,
+    {
+      onSuccess: (data) => {
+        dispatch(setChartData(data));
+      },
+    }
   );
-  const { artistData, artistLoading, artistError } = useSelector(
-    (state: RootState) => state.artist
+
+  const { data: artistData, isLoading: artistLoading } = useQuery(
+    "artists",
+    fetchArtistData,
+    {
+      onSuccess: (data) => {
+        dispatch(setArtistData(data));
+      },
+    }
   );
-  console.log(artistData);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setPage(newValue);
@@ -56,14 +75,13 @@ function MusicHome() {
     }
   };
 
+  const goDetailArtist = (artist: Artist) => {
+    navigation(`/main4?artistId=${artist.id}&artistName=${artist.name}`);
+  };
+
   //리액트 쿼리 사용 -> 메인화면 올때 멤버 정보를 받아서 langtype으로 en ,jp 구분해서
   //플레이리스트를 보여줘야함
   // 메인환경올때마다 이걸 요청? -> 리액트 쿼리 이용해서 불필요한 호출 방지 되면 환경설정에서도 적용
-
-  useEffect(() => {
-    dispatch(fetchChartData() as unknown as UnknownAction); //인기 노래
-    dispatch(fetchArtistData() as unknown as UnknownAction); // 인기 가수
-  }, [dispatch]);
 
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
@@ -78,15 +96,15 @@ function MusicHome() {
 
         {/* 사용자 추천 음악*/}
         <div className="z-10 px-3 mt-4">
-          <div className="flex justify-between">
+          <div className="flex items-center justify-between">
             <span className="text-[22px] font-extrabold px-2">
               사용자 추천 음악
             </span>
             <Link
               to={""}
-              className="text-[#4B8E96] hover:text-[#6BC2B9] text-decoration-none"
+              className="text-[#4B8E96] hover:opacity-60 text-decoration-none"
             >
-              See all
+              모두 보기
             </Link>
           </div>
           <Swiper
@@ -109,14 +127,14 @@ function MusicHome() {
 
         {/* 인기 가수*/}
         <div className="z-10 px-3 mt-4">
-          <div className="flex justify-between ">
+          <div className="flex items-center justify-between ">
             <span className="text-[22px] font-extrabold px-2">인기 가수</span>
 
             <Link
               to={"/home/main3"}
-              className="text-[#4B8E96] hover:text-[#6BC2B9] text-decoration-none"
+              className="text-[#4B8E96] hover:opacity-60 text-decoration-none"
             >
-              See all
+              모두 보기
             </Link>
           </div>
           {!artistLoading ? (
@@ -129,15 +147,16 @@ function MusicHome() {
               loop={true}
               className="mySwiper"
             >
-              {artistData.artists.slice(0, 10).map((artist, index) => (
+              {artistData?.artists.slice(0, 10).map((artist, index) => (
                 <SwiperSlide
                   key={index}
                   className="swiper-slide-mini hover:bg-slate-400 "
+                  onClick={() => goDetailArtist(artist)}
                 >
                   <img
                     src={artist.visuals.avatar[0].url}
                     alt="Artist Cover"
-                    className="p-4 img-circle"
+                    className="p-2"
                   />
                   <span className="pb-3 font-bold text-[15px]">
                     {artist.name}
@@ -154,14 +173,14 @@ function MusicHome() {
 
         {/* 인기 음악*/}
         <div className="z-10 px-3 mt-4">
-          <div className="flex justify-between ">
+          <div className="flex items-center justify-between ">
             <span className="text-[22px] font-extrabold px-2">인기 음악</span>
 
             <Link
               to={"/home/main2"}
-              className="text-[#4B8E96] hover:text-[#6BC2B9] text-decoration-none"
+              className="text-[#4B8E96] hover:opacity-60 text-decoration-none"
             >
-              See all
+              모두 보기
             </Link>
           </div>
 
@@ -175,7 +194,7 @@ function MusicHome() {
               loop={true}
               className="mySwiper"
             >
-              {chartData.tracks.slice(0, 10).map((track, index) => (
+              {chartData?.tracks.slice(0, 10).map((track, index) => (
                 <SwiperSlide
                   key={index}
                   className="swiper-slide-mid hover:bg-slate-400"
