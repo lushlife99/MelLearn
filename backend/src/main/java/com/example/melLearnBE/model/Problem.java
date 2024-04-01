@@ -30,6 +30,4 @@ public class Problem {
 
     @ManyToOne
     private ProblemList problemList;
-
-
 }
