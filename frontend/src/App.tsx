@@ -31,8 +31,8 @@ function App() {
 
 
           {/* TODO frontend -main 작업 시작 확인 후 지울것 */}
-          <Route path="/main2" element={<Main2 />}></Route>
-          <Route path="/main3" element={<Main3 />}></Route>
+          <Route path="/home/main2" element={<Main2 />}></Route>
+          <Route path="/home/main3" element={<Main3 />}></Route>
           <Route path="/main4" element={<Main4 />}></Route>
           <Route path="/main5" element={<Main5 />}></Route>
         </Routes>

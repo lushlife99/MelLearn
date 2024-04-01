@@ -20,7 +20,16 @@ export const Main5 = () => {
 
 
     const handleSubmit = async (event : any) => {
-        event.preventDefault(); // 기본 동작 중지
+        if(event.key === 'Enter') {
+            event.preventDefault(); // 기본 동작 중지
+            console.log("enter")
+
+            // Search 요청 을 보낸다.
+
+
+
+        }
+
         // 여기에서 검색 기능을 구현하거나 다른 작업을 수행할 수 있습니다.
         console.log(search)
 
@@ -55,6 +64,8 @@ export const Main5 = () => {
 
             </Paper>
             </div>
+
+
             </div>
 
         </>

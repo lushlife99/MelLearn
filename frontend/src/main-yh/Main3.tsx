@@ -5,9 +5,16 @@ import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import {Avatar, CardActionArea} from '@mui/material';
 import axios from "axios";
+import {useSelector} from "react-redux";
+import {RootState} from "../redux/store";
 
 export const Main3 = (): JSX.Element => {
     const [artist, setArtist] = useState([]);
+
+
+    const { artistData, artistLoading, artistError } = useSelector(
+        (state: RootState) => state.artist
+    );
 
     // TODO 지워야함 테스트용
     const options = {
@@ -45,7 +52,7 @@ export const Main3 = (): JSX.Element => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 bg-black">
-                {artist.map((artist: any) => (
+                {artistData.artists.map((artist: any) => (
                     // <Card key={artist.id}>
                     //     <Card.Img variant="top" src={artist.visuals.avatar[0].url} />
                     //     <Card.Body>
