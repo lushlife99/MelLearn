@@ -28,15 +28,15 @@ interface ChartData {
 }
 
 interface ChartState {
-  data: ChartData;
+  chartData: ChartData;
   chartLoading: boolean;
-  error: string | null;
+  chartError: string | null;
 }
 
 const initialState: ChartState = {
-  data: { tracks: [] },
+  chartData: { tracks: [] },
   chartLoading: false,
-  error: null,
+  chartError: null,
 };
 
 const charSlice = createSlice({
@@ -45,15 +45,15 @@ const charSlice = createSlice({
   reducers: {
     fetchChartStart(state) {
       state.chartLoading = true;
-      state.error = null;
+      state.chartError = null;
     },
     fetchChartSuccess(state, action: PayloadAction<ChartData>) {
-      state.data = action.payload;
+      state.chartData = action.payload;
       state.chartLoading = false;
     },
     fetchChartError(state, action: PayloadAction<string>) {
       state.chartLoading = false;
-      state.error = action.payload;
+      state.chartError = action.payload;
     },
   },
 });

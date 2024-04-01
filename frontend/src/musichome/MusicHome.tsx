@@ -20,15 +20,21 @@ import { RootState } from "../redux/store";
 import { UnknownAction } from "redux";
 import { Link } from "react-router-dom";
 import Spinner from "react-bootstrap/Spinner";
+import axios from "axios";
+import { fetchArtistData } from "../redux/artist/artistAction";
 
 function MusicHome() {
   const [page, setPage] = useState(0);
   const navigation = useNavigate();
 
   const dispatch = useDispatch();
-  const { data, chartLoading, error } = useSelector(
+  const { chartData, chartLoading, chartError } = useSelector(
     (state: RootState) => state.chart
   );
+  const { artistData, artistLoading, artistError } = useSelector(
+    (state: RootState) => state.artist
+  );
+  console.log(artistData);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setPage(newValue);
@@ -55,9 +61,9 @@ function MusicHome() {
   // 메인환경올때마다 이걸 요청? -> 리액트 쿼리 이용해서 불필요한 호출 방지 되면 환경설정에서도 적용
 
   useEffect(() => {
-    dispatch(fetchChartData() as unknown as UnknownAction);
+    dispatch(fetchChartData() as unknown as UnknownAction); //인기 노래
+    dispatch(fetchArtistData() as unknown as UnknownAction); // 인기 가수
   }, [dispatch]);
-  console.log(data.tracks.length);
 
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
@@ -113,28 +119,37 @@ function MusicHome() {
               See all
             </Link>
           </div>
-          <Swiper
-            spaceBetween={10}
-            slidesPerView={3.3}
-            onSlideChange={() => console.log("slide change")}
-            onSwiper={(swiper: any) => console.log(swiper)}
-            modules={[Pagination]}
-            loop={true}
-            className="mySwiper"
-          >
-            <SwiperSlide className="swiper-slide-mini">
-              <img src="" />
-            </SwiperSlide>
-            <SwiperSlide className="swiper-slide-mini">
-              <img src="" />
-            </SwiperSlide>
-            <SwiperSlide className="swiper-slide-mini">
-              <img src="" />
-            </SwiperSlide>
-            <SwiperSlide className="swiper-slide-mini">
-              <img src="" />
-            </SwiperSlide>
-          </Swiper>
+          {!artistLoading ? (
+            <Swiper
+              spaceBetween={10}
+              slidesPerView={3.3}
+              //onSlideChange={() => console.log("slide change")}
+              //onSwiper={(swiper: any) => console.log(swiper)}
+              modules={[Pagination]}
+              loop={true}
+              className="mySwiper"
+            >
+              {artistData.artists.slice(0, 10).map((artist, index) => (
+                <SwiperSlide
+                  key={index}
+                  className="swiper-slide-mini hover:bg-slate-400 "
+                >
+                  <img
+                    src={artist.visuals.avatar[0].url}
+                    alt="Artist Cover"
+                    className="p-4 img-circle"
+                  />
+                  <span className="pb-3 font-bold text-[15px]">
+                    {artist.name}
+                  </span>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          ) : (
+            <div className="flex items-center justify-center h-[300%]">
+              <Spinner className="border" variant="primary" />
+            </div>
+          )}
         </div>
 
         {/* 인기 음악*/}
@@ -160,7 +175,7 @@ function MusicHome() {
               loop={true}
               className="mySwiper"
             >
-              {data.tracks.slice(0, 10).map((track, index) => (
+              {chartData.tracks.slice(0, 10).map((track, index) => (
                 <SwiperSlide
                   key={index}
                   className="swiper-slide-mid hover:bg-slate-400"
