@@ -1,4 +1,4 @@
-# gpt3.5-turbo-0125 모델 성능 최적화 과정
+# gpt3.5-turbo 모델 성능 최적화 과정
 
 ## 만들어야 하는 모델
 노래의 가사를 주면 사용자의 학습능력에 맞는 10개의 문제를 제공하는 인공지능 모델
@@ -107,45 +107,128 @@ gpt모델에 사용자의 학습 레벨에 따라서 난이도를 조절해주�
 
 3, 4번 문제해결 : Vocabulary유형의 문제 출제 서비스의 파이프라인 변경
 
-## 문제 생성 파이프라인.
+# 문제 생성 파이프라인
 
 > 문제유형 Grammar 파이프라인
 >> 1. 프론트엔드 -> 백엔드에 문제 요청 (Params : 노래 정보, 문제 유형(grammar, voca), 사용자 레벨)
 >> 2. 백엔드 -> OpanAI api (fine-tuning model : 사용자 수준과 문제 유형에 맞는 문제를 출제해주는 모델)
 >> 3. 백엔드 -> OpenAI의 파인튜닝 모델의 응답을 객체로 변환 -> 데이터 처리, 저장 -> 프론트엔드에 응답.
 
-> 문제유형 Vocabulary 파이프라인
->> 1. 프론트엔드 -> 백엔드에 문제 요청 (Params : 노래 정보, 문제 유형(grammar, voca), 사용자 레벨)
->> 2. 백엔드 -> OpenAI api (gpt3.5 turbo-0125 모델 : 사용자 레벨에 따른 난이도 기준을 정확하게 주어서 문제, 해설을 제공)
->> 3. 백엔드 -> OpenAI api에서 제공받은 데이터를 객체로 변환, 데이터 처리, 저장
->> 4. 백엔드 -> 단어 네트워크 데이터베이스(e.g Wordnet)을 사용하여 선택지를 분명하게 만듦 (Reading 유형이 아닌 Vocabulary 유형이 되게)
->>            만약 정답이 apple 이라면, 다른 선택지에 melon, banana가 아닌 airplane, weapon이 채택될 수 있도록 만드는게 목표. 선택지 제공 파이프라인 참고.
+~~> 문제유형 Vocabulary 파이프라인~~
+>> ~~1. 프론트엔드 -> 백엔드에 문제 요청 (Params : 노래 정보, 문제 유형(grammar, voca), 사용자 레벨)~~
+>> ~~2. 백엔드 -> OpenAI api (gpt3.5 turbo-0125 모델 : 사용자 레벨에 따른 난이도 기준을 정확하게 주어서 문제, 해설을 제공)~~
+>> ~~3. 백엔드 -> OpenAI api에서 제공받은 데이터를 객체로 변환, 데이터 처리, 저장~~
+>> ~~4. 백엔드 -> 단어 네트워크 데이터베이스(e.g Wordnet)을 사용하여 선택지를 분명하게 만듦 (Reading 유형이 아닌 Vocabulary 유형이 되게)~~
+>> ~~만약 정답이 apple 이라면, 다른 선택지에 melon, banana가 아닌 airplane, weapon이 채택될 수 있도록 만드는게 목표. 선택지 제공 파이프라인 참고.~~
 >>            
->> 6. 백엔드 -> 프론트엔드 Response
+>> ~~6. 백엔드 -> 프론트엔드 Response~~
 
-Grammar 유형은 레벨을 나누기도 쉽고, 문제의 유형이 확실하여서 파인튜닝 모델만을 사용하는 문제 생성 파이프라인(첫번째)를 사용하면 될 것 같다.
+~~Grammar 유형은 레벨을 나누기도 쉽고, 문제의 유형이 확실하여서 파인튜닝 모델만을 사용하는 문제 생성 파이프라인(첫번째)를 사용하면 될 것 같다.~~
+4/1 수정 -> 순수 자바 환경에서 nlp를 사용하는 방법이 한정적이다. 패스.
 
-## 선택지 제공 파이프라인 
+## Vocabulary 문제 생성 파이프라인
 
-### 첫번째 방법.
+모델이 알아들을 수 있도록 프롬프트를 계속 수정해가야 한다.
+매 주 주기적으로 모델이 생성해주는 퀴즈를 풀고 종합한 오류를 바탕으로 프롬프트를 수정해나갈 것이다.
+만약 여기서 멈춘다면 프롬프트 체이닝, 파인튜닝의 방법을 사용해야 한다.
 
-> 1. GPT에게 answer word를 받음.
+> ### 현재 모델이 만들어준 문제의 오류 종류 (4/1 업데이트)
 > 
-> 2. answer word의 품사를 찾고 단어의 의미적 유사성을 찾음
->>
->> 한 단어는 여러가지 품사의 형태로 존재할 수 있음. 따라서 문장에서 사용된 단어의 품사를 찾아야함. (Stanford Core NLP 사용)
->>
->> 확정된 품사만을 가지고 단어의 의미를 특정할 수 없다. (eg. bank(명사) : 1. 은행, 2. 강둑.. 이처럼 하나의 단어에 여러가지 뜻이 있을 수 있다.)
->> 
->> 가장 쉬운 방법은 사람들이 가장 많이 사용하는 의미를 찾아오는 방식이 있다.
->> 
->> 하지만 이 방식은 많은 의미로 사용되는 단어들을 처리하는데 적합하지 않은 방식이다. 또한 음악 가사의 특성상 단어에 은유적인 의미를 담고있기에 적합하지 않다.
->> 
->> 그래서 정확한 방식을 사용하려면 WSD(Word Sense Disambiguation)라는 기술을 사용하여 모호성을 제거하여 문장에서 사용된 의미적 집합을 찾아야 한다.
->> 
->> 하지만 Java 환경에서 사용할 수 있는 라이브러리를 찾아보니 거의 없다. 파이썬에서 지원하는 라이브러리가 대부분이다. -> 여기서 멈춤 아무리 찾아봐도 사용할만한 라이브러리가 안나옴.
->> 
+> 문제를 푸는 사용자는 노래의 대략적인 분위기 정도만 파악했다고 전제한다. (사용자는 가사의 의미, 문맥 등의 세부 정보를 알지 못함)
+>> #### 빈칸의 정답과 option 불일치
+'''' 
 
-### 두번째 방법.
+            question": "I've been reading books of old The legends and the myths The moon and its ___",
 
-> 프롬프트 체이닝을 사용해보자.
+            "options": [
+                "sun",
+                "stars",
+                "planets",
+                "galaxy"
+            ],
+            "answer": "2",
+            "comment": "이 문장에서 'The moon and its eclipse'는 '달과 그 음모들'을 의미합니다. 'moon'과 관련이 있는 'sun', 'stars', 'galaxy'는 여기에 적절하지 않습니다. 'sun'은 해와 관련이 있고, 'stars'는 별들과, 'galaxy'는 은하와 관련이 있습니다. 'moon'과 일치하지 않습니다."
+''''
+
+>> #### 중복 정답
+>> 사용자는 곡의 전체적인 분위기는 파악하고 있다고 가정한다. 따라서 ordinary를 제외한 모든 단어가 정답이 될 수 있다.
+''''
+
+           "question": "I'm not lookin' for somebody With some ___ gifts",
+            "options": [
+                "ordinary",
+                "superhuman",
+                "mysterious",
+                "magical"
+            ],
+            "answer": "2",
+            "comment": "이 문장에서 'With some mysterious gifts'는 '어떤 수수께끼같은 선물을 가진 사람을 찾고 있지 않아'라는 뜻입니다. 'mysterious'가 가장 적합한 단어이며, 'ordinary', 'superhuman', 'magical'은 여기에 적합하지 않습니다. 'ordinary'는 평범한, 'superhuman'은 초능력을 갖춘, 'magical'은 마법 같은 단어이지만, 'mysterious'와는 맞지 않습니다."
+
+
+''''
+
+>> #### 생성된 question의 빈칸이 모호함.
+>> 빈칸이 한정적인 단어가 아닌 대부분의 단어로 대체될 수 있다.
+''''
+
+            "question": "Superman unrolls A suit before he ___",
+            "options": [
+                "flies",
+                "jumps",
+                "dances",
+                "paints"
+            ],
+            "answer": "3",
+            "comment": "이 문장에서 'Superman unrolls A suit before he lifts'는 'Superman은 올리기 전에 의상을 펼칩니다.'라는 뜻입니다. 'lifts'와 관련이 있는 'flies', 'jumps', 'paints'는 여기에 어울리지 않습니다. 'flies'는 날다, 'jumps'는 뛰다, 'paints'는 그리는 행위를 의미하는데, 'lifts'와 의미가 맞지 않습니다."
+''''
+>>> #### 해결방법 : 정확한 문제 생성 기준을 제공. (빈칸을 뚫는 구체적 지침을 제공)
+
+>> #### 선택지의 모호함.
+'''' 이 문제는 생성된 question의 빈칸이 모호한 경우에도 포함되지만, 선택지를 보면 기준이 모호한 것을 볼 수 있다. 선택지는 반의어 관계처럼 확실하게 뜻이 다르거나, 문맥 상 유추할 수 있는 단어여야 한다.
+
+            "question": "Superman unrolls A suit before he ___",
+            "options": [
+                "flies",
+                "jumps",
+                "dances",
+                "paints"
+            ],
+            "answer": "3",
+            "comment": "이 문장에서 'Superman unrolls A suit before he lifts'는 'Superman은 올리기 전에 의상을 펼칩니다.'라는 뜻입니다. 'lifts'와 관련이 있는 'flies', 'jumps', 'paints'는 여기에 어울리지 않습니다. 'flies'는 날다, 'jumps'는 뛰다, 'paints'는 그리는 행위를 의미하는데, 'lifts'와 의미가 맞지 않습니다."
+
+''''
+
+>> #### 의미 없는 멜로디, 전치사에 관한 문제를 출제
+''''
+
+             "question": "I want something just like this Do ___-doo, doo-doo",
+            "options": [
+                "mi",
+                "re",
+                "sol",
+                "la"
+            ],
+            "answer": "1",
+            "comment": "이 문장에서 'Do re-doo, doo-doo'는 가사에서 나오는 멜로디 일부를 반복하는 부분입니다. 're'가 문맥적으로 가장 적합한 단어이며, 'mi', 'sol', 'la'는 여기에 맞지 않습니다. 'mi', 'sol', 'la'는 멜로디 중 다른 음향을 대표하는 단어이지만, 're'와는 관련이 없습니다."
+
+'''' 
+
+>> #### 의미 없는 멜로디, 전치사에 관한 문제를 출제
+''''
+
+             "question": "I want something just like this Do ___-doo, doo-doo",
+            "options": [
+                "mi",
+                "re",
+                "sol",
+                "la"
+            ],
+            "answer": "1",
+            "comment": "이 문장에서 'Do re-doo, doo-doo'는 가사에서 나오는 멜로디 일부를 반복하는 부분입니다. 're'가 문맥적으로 가장 적합한 단어이며, 'mi', 'sol', 'la'는 여기에 맞지 않습니다. 'mi', 'sol', 'la'는 멜로디 중 다른 음향을 대표하는 단어이지만, 're'와는 관련이 없습니다."
+
+'''' 
+
+
+### Grammar 문제 생성 파이프라인
+
+
