@@ -23,7 +23,7 @@ function Login() {
       memberId: user_id,
       password,
     });
-    console.log(res.data);
+
     const accessToken = res.data.accessToken;
     localStorage.setItem("accessToken", accessToken);
     navigate("/spotify");
