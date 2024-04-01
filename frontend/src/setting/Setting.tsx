@@ -26,6 +26,7 @@ export const Setting = (): JSX.Element => {
     const res = await axiosApi.get("/api/member/info");
     if (res.status === 200) {
       setMember(res.data);
+      console.log(res.data);
     }
   };
 

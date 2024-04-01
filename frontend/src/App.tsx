@@ -8,14 +8,18 @@ import Setting from "./setting/Setting";
 import { SpotifyLogo } from "./setting/SpotifyLogo";
 import Callback from "./callback/Callback";
 import MusicHome from "./musichome/MusicHome";
+
 import {Main2} from "./main-yh/Main2";
 import {Main3} from "./main-yh/Main3";
 import {Main4} from "./main-yh/Main4";
 import {Main5} from "./main-yh/Main5";
+import { Provider } from "react-redux";
+import { store } from "./redux/store";
+
 
 function App() {
   return (
-    <div className="">
+    <Provider store={store}>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Login />}></Route>
@@ -33,7 +37,7 @@ function App() {
           <Route path="/main5" element={<Main5 />}></Route>
         </Routes>
       </BrowserRouter>
-    </div>
+    </Provider>
   );
 }
 
