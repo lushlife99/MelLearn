@@ -83,7 +83,7 @@ function MusicHome() {
               사용자 추천 음악
             </span>
             <Link
-              to={"/detailMusic"}
+              to={""}
               className="text-[#4B8E96] hover:text-[#6BC2B9] text-decoration-none"
             >
               See all
@@ -113,7 +113,7 @@ function MusicHome() {
             <span className="text-[22px] font-extrabold px-2">인기 가수</span>
 
             <Link
-              to={"/detailMusic"}
+              to={"/home/main3"}
               className="text-[#4B8E96] hover:text-[#6BC2B9] text-decoration-none"
             >
               See all
@@ -158,7 +158,7 @@ function MusicHome() {
             <span className="text-[22px] font-extrabold px-2">인기 음악</span>
 
             <Link
-              to={"/detailMusic"}
+              to={"/home/main2"}
               className="text-[#4B8E96] hover:text-[#6BC2B9] text-decoration-none"
             >
               See all
