@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import axiosApi from "../api";
 import BgCircle from "../components/BgCircle";
-import {Link, useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 interface Input {
   user_id: string;
@@ -23,12 +23,10 @@ function Login() {
       memberId: user_id,
       password,
     });
-    console.log(res.data);
+
     const accessToken = res.data.accessToken;
     localStorage.setItem("accessToken", accessToken);
     navigate("/spotify");
-
-
   };
 
   return (
@@ -53,7 +51,7 @@ function Login() {
           <input
             {...register("user_id", { required: true })}
             placeholder="아이디"
-            className="mb-3 rounded-[30px] h-[45px] shadow-[0px_4px_4px_#00000040] px-4  focus:outline-none focus:border-sky-500 focus:ring-2"
+            className="my-3 rounded-[30px] h-[45px] shadow-[0px_4px_4px_#00000040] px-4  focus:outline-none focus:border-sky-500 focus:ring-2"
           />
           {errors.user_id && (
             <span className="text-center text-[red] font-bold">
@@ -64,7 +62,7 @@ function Login() {
             {...register("password", { required: true })}
             type="password"
             placeholder="비밀번호"
-            className="mt-3 mb-3 rounded-[30px] h-[45px] shadow-[0px_4px_4px_#00000040] px-4  focus:outline-none focus:border-sky-500 focus:ring-2"
+            className="my-3 rounded-[30px] h-[45px] shadow-[0px_4px_4px_#00000040] px-4  focus:outline-none focus:border-sky-500 focus:ring-1"
           />
           {errors.password && (
             <span className="text-center text-[red] font-bold">

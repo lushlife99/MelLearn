@@ -4,6 +4,7 @@ import { IoIosArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import axiosApi from "../api";
+import BackArrow from "../components/BackArrow";
 
 interface Input {
   username: string;
@@ -25,14 +26,12 @@ function Join() {
     navigate("/");
   };
   const onSubmit = async (data: Input) => {
-    console.log(data.password, data.confirmPassword);
     if (data.password !== data.confirmPassword) {
       setError("confirmPassword", {
         type: "manual",
         message: "비밀번호가 일치하지 않습니다.",
       });
     } else {
-      console.log(data);
       const { username, user_id, password } = data;
       setValue("username", "");
       setValue("user_id", "");
@@ -43,7 +42,6 @@ function Join() {
         memberId: user_id,
         password,
       });
-      console.log(res.data, res.status);
 
       if (res.status === 200) {
         //회원가입 성공한 경우
