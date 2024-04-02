@@ -2,6 +2,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { useNavigate } from "react-router-dom";
 import { IoIosArrowRoundBack } from "react-icons/io";
+import "../css/scroll.css";
 
 export const Main2 = (): JSX.Element => {
   const { chartData } = useSelector((state: RootState) => state.chart);
@@ -12,8 +13,8 @@ export const Main2 = (): JSX.Element => {
   };
 
   return (
-    <div className="container flex justify-center w-full overflow-y-auto">
-      <div className="flex  flex-col items-center w-full  bg-black max-w-[450px] h-full px-3 ">
+    <div className="container flex justify-center w-full h-screen">
+      <div className="flex  flex-col items-center w-full  bg-black max-w-[450px]  p-3">
         <div className="flex items-center justify-between w-full py-2 mb-3">
           <div className="w-[33%] h-10 flex justify-start items-center ">
             <IoIosArrowRoundBack
@@ -27,7 +28,7 @@ export const Main2 = (): JSX.Element => {
           <div className="w-[33%]"></div>
         </div>
 
-        <div className="grid w-full h-full grid-cols-3 gap-4 ">
+        <div className="grid w-full grid-cols-3 gap-4 px-3 overflow-y-auto scrollbar">
           {chartData.tracks.slice(0, 21).map((track, index) => (
             <div
               key={index}
@@ -36,7 +37,7 @@ export const Main2 = (): JSX.Element => {
               <img
                 alt="Artist Cover"
                 src={track.album.cover[0].url}
-                className="w-[125px] h-[125px] rounded-md "
+                className="w-[125px] h-[110px] rounded-md "
               />
               <span className="text-[white] font-bold mt-2 overflow-hidden overflow-ellipsis ">
                 {track.name}
