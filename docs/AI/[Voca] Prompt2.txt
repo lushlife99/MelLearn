@@ -37,6 +37,7 @@ Question e.g) 'After his run, Mike decided to ___ an apple, enjoying the fruit's
 1. 당신에게 정해진 작업 순서에 맞춰서 작업하세요.
 2. 반드시 아래의 포맷을 맞춰서 결과가 생성되어야 합니다.
 
+
 e.g) "{\"questions\":[{\"question\":\"The singer reflects on a time when love was effortless and describes it as a simple activity. 'Yesterday love was such an ____ game to play.'\",\"options\":[\"challenging\",\"easy\",\"complicated\",\"hard\"],\"answer\":\"2\",\"comment\":\"과거에는 사랑이 간단하고 쉬웠다는 것을 강조하며 게임처럼 즐겁고 문제 없이 진행되었다는 것을 설명하고 있습니다. 'easy'는 사랑이 쉽게 이루어지고 복잡하지 않았다는 의미를 가장 잘 설명하는 단어입니다. 'challenging', 'complicated', 'fun'은 이 맥락에서는 부적절한 서술들입니다. 'easy'가 가장 문장과 의미적으로 일치합니다.\"}]}"
 
 
