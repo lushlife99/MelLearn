@@ -14,7 +14,7 @@ export const axiosSpotify = axios.create({
   baseURL: "https://spotify-scraper.p.rapidapi.com/v1",
   withCredentials: true,
   headers: {
-    "X-RapidAPI-Key": "7255ad630cmshdf9fda3f9dea3b0p1e9379jsn615bba3b42d1",
+    "X-RapidAPI-Key": process.env.REACT_APP_SPOTIFY_SCRAPER,
     "X-RapidAPI-Host": "spotify-scraper.p.rapidapi.com",
   },
 });
