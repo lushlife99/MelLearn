@@ -1,124 +1,115 @@
-import React, {useEffect, useState} from 'react';
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
-import CardMedia from "@mui/material/CardMedia";
-import axios from "axios";
-
-
+import { useQuery } from "react-query";
+import { axiosSpotify } from "../api";
+import { useLocation, useNavigate } from "react-router-dom";
+import { IoIosArrowRoundBack } from "react-icons/io";
+import Spinner from "react-bootstrap/Spinner";
+import "../css/scroll.css";
+interface Artist {
+  id: string;
+  type: string;
+  name: string;
+  shareUrl: string;
+  visuals: {
+    avatar: {
+      url: string;
+      width: number | null;
+      height: number | null;
+    }[];
+  };
+}
+interface ArtistAlbum {
+  albums: {
+    items: { id: string; name: string; cover: { url: string }[] }[];
+  };
+}
+interface LocationState {
+  prevPath: string;
+  artist: Artist;
+}
 
 export const Main4 = (): JSX.Element => {
-    //     7255ad630cmshdf9fda3f9dea3b0p1e9379jsn615bba3b42d1
+  const location = useLocation();
+  const navigate = useNavigate();
+  const searchParams = new URLSearchParams(location.search);
+  const artistId = searchParams.get("artistId");
+  const { prevPath, artist } = location.state as LocationState;
+  const goBack = () => {
+    navigate(prevPath);
+  };
 
-    const [albums, setAlbums] = useState([]);
-    const [artistName, setArtistName] = useState('');
-    const [artistImg, setArtisImg] = useState('');
+  //Artist Album 조회
+  const getArtistAlbum = async () => {
+    const response = await axiosSpotify.get("/artist/albums", {
+      params: {
+        artistId,
+      },
+    });
+    return response.data;
+  };
 
+  const { data: artistAlbum, isLoading: artistAlbumLoading } =
+    useQuery<ArtistAlbum>(["artistAlbum", artistId], () => getArtistAlbum(), {
+      staleTime: 10800000, //캐싱기간 3시간 설정
+    });
 
-    //TODO 지울것 테스트용
-    const artistId = {
-        method: 'GET',
-        url: 'https://spotify-scraper.p.rapidapi.com/v1/artist/search',
-        params: {name: 'IU'},
-        headers: {
-            'X-RapidAPI-Key': '7255ad630cmshdf9fda3f9dea3b0p1e9379jsn615bba3b42d1',
-            'X-RapidAPI-Host': 'spotify-scraper.p.rapidapi.com'
-        }
-    };
-
-    const getData = async () => {
-        try {
-            const response = await axios.request(artistId);
-            // console.log(response.data)
-            // console.log(response.data.name)
-            // console.log(response.data.visuals.avatar[0].url)
-            setArtistName(response.data.name)
-            setArtisImg(response.data.visuals.avatar[0].url)
-
-            const id = response.data.id
-
-            const listArtistAlbums = {
-                method: 'GET',
-                url: 'https://spotify-scraper.p.rapidapi.com/v1/artist/albums',
-                params: {
-                    artistId: id
-                },
-                headers: {
-                    'X-RapidAPI-Key': '7255ad630cmshdf9fda3f9dea3b0p1e9379jsn615bba3b42d1',
-                    'X-RapidAPI-Host': 'spotify-scraper.p.rapidapi.com'
-                }
-            };
-
-            const response2 = await axios.request(listArtistAlbums);
-            console.log(response2.data)
-            setAlbums(response2.data.albums.items)
-
-            return response2.data;
-            // return response.data;
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    useEffect(() => {
-        // 아티스트가 작업한 곡들 가져오기
-          const data =  getData();
-    }, [])
-
+  if (artistAlbumLoading) {
     return (
-        <>
-            <div style={{backgroundColor : 'black'}}>
-            <div style={{display: 'flex', justifyContent: 'center', alignItems: 'flex-start', paddingTop: '80px'}}>
-                <Card sx={{maxWidth: 500, maxHeight: 500, backgroundColor: "black", marginBottom: '5px'}}>
-                    <CardMedia
-                        sx={{height: 300, width: 350, borderRadius: '14px'}}
-                        image={artistImg}
-                        title=""
-                    />
-                    <CardContent sx={{textAlign: 'center'}}>
-                        <Typography gutterBottom
-                                    variant="h5"
-                                    color="white"
-                                    borderColor="black"
-                                    component="div">
-                            {artistName}
-                        </Typography>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <div className="container mx-auto px-2 flex flex-col items-center justify-center h-screen">
-
-                {albums.map((album: any, index : number) => (
-
-                    <Card key = {index} sx={{maxWidth: 500, backgroundColor: "black", display: 'flex' , marginBottom: '20px'}}>
-                        <CardMedia
-                            sx={{height: 120, width: 120, flex: '1 1 auto', borderRadius: '8px'}} // 이미지가 왼쪽에 오도록 flex 속성 추가
-                            image={album.cover[0].url}
-                            title=""
-                        />
-                        <CardContent
-                            sx={{width: 400, textAlign: 'left', flex: '1 1 auto'}}> {/* 텍스트가 오른쪽에 오도록 flex 속성 추가 */}
-                            <Typography gutterBottom
-                                        variant="h5"
-                                        color="white"
-                                        borderColor="black"
-                                        component="div">
-                                {album.name}
-                            </Typography>
-                            <Typography gutterBottom
-                                        variant="h6"
-                                        color="white"
-                                        borderColor="black"
-                                        component="div">
-                                {artistName}
-                            </Typography>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-            </div>
-        </>
+      <div className="flex justify-center w-full h-screen">
+        <div className="flex flex-col justify-center items-center w-full bg-black max-w-[450px] h-full px-3 py-4">
+          <Spinner animation="border" role="status" />
+        </div>
+      </div>
     );
-};
+  }
 
+  return (
+    <div className="flex justify-center w-full h-screen ">
+      <div className="flex flex-col items-center w-full bg-black max-w-[450px]  px-3 py-4">
+        {/* Artist 커버 이미지, 이름*/}
+        <div className="flex flex-col items-center justify-center w-full ">
+          <div className="flex items-start justify-around w-full">
+            <div className="w-[21%] flex justify-start ">
+              <IoIosArrowRoundBack
+                onClick={goBack}
+                className="w-12 h-12 fill-white hover:fill-gray-500"
+              />
+            </div>
+
+            <img
+              src={artist.visuals.avatar[0].url}
+              className="w-[58%] h-[200px] rounded-md "
+              alt="Artist Cover"
+            />
+            <div className="w-[21%] "></div>
+          </div>
+
+          <span className="font-bold text-[white] text-3xl mt-4">
+            {artist.name}
+          </span>
+        </div>
+
+        {/* Artist 앨범 목록 */}
+        <div className="mt-12 overflow-y-auto scrollbar">
+          {artistAlbum?.albums.items.map((album, index) => (
+            <div
+              key={album.id}
+              className="flex items-center mb-4 hover:opacity-60"
+            >
+              <img
+                className="w-[70px] h-[70px] rounded-md"
+                src={album.cover[0].url}
+                alt="Album Cover"
+              />
+              <div className="flex flex-col ml-3">
+                <span className="text-[white] font-semibold">{album.name}</span>
+                <span className="text-[gray] font-semibold">
+                  {artist.name} 재생 시간
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};

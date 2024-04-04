@@ -82,7 +82,7 @@ function Login() {
             <div className="h-[2px] bg-white w-32"></div>
             <Link
               to="/join"
-              className="text-[#007AFF] font-bold mx-2 hover:text-[#87ceeb]"
+              className="text-[#007AFF] font-bold mx-2 hover:text-[#87ceeb] text-decoration-none"
             >
               회원가입
             </Link>

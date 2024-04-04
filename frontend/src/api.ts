@@ -9,6 +9,16 @@ const axiosApi = axios.create({
   withCredentials: true,
 });
 
+/* Spotify API 호출용 */
+export const axiosSpotify = axios.create({
+  baseURL: "https://spotify-scraper.p.rapidapi.com/v1",
+  withCredentials: true,
+  headers: {
+    "X-RapidAPI-Key": process.env.REACT_APP_SPOTIFY_SCRAPER,
+    "X-RapidAPI-Host": "spotify-scraper.p.rapidapi.com",
+  },
+});
+
 const handleRequestInterceptor = (
   config: InternalAxiosRequestConfig
 ): InternalAxiosRequestConfig => {
@@ -46,5 +56,7 @@ axiosApi.interceptors.response.use(
   (response) => response,
   handleResponseInterceptor
 );
+
+/* 특정 아티스트 정보 */
 
 export default axiosApi;
