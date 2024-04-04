@@ -1,5 +1,5 @@
 import { useQuery } from "react-query";
-import { axiosSpotify } from "../api";
+import { axiosSpotifyScraper } from "../api";
 import { useLocation, useNavigate } from "react-router-dom";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import Spinner from "react-bootstrap/Spinner";
@@ -39,7 +39,7 @@ export const Main4 = (): JSX.Element => {
 
   //Artist Album 조회
   const getArtistAlbum = async () => {
-    const response = await axiosSpotify.get("/artist/albums", {
+    const response = await axiosSpotifyScraper.get("/artist/albums", {
       params: {
         artistId,
       },

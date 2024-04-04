@@ -1,7 +1,9 @@
 import { ArtistData } from "../type";
-import { axiosSpotify } from "../../api";
+import { axiosSpotifyScraper } from "../../api";
 
 export const fetchArtistData = async (): Promise<ArtistData> => {
-  const response = await axiosSpotify.get("/chart/artists/top?region=us");
+  const response = await axiosSpotifyScraper.get(
+    "/chart/artists/top?region=us"
+  );
   return response.data;
 };

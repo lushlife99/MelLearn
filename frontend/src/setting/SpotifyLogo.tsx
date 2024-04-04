@@ -49,7 +49,12 @@ export const SpotifyLogo = () => {
       const clientId = "f7d3088794d14901af7c8bf354326039";
       const redirectUri = "http://localhost:3000/callback";
 
-      const scope = "user-read-private user-read-email user-library-read";
+      const scope =
+        "user-read-private" +
+        " user-read-email" +
+        " user-read-playback-state" +
+        " user-modify-playback-state " +
+        "streaming";
       const authUrl = new URL("https://accounts.spotify.com/authorize");
 
       const params = {

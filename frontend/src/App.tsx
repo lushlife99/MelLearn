@@ -15,6 +15,7 @@ import { Main4 } from "./main-yh/Main4";
 import { Main5 } from "./main-yh/Main5";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
+import PlayMusic from "./musichome/PlayMusic";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
           {/* TODO frontend -main 작업 시작 확인 후 지울것 */}
 
           <Route path="/main4" element={<Main4 />}></Route>
+          <Route path="/playMusic" element={<PlayMusic />}></Route>
         </Routes>
       </BrowserRouter>
     </Provider>

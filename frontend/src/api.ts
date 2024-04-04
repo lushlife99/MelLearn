@@ -9,13 +9,23 @@ const axiosApi = axios.create({
   withCredentials: true,
 });
 
-/* Spotify API 호출용 */
-export const axiosSpotify = axios.create({
+/* Spotify Scraper API 호출용 */
+export const axiosSpotifyScraper = axios.create({
   baseURL: "https://spotify-scraper.p.rapidapi.com/v1",
   withCredentials: true,
   headers: {
     "X-RapidAPI-Key": process.env.REACT_APP_SPOTIFY_SCRAPER,
     "X-RapidAPI-Host": "spotify-scraper.p.rapidapi.com",
+  },
+});
+
+const accessToken = localStorage.getItem("spotify_access_token");
+
+export const aixosSpotify = axios.create({
+  baseURL: "https://api.spotify.com/v1",
+  headers: {
+    Authorization: "Bearer " + accessToken,
+    "Content-Type": "application/json",
   },
 });
 

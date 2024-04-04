@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaMagnifyingGlass } from "react-icons/fa6";
-import { axiosSpotify } from "../api";
+import { axiosSpotifyScraper } from "../api";
 import { Link } from "react-router-dom";
 import "../css/scroll.css";
 import { useQuery } from "react-query";
@@ -26,7 +26,7 @@ export const Main5 = () => {
 
   // TODO 작업중
   const getArtistAlbum = async (search: string) => {
-    const response = await axiosSpotify.get("/search", {
+    const response = await axiosSpotifyScraper.get("/search", {
       params: {
         term: search,
       },

@@ -24,6 +24,7 @@ function Callback() {
       },
     });
     if (response.status === 200) {
+      //여기서 spotify 장치 추가 코드 하기
       nav("/home");
     }
   };
@@ -51,6 +52,7 @@ function Callback() {
     // member access token 가져오기
     const res = await fetch("https://accounts.spotify.com/api/token", payload);
     const { access_token } = await res.json();
+    localStorage.setItem("spotify_access_token", access_token);
     // member access_token으로 spotify 프로필 조회
     fetchProfile(access_token);
   };
