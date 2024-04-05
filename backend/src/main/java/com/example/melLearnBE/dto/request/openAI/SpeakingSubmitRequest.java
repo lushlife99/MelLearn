@@ -14,5 +14,5 @@ public class SpeakingSubmitRequest {
 
     private MultipartFile file;
     private String lrcLyric;
-
+    private long endMs;
 }

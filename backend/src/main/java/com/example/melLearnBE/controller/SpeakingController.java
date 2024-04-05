@@ -2,6 +2,7 @@ package com.example.melLearnBE.controller;
 
 import com.example.melLearnBE.dto.request.openAI.SpeakingSubmitRequest;
 import com.example.melLearnBE.service.SpeakingService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -17,7 +18,7 @@ public class SpeakingController {
     private SpeakingService speakingService;
 
     @PostMapping(value = "/transcription", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public void submit(@ModelAttribute SpeakingSubmitRequest speakingSubmitRequest) {
-
+    public void submit(@ModelAttribute SpeakingSubmitRequest speakingSubmitRequest, HttpServletRequest request) {
+        speakingService.submit(speakingSubmitRequest, request);
     }
 }
