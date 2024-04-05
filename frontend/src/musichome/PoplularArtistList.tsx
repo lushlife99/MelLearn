@@ -18,17 +18,17 @@ interface Artist {
   };
 }
 
-export const Main3 = (): JSX.Element => {
+export const PoplularArtistList = (): JSX.Element => {
   const { artistData } = useSelector((state: RootState) => state.artist);
   const navigation = useNavigate();
   const location = useLocation();
 
   const goHome = () => {
-    navigation("/home");
+    navigation(-1);
   };
   const goDetailArtist = (artist: Artist) => {
     navigation(`/main4?artistId=${artist.id}`, {
-      state: { prevPath: location.pathname, artist },
+      state: { artist },
     });
   };
 

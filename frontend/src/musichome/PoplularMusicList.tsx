@@ -1,15 +1,23 @@
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import "../css/scroll.css";
 
-export const Main2 = (): JSX.Element => {
+export const PopularMusicList = (): JSX.Element => {
   const { chartData } = useSelector((state: RootState) => state.chart);
   const navigation = useNavigate();
+  const location = useLocation();
 
   const goHome = () => {
     navigation("/home");
+  };
+  const goPlayMusic = (track: any) => {
+    navigation("/playMusic", {
+      state: {
+        track,
+      },
+    });
   };
 
   return (
@@ -29,14 +37,15 @@ export const Main2 = (): JSX.Element => {
         </div>
 
         <div className="grid w-full grid-cols-3 gap-4 px-3 overflow-y-auto scrollbar">
-          {chartData.tracks.slice(0, 21).map((track, index) => (
+          {chartData.tracks.slice(0, 30).map((track, index) => (
             <div
               key={index}
               className="flex flex-col items-start hover:opacity-60"
+              onClick={() => goPlayMusic(track)}
             >
               <img
                 alt="Artist Cover"
-                src={track.album.cover[0].url}
+                src={track.album.images[0].url}
                 className="w-[125px] h-[110px] rounded-md "
               />
               <span className="text-[white] font-bold mt-2 overflow-hidden overflow-ellipsis ">

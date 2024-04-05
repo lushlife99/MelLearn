@@ -1,60 +1,66 @@
 import React, { useEffect, useState } from "react";
-import { aixosSpotify, axiosSpotifyScraper } from "../api";
+import { axiosSpotify, axiosSpotifyScraper } from "../api";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaPlay, FaPause, FaStepBackward, FaStepForward } from "react-icons/fa";
-import { useQuery } from "react-query";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
+
+export interface CurrentTimeData {
+  progress_ms: number;
+}
 
 function PlayMusic() {
-  // https://developer.spotify.com/documentation/web-api/reference/start-a-users-playback
-
-  // https://api.spotify.com/v1/me/player/play
   const location = useLocation();
   const [isPlaying, setIsPlaying] = useState<boolean>();
+
   const navigate = useNavigate();
   const { track } = location.state;
-  // console.log(track);
-  //console.log(location.state.track);
+
+  //메타 데이터 가져오기
+  const { trackMetaData } = useSelector((state: RootState) => state.trackMeta);
+
+  //재생
+
   const play = async () => {
-    const playbackState = await aixosSpotify.get("/me/player"); //현재 재생 위치 확인
-    const progress_ms = playbackState.data.progress_ms;
-    const res = await aixosSpotify.put("/me/player/play", {
+    console.log("새로운 재생", track.id);
+    const playbackState = await axiosSpotify.get("/me/player"); //현재 재생 위치 확인
+    const res2 = await axiosSpotify.get("/me/player/currently-playing");
+    const existingPlaying = res2.data.item.id;
+    //새로운 음악 재생시 새로운 재생
+    const progress_ms =
+      track.id === existingPlaying ? playbackState.data.progress_ms : 0;
+    const res = await axiosSpotify.put("/me/player/play", {
       uris: ["spotify:track:" + track.id],
-      position_ms: progress_ms, // 재생 위치를 현재 위치로 설정
+      position_ms: progress_ms,
     });
 
     if (res.status === 202) {
       setIsPlaying(true);
     }
   };
-  const getTrackMeta = async () => {
-    const res = await axiosSpotifyScraper.get(
-      `/track/metadata?trackId=${track.id}`
-    );
-    console.log("meta", res.data);
-    //res.data.durationMs , res.data.durationText
-  };
-  const { data: trackMeta, isLoading: trackMetaLoading } = useQuery(
-    "trackMeta",
-    getTrackMeta
-  );
-  console.log("s", trackMeta);
 
+  //정지
   const pause = async () => {
-    const res = await aixosSpotify.put("/me/player/pause");
+    const res = await axiosSpotify.put("/me/player/pause");
+
     if (res.status === 202) {
       setIsPlaying(false);
     }
   };
+
+  //이전 재생
   const playPrevious = async () => {
-    const res = await aixosSpotify.post("/me/player/previous");
+    const res = await axiosSpotify.post("/me/player/previous");
     console.log("이전", res.status);
   };
+
+  //다음재생
   const playNext = async () => {
-    const res = await aixosSpotify.post("/me/player/next");
-    console.log("이전", res.status);
+    const res = await axiosSpotify.post("/me/player/next");
+    console.log("다음", res.data);
   };
-  const goHome = () => {
-    navigate("/home");
+  const goBack = () => {
+    navigate(-1); //뒤로가기
   };
 
   return (
@@ -65,7 +71,7 @@ function PlayMusic() {
         </span>
         <div className="flex items-center justify-center mt-16 ">
           <img
-            src={track.album.cover[0].url}
+            src={track.album.images[0].url}
             alt="Album Cover"
             className="rounded-lg w-80 h-80"
           />
@@ -101,7 +107,13 @@ function PlayMusic() {
             className="fill-[white] w-10 h-10 hover:opacity-60"
           />
         </div>
-        <span className="text-[white] text-xl" onClick={goHome}>
+        <span className="text-[white] text-xl">
+          {Math.floor(track.duration_ms / 1000 / 60)}:
+          {Math.floor((track.duration_ms / 1000) % 60) < 10
+            ? `0${Math.floor((track.duration_ms / 1000) % 60)}`
+            : Math.floor((track.duration_ms / 1000) % 60)}
+        </span>
+        <span className="text-[white] text-xl" onClick={goBack}>
           뒤로가기
         </span>
       </div>

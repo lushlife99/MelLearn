@@ -1,54 +1,50 @@
 import { useQuery } from "react-query";
-import { axiosSpotifyScraper } from "../api";
+import { axiosSpotify, axiosSpotifyScraper } from "../api";
 import { useLocation, useNavigate } from "react-router-dom";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import Spinner from "react-bootstrap/Spinner";
 import "../css/scroll.css";
-interface Artist {
-  id: string;
-  type: string;
-  name: string;
-  shareUrl: string;
-  visuals: {
-    avatar: {
-      url: string;
-      width: number | null;
-      height: number | null;
-    }[];
-  };
-}
-interface ArtistAlbum {
-  albums: {
-    items: { id: string; name: string; cover: { url: string }[] }[];
-  };
-}
+import { ChartData } from "../redux/type";
+
 interface LocationState {
-  prevPath: string;
-  artist: Artist;
+  artist: {
+    visuals: {
+      avatar: {
+        url: string;
+        width: number | null;
+        height: number | null;
+      }[];
+    };
+    name: string;
+  };
 }
 
-export const Main4 = (): JSX.Element => {
+export const ArtistDetial = (): JSX.Element => {
   const location = useLocation();
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
   const artistId = searchParams.get("artistId");
-  const { prevPath, artist } = location.state as LocationState;
+  const { artist } = location.state as LocationState;
   const goBack = () => {
-    navigate(prevPath);
+    navigate(-1);
   };
 
   //Artist Album 조회
   const getArtistAlbum = async () => {
-    const response = await axiosSpotifyScraper.get("/artist/albums", {
-      params: {
-        artistId,
+    const res = await axiosSpotify.get(`/artists/${artistId}/top-tracks`);
+    return res.data;
+  };
+
+  const goPlayMusic = async (track: any) => {
+    navigate("/playMusic", {
+      state: {
+        track,
       },
     });
-    return response.data;
   };
 
   const { data: artistAlbum, isLoading: artistAlbumLoading } =
-    useQuery<ArtistAlbum>(["artistAlbum", artistId], () => getArtistAlbum(), {
+    useQuery<ChartData>(["artistAlbum", artistId], () => getArtistAlbum(), {
       staleTime: 10800000, //캐싱기간 3시간 설정
     });
 
@@ -90,24 +86,32 @@ export const Main4 = (): JSX.Element => {
 
         {/* Artist 앨범 목록 */}
         <div className="mt-12 overflow-y-auto scrollbar">
-          {artistAlbum?.albums.items.map((album, index) => (
-            <div
-              key={album.id}
-              className="flex items-center mb-4 hover:opacity-60"
-            >
-              <img
-                className="w-[70px] h-[70px] rounded-md"
-                src={album.cover[0].url}
-                alt="Album Cover"
-              />
-              <div className="flex flex-col ml-3">
-                <span className="text-[white] font-semibold">{album.name}</span>
-                <span className="text-[gray] font-semibold">
-                  {artist.name} 재생 시간
-                </span>
+          {artistAlbum?.tracks
+            .filter((track) => track.is_playable)
+            .map((track, index) => (
+              <div
+                onClick={() => goPlayMusic(track)}
+                key={track.id}
+                className="flex items-center mb-4 hover:opacity-60"
+              >
+                <img
+                  className="w-[70px] h-[70px] rounded-md"
+                  src={track.album.images[2].url}
+                  alt="Album Cover"
+                />
+                <div className="flex flex-col ml-3">
+                  <span className="text-[white] font-semibold">
+                    {track.name}
+                  </span>
+                  <span className="text-[gray] font-semibold">
+                    {artist.name} {Math.floor(track.duration_ms / 1000 / 60)}:
+                    {Math.floor((track.duration_ms / 1000) % 60) < 10
+                      ? `0${Math.floor((track.duration_ms / 1000) % 60)}`
+                      : Math.floor((track.duration_ms / 1000) % 60)}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
     </div>

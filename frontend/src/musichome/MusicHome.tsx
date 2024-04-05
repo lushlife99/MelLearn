@@ -23,7 +23,9 @@ import { setArtistData } from "../redux/artist/artistSlice";
 import { fetchChartData } from "../redux/chart/chartAction";
 import { setChartData } from "../redux/chart/chartSlice";
 import { setSpotifyPlayer } from "../redux/player/playerSlice";
-import { aixosSpotify } from "../api";
+import { axiosSpotify } from "../api";
+import { fetchMetaData } from "../redux/trackMeta/trackMetaAction";
+import { setTrackMetaData } from "../redux/trackMeta/trackMetaSlice";
 
 interface Artist {
   id: string;
@@ -87,11 +89,14 @@ function MusicHome() {
 
   const goDetailArtist = (artist: Artist) => {
     navigation(`/main4?artistId=${artist.id}`, {
-      state: { prevPath: location.pathname, artist },
+      state: { artist },
     });
   };
 
-  const goPlayMusic = (track: any) => {
+  const goPlayMusic = async (track: any) => {
+    const metaData = await fetchMetaData(track.id);
+    dispatch(setTrackMetaData(metaData));
+
     navigation("/playMusic", {
       state: {
         track,
@@ -217,11 +222,10 @@ function MusicHome() {
                   className="swiper-slide-mid hover:bg-slate-400"
                   onClick={() => {
                     goPlayMusic(track);
-                    //console.log(chartData.tracks[index]);
                   }}
                 >
                   <img
-                    src={track.album.cover[0]?.url}
+                    src={track.album.images[0]?.url}
                     className="p-2"
                     alt="Album Cover"
                   />
