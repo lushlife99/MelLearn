@@ -1,4 +1,4 @@
-package com.example.melLearnBE.dto.model;
+package com.example.melLearnBE.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

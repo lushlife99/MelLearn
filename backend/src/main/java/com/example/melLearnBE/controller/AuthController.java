@@ -1,6 +1,6 @@
 package com.example.melLearnBE.controller;
 
-import com.example.melLearnBE.dto.model.AuthRequest;
+import com.example.melLearnBE.dto.request.AuthRequest;
 import com.example.melLearnBE.dto.model.TokenInfo;
 import com.example.melLearnBE.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
