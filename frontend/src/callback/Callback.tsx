@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import axiosApi from "../api";
+import axiosApi, { aixosSpotify } from "../api";
 import axios from "axios";
+import { transcode } from "buffer";
 
 function Callback() {
   const location = useLocation();
@@ -10,6 +11,15 @@ function Callback() {
   const code = queryParams.get("code");
   const nav = useNavigate();
 
+  // spotify 내 로컬에 device 설치
+  const transferDevice = async (devcieId: string, player: Spotify.Player) => {
+    localStorage.setItem("deviceId", devcieId);
+    const response = await aixosSpotify.put(`/me/player`, {
+      device_ids: [devcieId],
+      play: true,
+    });
+  };
+
   // access_token으로 유저 정보 조회
   const fetchProfile = async (token: string) => {
     const res = await axios.get("https://api.spotify.com/v1/me", {
@@ -17,6 +27,45 @@ function Callback() {
     });
 
     const { id } = res.data;
+    console.log("아이디 연동", res.status);
+    const script = document.createElement("script");
+    script.src = "https:/sdk.scdn.co/spotify-player.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    window.onSpotifyWebPlaybackSDKReady = () => {
+      const player = new Spotify.Player({
+        name: "MelLearn",
+        getOAuthToken: (cb) => {
+          cb(token);
+        },
+        volume: 0.5,
+      });
+      player.addListener("ready", ({ device_id }) => {
+        transferDevice(device_id, player);
+      });
+      player.addListener("not_ready", ({ device_id }) => {
+        console.log("Device ID has gone offline", device_id);
+      });
+
+      player.addListener("initialization_error", ({ message }) => {
+        console.error(message);
+      });
+
+      player.addListener("authentication_error", ({ message }) => {
+        console.error("인증", message);
+      });
+
+      player.addListener("account_error", ({ message }) => {
+        console.error(message);
+      });
+      player.connect().then((success) => {
+        if (success) {
+          console.log(success);
+          // dispatch(setSpotifyPlayer(player));
+        }
+      });
+    };
 
     const response = await axiosApi.post("/api/member/spotifyAccount", null, {
       params: {
@@ -25,6 +74,7 @@ function Callback() {
     });
     if (response.status === 200) {
       //여기서 spotify 장치 추가 코드 하기
+
       nav("/home");
     }
   };

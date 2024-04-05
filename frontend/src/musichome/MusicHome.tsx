@@ -90,13 +90,6 @@ function MusicHome() {
       state: { prevPath: location.pathname, artist },
     });
   };
-  const transferDevice = async (devcieId: string, player: Spotify.Player) => {
-    localStorage.setItem("deviceId", devcieId);
-    const response = await aixosSpotify.put(`/me/player`, {
-      device_ids: [devcieId],
-      play: true,
-    });
-  };
 
   const goPlayMusic = (track: any) => {
     navigation("/playMusic", {
@@ -105,54 +98,6 @@ function MusicHome() {
       },
     });
   };
-
-  useEffect(() => {
-    console.log("hihi");
-    const script = document.createElement("script");
-    script.src = "https://sdk.scdn.co/spotify-player.js";
-    script.async = true;
-    document.body.appendChild(script);
-
-    window.onSpotifyWebPlaybackSDKReady = () => {
-      const token = localStorage.getItem("spotify_access_token");
-      const player = new Spotify.Player({
-        name: "MelLearn",
-        getOAuthToken: (cb) => {
-          if (token !== null) {
-            cb(token);
-          } else {
-            console.error("Spotify access token not found");
-          }
-        },
-        volume: 0.5,
-      });
-      player.addListener("ready", ({ device_id }) => {
-        transferDevice(device_id, player);
-      });
-      // Not Ready
-      player.addListener("not_ready", ({ device_id }) => {
-        console.log("Device ID has gone offline", device_id);
-      });
-
-      player.addListener("initialization_error", ({ message }) => {
-        console.error(message);
-      });
-
-      player.addListener("authentication_error", ({ message }) => {
-        console.error("인증", message);
-      });
-
-      player.addListener("account_error", ({ message }) => {
-        console.error(message);
-      });
-      player.connect().then((success) => {
-        if (success) {
-          console.log(success);
-          // dispatch(setSpotifyPlayer(player));
-        }
-      });
-    };
-  }, []);
 
   //리액트 쿼리 사용 -> 메인화면 올때 멤버 정보를 받아서 langtype으로 en ,jp 구분해서
   //플레이리스트를 보여줘야함

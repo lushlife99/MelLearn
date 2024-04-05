@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { aixosSpotify } from "../api";
+import React, { useEffect, useState } from "react";
+import { aixosSpotify, axiosSpotifyScraper } from "../api";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaPlay, FaPause, FaStepBackward, FaStepForward } from "react-icons/fa";
+import { useQuery } from "react-query";
 
 function PlayMusic() {
   // https://developer.spotify.com/documentation/web-api/reference/start-a-users-playback
@@ -11,7 +12,7 @@ function PlayMusic() {
   const [isPlaying, setIsPlaying] = useState<boolean>();
   const navigate = useNavigate();
   const { track } = location.state;
-
+  // console.log(track);
   //console.log(location.state.track);
   const play = async () => {
     const playbackState = await aixosSpotify.get("/me/player"); //현재 재생 위치 확인
@@ -25,6 +26,18 @@ function PlayMusic() {
       setIsPlaying(true);
     }
   };
+  const getTrackMeta = async () => {
+    const res = await axiosSpotifyScraper.get(
+      `/track/metadata?trackId=${track.id}`
+    );
+    console.log("meta", res.data);
+    //res.data.durationMs , res.data.durationText
+  };
+  const { data: trackMeta, isLoading: trackMetaLoading } = useQuery(
+    "trackMeta",
+    getTrackMeta
+  );
+  console.log("s", trackMeta);
 
   const pause = async () => {
     const res = await aixosSpotify.put("/me/player/pause");
@@ -88,7 +101,9 @@ function PlayMusic() {
             className="fill-[white] w-10 h-10 hover:opacity-60"
           />
         </div>
-        <button onClick={goHome}>뒤로가기</button>
+        <span className="text-[white] text-xl" onClick={goHome}>
+          뒤로가기
+        </span>
       </div>
     </div>
   );
