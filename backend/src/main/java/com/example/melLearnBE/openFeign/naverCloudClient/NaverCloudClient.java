@@ -7,12 +7,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(
         name = "papago-detectLang-service",
-        url = "https://naveropenapi.apigw.ntruss.com"
+        url = "https://naveropenapi.apigw.ntruss.com",
+        configuration = NaverCloudConfig.class
 )
 public interface NaverCloudClient {
 
     @PostMapping("/langs/v1/dect")
-    String detectLanguage(@RequestHeader("X-NCP-APIGW-API-KEY-ID") String clientId,
-                          @RequestHeader("X-NCP-APIGW-API-KEY") String clientSecret,
-                          @RequestParam("query") String query);
+    String detectLanguage(@RequestParam("query") String query);
 }

@@ -25,10 +25,7 @@ public class SupportService {
 
     private final NaverCloudClient naverCloudClient;
     private final JwtTokenProvider jwtTokenProvider;
-    @Value("${naver.cloud.api.key-id}")
-    private static String naverClientId;
-    @Value("${naver.cloud.api.key}")
-    private static String naverClientApiKey;
+
     public List<String> getSupportLang() {
         List<Language> langList = Arrays.stream(Language.values()).toList();
         ArrayList<String> isoList = new ArrayList<>();
@@ -44,7 +41,7 @@ public class SupportService {
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
 
         //가사의 언어 체크
-        String langCode = naverCloudClient.detectLanguage(naverClientId, naverClientApiKey, lyric);
+        String langCode = naverCloudClient.detectLanguage(lyric);
         System.out.println(langCode);
 
         if(member.getLangType().getIso639Value().equals(langCode)) {
