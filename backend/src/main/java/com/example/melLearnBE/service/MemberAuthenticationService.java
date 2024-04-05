@@ -1,6 +1,5 @@
 package com.example.melLearnBE.service;
 
-import com.example.melLearnBE.dto.model.MemberDto;
 import com.example.melLearnBE.model.Member;
 import com.example.melLearnBE.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;

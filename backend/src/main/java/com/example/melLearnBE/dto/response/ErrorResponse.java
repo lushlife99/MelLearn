@@ -1,4 +1,4 @@
-package com.example.melLearnBE.dto.model;
+package com.example.melLearnBE.dto.response;
 
 import com.example.melLearnBE.error.ErrorCode;
 import lombok.Builder;
