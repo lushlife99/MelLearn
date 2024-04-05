@@ -1,6 +1,7 @@
 package com.example.melLearnBE.service;
 
 import com.example.melLearnBE.dto.response.SupportQuizCategories;
+import com.example.melLearnBE.dto.response.naverCloud.DetectLang;
 import com.example.melLearnBE.enums.Language;
 import com.example.melLearnBE.error.CustomException;
 import com.example.melLearnBE.error.ErrorCode;
@@ -41,14 +42,16 @@ public class SupportService {
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
 
         //가사의 언어 체크
-        String langCode = naverCloudClient.detectLanguage(lyric);
-        System.out.println(langCode);
-
-        if(member.getLangType().getIso639Value().equals(langCode)) {
+        DetectLang detectLang = naverCloudClient.detectLanguage(lyric);
+        System.out.println(detectLang.getLangCode());
+        System.out.println(member.getLangType().getIso639Value());
+        if(member.getLangType().getIso639Value().equals(detectLang.getLangCode())) {
             supportQuizCategories.setListening(true);
             supportQuizCategories.setReading(true);
             supportQuizCategories.setGrammar(true);
             supportQuizCategories.setVocabulary(true);
+        } else {
+            return supportQuizCategories;
         }
 
         // lrc 포맷인지 체크
