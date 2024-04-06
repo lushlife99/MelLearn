@@ -26,7 +26,8 @@ public enum ErrorCode {
     ALREADY_EXIST_USERID(HttpStatus.CONFLICT, "이미 존재하는 userId 입니다"),
 
     /* 500 INTERNAL_SERVER_ERROR : 서버오류 */
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류")
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류"),
+    AUDIO_PRE_PROCESSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "오디오 전처리 에러"),
     ;
 
     private final HttpStatus httpStatus;

@@ -1,6 +1,6 @@
 package com.example.melLearnBE.controller;
 
-import com.example.melLearnBE.dto.request.openAI.SpeakingSubmitRequest;
+import com.example.melLearnBE.dto.request.SpeakingSubmitRequest;
 import com.example.melLearnBE.service.SpeakingService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
