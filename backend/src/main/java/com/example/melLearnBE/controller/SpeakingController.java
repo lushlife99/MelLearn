@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/problem/speaking")
 public class SpeakingController {
 
-    private SpeakingService speakingService;
+    private final SpeakingService speakingService;
 
     @PostMapping(value = "/transcription", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void submit(@ModelAttribute SpeakingSubmitRequest speakingSubmitRequest, HttpServletRequest request) {
