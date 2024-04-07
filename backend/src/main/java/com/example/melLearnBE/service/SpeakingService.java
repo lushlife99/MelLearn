@@ -44,7 +44,7 @@ public class SpeakingService {
     private static final String AUDIO_PATH = "." + File.separator + "audio" + File.separator;
 
     @Transactional
-    public AnswerSpeakingDto submit(SpeakingSubmitRequest submitRequest, HttpServletRequest request) {
+    public AnswerSpeakingDto submit(SpeakingSubmitRequest submitRequest, String musicId, HttpServletRequest request) {
 
         List<LrcLyric> lyricList = submitRequest.getLyricList();
         MultipartFile file = submitRequest.getFile();
@@ -65,7 +65,7 @@ public class SpeakingService {
         convertGradableFormat(lyricList, whisperSegments);
 
         // 4. 채점
-        AnswerSpeakingDto answerSpeaking = grade(lyricList, member, transcription);
+        AnswerSpeakingDto answerSpeaking = grade(musicId, lyricList, member, transcription);
 
         // 5. 랭킹
         return answerSpeaking;
@@ -106,7 +106,7 @@ public class SpeakingService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public AnswerSpeakingDto grade(List<LrcLyric> answerLyrics, Member member, WhisperTranscriptionResponse transcriptionResponse) {
+    public AnswerSpeakingDto grade(String musicId, List<LrcLyric> answerLyrics, Member member, WhisperTranscriptionResponse transcriptionResponse) {
 
         List<WhisperSegment> submitLyrics = transcriptionResponse.getSegments();
         Properties props = new Properties();
@@ -145,7 +145,7 @@ public class SpeakingService {
         log.info("answerSheet={}", answerSheet);
 
         AnswerSpeaking answerSpeaking = AnswerSpeaking.builder()
-                //.musicId()
+                .musicId(musicId)
                 .markedText(answerSheet.toString())
                 .submit(transcriptionResponse.getText())
                 .score(wrongTokenSize / allTokenSize)

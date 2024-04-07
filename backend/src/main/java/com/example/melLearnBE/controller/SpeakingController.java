@@ -24,13 +24,14 @@ public class SpeakingController {
     @PostMapping(value = "/transcription", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public AnswerSpeakingDto submit(@RequestPart("file") MultipartFile file,
                                     @RequestPart("lyricList") List<LrcLyric> lyricList,
+                                    @RequestPart("musicId") String musicId,
                                     HttpServletRequest request) {
 
         SpeakingSubmitRequest submitRequest = SpeakingSubmitRequest.builder()
                 .file(file)
                 .lyricList(lyricList)
                 .build();
-        return speakingService.submit(submitRequest, request);
+        return speakingService.submit(submitRequest, musicId, request);
     }
 
 }
