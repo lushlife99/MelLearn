@@ -25,8 +25,10 @@ function PlayMusic() {
     console.log("새로운 재생", track.id);
     const playbackState = await axiosSpotify.get("/me/player"); //현재 재생 위치 확인
     const res2 = await axiosSpotify.get("/me/player/currently-playing");
+
     const existingPlaying = res2.data.item.id;
     //새로운 음악 재생시 새로운 재생
+    //const progress_ms = 0;
     const progress_ms =
       track.id === existingPlaying ? playbackState.data.progress_ms : 0;
     const res = await axiosSpotify.put("/me/player/play", {

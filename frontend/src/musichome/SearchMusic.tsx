@@ -27,6 +27,7 @@ interface SearchTrack {
 
 export const SearchMusic = () => {
   const [search, setSearch] = useState("");
+  const navigate = useNavigate();
 
   // TODO 작업중
   const getArtistAlbum = async (search: string) => {
@@ -53,9 +54,16 @@ export const SearchMusic = () => {
     // Search 요청 을 보낸다.
     refetch();
   };
-  const navigate = useNavigate();
+
   const goPlayMusic = (track: any) => {
     navigate("/playMusic", {
+      state: {
+        track,
+      },
+    });
+  };
+  const goSpeakingTest = (track: any) => {
+    navigate("/speaking", {
       state: {
         track,
       },
@@ -124,7 +132,10 @@ export const SearchMusic = () => {
                       <FaPlay className="mr-2" />
                       <span className="font-bold">재생</span>
                     </button>
-                    <button className="bg-[white] w-32 rounded-2xl h-8 hover:opacity-60 flex items-center justify-center">
+                    <button
+                      onClick={() => goSpeakingTest(track)}
+                      className="bg-[white] w-32 rounded-2xl h-8 hover:opacity-60 flex items-center justify-center"
+                    >
                       <LuPencilLine className="mr-2 fill-black" />
                       <span className="font-bold">공부</span>
                     </button>

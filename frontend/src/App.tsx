@@ -14,6 +14,7 @@ import { SearchMusic } from "./musichome/SearchMusic";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import PlayMusic from "./musichome/PlayMusic";
+import Speaking from "./learning/Speaking";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
 
           <Route path="/main4" element={<ArtistDetial />}></Route>
           <Route path="/playMusic" element={<PlayMusic />}></Route>
+          <Route path="/speaking" element={<Speaking />}></Route>
         </Routes>
       </BrowserRouter>
     </Provider>
