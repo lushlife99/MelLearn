@@ -1,5 +1,6 @@
 package com.example.melLearnBE.controller;
 
+import com.example.melLearnBE.dto.request.LrcLyric;
 import com.example.melLearnBE.dto.response.SupportQuizCategories;
 import com.example.melLearnBE.enums.Language;
 import com.example.melLearnBE.service.SupportService;
@@ -28,7 +29,7 @@ public class SupportController {
 
     @GetMapping("/quiz/category")
     @Operation(summary = "특정 노래가 지원하는 문제 카테고리 조회", description = "서버에서 지원하는 5가지 카테고리의 문제 유형의 지원을 boolean 형식으로 리턴")
-    public SupportQuizCategories getSupportQuizCategory(@RequestParam String lyric, HttpServletRequest request) {
+    public SupportQuizCategories getSupportQuizCategory(@RequestBody List<LrcLyric> lyric, HttpServletRequest request) {
         return supportService.getSupportQuizCategory(lyric, request);
     }
 }

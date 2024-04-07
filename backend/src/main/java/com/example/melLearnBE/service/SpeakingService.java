@@ -26,14 +26,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.sound.sampled.*;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,30 +45,41 @@ public class SpeakingService {
     private final SupportService supportService;
     private final OpenAIClient openAIClient;
     private final OpenAIClientConfig openAIClientConfig;
+    private static final String AUDIO_PATH = "." + File.separator + "audio" + File.separator;
     private static final double SILENCE_LENGTH = 2.0; // 전처리 할 때 사용하는 temp audio의 시간
 
     @Transactional
-    public void submit(SpeakingSubmitRequest submitRequest, HttpServletRequest request) {
+    public List<WhisperSegment> submit(SpeakingSubmitRequest submitRequest, HttpServletRequest request) {
 
         List<LrcLyric> lyricList = submitRequest.getLyricList();
-        String pureLyric = getPureLyric(lyricList);
         MultipartFile file = submitRequest.getFile();
-
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-        SupportQuizCategories supportQuizCategory = supportService.getSupportQuizCategory(pureLyric, request);
-        if(!supportQuizCategory.isSpeaking())
+        SupportQuizCategories supportQuizCategory = supportService.getSupportQuizCategory(lyricList, request);
+        if (!supportQuizCategory.isSpeaking())
             throw new CustomException(ErrorCode.UN_SUPPORTED_QUIZ_LANG);
 
-        log.info("lrcLyrics = {}", lyricList);
 
         // 0. 녹음 파일 저장. 테스트용도로 저장해놓음. 나중에 삭제.
-        saveAudioFile(submitRequest);
+        //saveAudioFile(submitRequest);
         // 1. 전처리 1 - audio 파일을 lrc파일에 맞게 분할하고 사이에 temp audio 삽입
-        File preprocessingAudio = audioPreprocess(file, lyricList);
+        File preprocessingAudio = audioPreprocess(submitRequest);
 
         // 2. whisper 전송
         WhisperTranscriptionResponse transcription = createTranscription(preprocessingAudio, member.getLangType().getIso639Value());
 
+        System.out.println("lrcLyric: ");
+
+        for (LrcLyric lrcLyric : lyricList) {
+            System.out.println(lrcLyric.getText());
+        }
+
+        System.out.println("Whisper Segments: ");
+
+        System.out.println(transcription);
+
+        for (WhisperSegment segment : transcription.getSegments()) {
+            System.out.println(segment.getText());
+        }
         // 3. 전처리 2 - 세그먼트와 lyric 줄 싱크 맞추기, 대소문자 변경, 특수문자 제거
         List<WhisperSegment> whisperSegments = synchronizeLyricsAndSegments(lyricList, transcription);
         convertGradableFormat(lyricList, whisperSegments);
@@ -77,6 +88,7 @@ public class SpeakingService {
         grade(lyricList, whisperSegments);
 
         // 5. 랭킹
+        return whisperSegments;
     }
 
     private void saveAudioFile(SpeakingSubmitRequest submitRequest) {
@@ -86,23 +98,21 @@ public class SpeakingService {
         }
 
         try {
-            // resources 디렉토리 아래에 audio 디렉토리 경로를 구성합니다.
-            // Spring Boot 애플리케이션의 클래스 패스 상대 경로를 사용합니다.
-            String resourcesDirectory = "./audio/" + UUID.randomUUID() + ".wav";
-            Path directoryPath = Paths.get(resourcesDirectory);
-            if (!Files.exists(directoryPath)) {
-                Files.createDirectories(directoryPath); // 디렉토리가 없다면 생성
+            String fileName = UUID.randomUUID() + ".m4a";
+            Path directory = Paths.get(AUDIO_PATH).toAbsolutePath();
+            if (!Files.exists(directory)) {
+                Files.createDirectories(directory); // 디렉토리 생성
             }
-
-            Path filePath = directoryPath.resolve(file.getOriginalFilename());
-
-            file.transferTo(filePath.toFile());
-
+            File uploadFile = new File(directory + File.separator + fileName);
+            System.out.println(uploadFile.getAbsolutePath());
+            file.transferTo(uploadFile.toPath());
         } catch (IOException e) {
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+            e.printStackTrace();
+            throw new RuntimeException("파일 저장 중 오류 발생", e);
         }
-
     }
+
+
     private void convertGradableFormat(List<LrcLyric> answerLyrics, List<WhisperSegment> submitLyrics) {
         convertLyricToLowerCase(answerLyrics, submitLyrics);
         removeSpecialChar(answerLyrics, submitLyrics);
@@ -137,7 +147,7 @@ public class SpeakingService {
         props.setProperty("annotators", "tokenize, ssplit");
         double similarity = 0.0;
 
-        for(int i = 0; i < answerLyrics.size(); i++) {
+        for (int i = 0; i < answerLyrics.size(); i++) {
             LrcLyric lrcLyricLine = answerLyrics.get(i);
             WhisperSegment submitLyricLine = submitLyrics.get(i);
 
@@ -151,7 +161,6 @@ public class SpeakingService {
             similarity += (rightSubmitTokens.size() / allTokens.size());
 
         }
-
         return null;
     }
 
@@ -179,15 +188,15 @@ public class SpeakingService {
     private List<WhisperSegment> synchronizeLyricsAndSegments(List<LrcLyric> lrcLyrics, WhisperTranscriptionResponse transcription) {
         List<WhisperSegment> segments = transcription.getSegments();
 
-        // size가 같을경우 전처리가 필요없음.
-        if(lrcLyrics.size() == segments.size()) {
+        // size가 같을경우 후처리가 필요없음.
+        if (lrcLyrics.size() == segments.size()) {
             return segments;
         }
 
         log.info("Lyric Size is Not Matched. Start Progress of Whisper Transcription");
 
         // lrcLyrics.size() > segments.size()일 상황은 없음.
-        if(lrcLyrics.size() > segments.size()) {
+        if (lrcLyrics.size() > segments.size()) {
             log.info("Segment Lines is shorter than lrcLyrics");
             throw new CustomException(ErrorCode.AUDIO_PRE_PROCESSING_ERROR);
         }
@@ -195,11 +204,11 @@ public class SpeakingService {
         // lrcLyrics.size() < segments.size()일 경우 전처리.
         for (int i = 0; i < segments.size(); i++) {
             if (i != segments.size() - 1) {
-                if (segments.get(i+1).getStart() - segments.get(i).getEnd() < SILENCE_LENGTH) {
+                if (segments.get(i + 1).getStart() - segments.get(i).getEnd() < SILENCE_LENGTH) {
                     log.info("Segmented By Whisper Model");
                     log.info("LrcLyric = {}", lrcLyrics.get(i).getText());
                     log.info("Divided Segment1 ={}", segments.get(i).getText());
-                    log.info("Divided Segment2 ={}", segments.get(i+1).getText());
+                    log.info("Divided Segment2 ={}", segments.get(i + 1).getText());
 
                     WhisperSegment whisperSegment = segments.get(i);
                     WhisperSegment nextSegment = segments.get(i + 1);
@@ -212,14 +221,13 @@ public class SpeakingService {
                     break;
                 }
             }
-
         }
 
         return segments;
     }
 
 
-    private WhisperTranscriptionResponse createTranscription(File audioFile, String langCode){
+    private WhisperTranscriptionResponse createTranscription(File audioFile, String langCode) {
 
         WhisperTranscriptionRequest whisperTranscriptionRequest = WhisperTranscriptionRequest.builder()
                 .model(openAIClientConfig.getAudioModel())
@@ -233,92 +241,82 @@ public class SpeakingService {
         return transcription;
     }
 
-    private File audioPreprocess(MultipartFile file, List<LrcLyric> lrcLyrics) {
+    private File audioPreprocess(SpeakingSubmitRequest submitRequest) {
+        MultipartFile file = submitRequest.getFile();
+        List<LrcLyric> lrcLyrics = submitRequest.getLyricList();
+        Path directory = Paths.get(AUDIO_PATH).toAbsolutePath();
+
         try {
-            ClassPathResource resource = new ClassPathResource("audio/silence.wav");
+            File requestAudioFile = new File(directory + File.separator + UUID.randomUUID() + ".wav");
+            file.transferTo(requestAudioFile);
 
-            ClassPathResource returnFilePath = new ClassPathResource("audio/"+ UUID.randomUUID() +".wav");
-
-            File audioFile = new File(file.getName());
-            File silenceFile = resource.getFile();
-            File preProcessingAudio = new File(returnFilePath.getPath());
-
-            file.transferTo(audioFile);
-            AudioInputStream inputStream = AudioSystem.getAudioInputStream(audioFile);
-            AudioInputStream silenceInputStream = AudioSystem.getAudioInputStream(silenceFile);
-
-
-            for (LrcLyric lrcLyric : lrcLyrics) {
-
-                AudioFormat format = inputStream.getFormat();
-
-                long framesOfAudioToCopy = (long)((lrcLyric.getStartMs() + lrcLyric.getDurMs()) * (format.getFrameRate() / 1000));
-                inputStream.skip(lrcLyric.getStartMs() * (long) (format.getFrameRate() / 1000) * format.getFrameSize());
-                AudioInputStream shortenedStream = new AudioInputStream(inputStream, format, framesOfAudioToCopy);
-                AudioSystem.write(shortenedStream, AudioFileFormat.Type.WAVE, preProcessingAudio);
-                AudioSystem.write(silenceInputStream, AudioFileFormat.Type.WAVE, preProcessingAudio);
-
-                shortenedStream.close();
+            AudioFormat audioFormat;
+            try (AudioInputStream tempStream = AudioSystem.getAudioInputStream(requestAudioFile)) {
+                audioFormat = tempStream.getFormat();
             }
 
-            inputStream.close();
-            silenceInputStream.close();
-            return preProcessingAudio;
+            // 병합할 오디오 스트림 리스트
+            List<AudioInputStream> audioParts = new ArrayList<>();
 
-        } catch (UnsupportedAudioFileException | IOException e) {
-            log.info(e.getMessage());
+            // 사일런스 데이터 준비
+            AudioInputStream silenceStream = AudioSystem.getAudioInputStream(new File(directory + File.separator + "silence.wav"));
+            byte[] silenceData = new byte[(int) silenceStream.getFrameLength() * silenceStream.getFormat().getFrameSize()];
+            silenceStream.read(silenceData);
+            ByteArrayInputStream silenceBAIS = new ByteArrayInputStream(silenceData);
+            AudioInputStream silenceAudioStream = new AudioInputStream(silenceBAIS, audioFormat, 2000);
+
+            for (LrcLyric lrcLyric : lrcLyrics) {
+                AudioInputStream originalStream = AudioSystem.getAudioInputStream(requestAudioFile);
+                long framesToSkip = lrcLyric.getStartMs() * (long) (audioFormat.getFrameRate() / 1000);
+                originalStream.skip(framesToSkip * audioFormat.getFrameSize());
+
+                long framesOfAudioToCopy = (long) ((lrcLyric.getDurMs()) * (audioFormat.getFrameRate() / 1000));
+                AudioInputStream shortenedStream = new AudioInputStream(originalStream, audioFormat, framesOfAudioToCopy);
+
+                // 오디오 조각과 사일런스 추가
+                audioParts.add(shortenedStream);
+                audioParts.add(silenceAudioStream);
+            }
+
+            // 오디오 스트림 병합
+            AudioInputStream concatenatedStream = new SequenceAudioInputStream(audioFormat, audioParts);
+
+            // 최종 오디오 파일 저장
+            File preProcessingAudio = new File(directory + File.separator + "pre" + UUID.randomUUID() + ".wav");
+            AudioSystem.write(concatenatedStream, AudioFileFormat.Type.WAVE, preProcessingAudio);
+
+            return preProcessingAudio;
+        } catch (Exception e) {
+            e.printStackTrace();
             throw new CustomException(ErrorCode.AUDIO_PRE_PROCESSING_ERROR);
         }
-
     }
 
-//    private List<LrcLyric> parseLrc(SpeakingSubmitRequest submitRequest) {
-//        List<LrcLyric> lyrics = new ArrayList<>();
-//        Pattern pattern = Pattern.compile("\\[(\\d{2}):(\\d{2}\\.\\d{2})\\](.*)");
-//        String[] lines = submitRequest.getLrcLyric().split("\n");
-//
-//        for (int i = 0; i < lines.length; i++) {
-//            Matcher matcher = pattern.matcher(lines[i]);
-//            if (matcher.find()) {
-//                long startMs = convertToMilliseconds(matcher.group(1), matcher.group(2));
-//                long endMs = (i < lines.length - 1) ? convertToMilliseconds(lines[i + 1]) : submitRequest.getEndMs();
-//                String lyric = matcher.group(3);
-//                if(lyric.equals("♪")) {
-//                    continue;
-//                }
-//                lyrics.add(new LrcLyric(startMs, endMs, lyric));
-//            }
-//        }
-//
-//        // 마지막 가사의 끝 시간을 조정
-//        if (!lyrics.isEmpty()) {
-//            lyrics.get(lyrics.size() - 1).endMs = submitRequest.getEndMs();
-//        }
-//
-//        return lyrics;
-//    }
-
-    private long convertToMilliseconds(String line) {
-        Matcher matcher = Pattern.compile("\\[(\\d{2}):(\\d{2}\\.\\d{2})\\]").matcher(line);
-        if (matcher.find()) {
-            return convertToMilliseconds(matcher.group(1), matcher.group(2));
-        }
-        return 0;
-    }
-
-    private long convertToMilliseconds(String minutes, String seconds) {
-        return Long.parseLong(minutes) * 60000 + (long)(Double.parseDouble(seconds) * 1000);
-    }
-
-
-    private String getPureLyric(List<LrcLyric> lrcLyrics) {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        for (LrcLyric lrcLyric : lrcLyrics) {
-            stringBuilder.append(lrcLyric.getText());
+    class SequenceAudioInputStream extends AudioInputStream {
+        public SequenceAudioInputStream(AudioFormat audioFormat, List<AudioInputStream> audioInputStreams) {
+            super(new SequenceInputStream(Collections.enumeration(getInputStreams(audioInputStreams))), audioFormat, getFrameLength(audioInputStreams));
         }
 
-        return stringBuilder.toString();
+        private static Vector<InputStream> getInputStreams(List<AudioInputStream> streams) {
+            Vector<InputStream> inputStreams = new Vector<>();
+            for (AudioInputStream stream : streams) {
+                inputStreams.add(stream);
+            }
+            return inputStreams;
+        }
+
+        private static long getFrameLength(List<AudioInputStream> streams) {
+            long totalLength = 0;
+            for (AudioInputStream stream : streams) {
+                long frameLength = stream.getFrameLength();
+                if (frameLength != AudioSystem.NOT_SPECIFIED) {
+                    totalLength += frameLength;
+                } else {
+                    return AudioSystem.NOT_SPECIFIED;
+                }
+            }
+            return totalLength;
+        }
     }
 
 }
