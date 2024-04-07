@@ -2,6 +2,7 @@ package com.example.melLearnBE.controller;
 
 import com.example.melLearnBE.dto.request.LrcLyric;
 import com.example.melLearnBE.dto.request.SpeakingSubmitRequest;
+import com.example.melLearnBE.dto.response.AnswerSpeakingDto;
 import com.example.melLearnBE.dto.response.openAI.WhisperSegment;
 import com.example.melLearnBE.service.SpeakingService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,17 +22,15 @@ public class SpeakingController {
     private final SpeakingService speakingService;
 
     @PostMapping(value = "/transcription", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public List<WhisperSegment> submit(@RequestPart("file") MultipartFile file,
-                                       @RequestPart("lyricList") List<LrcLyric> lyricList,
-                                       HttpServletRequest request) {
+    public AnswerSpeakingDto submit(@RequestPart("file") MultipartFile file,
+                                    @RequestPart("lyricList") List<LrcLyric> lyricList,
+                                    HttpServletRequest request) {
 
         SpeakingSubmitRequest submitRequest = SpeakingSubmitRequest.builder()
                 .file(file)
                 .lyricList(lyricList)
                 .build();
-        List<WhisperSegment> submit = speakingService.submit(submitRequest, request);
-        System.out.println(submit);
-        return submit;
+        return speakingService.submit(submitRequest, request);
     }
 
 }

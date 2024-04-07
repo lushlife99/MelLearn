@@ -3,12 +3,14 @@ package com.example.melLearnBE.service;
 import com.example.melLearnBE.dto.request.LrcLyric;
 import com.example.melLearnBE.dto.request.SpeakingSubmitRequest;
 import com.example.melLearnBE.dto.request.openAI.WhisperTranscriptionRequest;
+import com.example.melLearnBE.dto.response.AnswerSpeakingDto;
 import com.example.melLearnBE.dto.response.SupportQuizCategories;
 import com.example.melLearnBE.dto.response.openAI.WhisperSegment;
 import com.example.melLearnBE.dto.response.openAI.WhisperTranscriptionResponse;
 import com.example.melLearnBE.error.CustomException;
 import com.example.melLearnBE.error.ErrorCode;
 import com.example.melLearnBE.jwt.JwtTokenProvider;
+import com.example.melLearnBE.model.AnswerSpeaking;
 import com.example.melLearnBE.model.Member;
 import com.example.melLearnBE.openFeign.openAIClient.OpenAIClient;
 import com.example.melLearnBE.openFeign.openAIClient.OpenAIClientConfig;
@@ -16,10 +18,8 @@ import com.example.melLearnBE.repository.AnswerSpeakingRepository;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,13 +27,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.sound.sampled.*;
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,10 +42,9 @@ public class SpeakingService {
     private final OpenAIClient openAIClient;
     private final OpenAIClientConfig openAIClientConfig;
     private static final String AUDIO_PATH = "." + File.separator + "audio" + File.separator;
-    private static final double SILENCE_LENGTH = 2.0; // 전처리 할 때 사용하는 temp audio의 시간
 
     @Transactional
-    public List<WhisperSegment> submit(SpeakingSubmitRequest submitRequest, HttpServletRequest request) {
+    public AnswerSpeakingDto submit(SpeakingSubmitRequest submitRequest, HttpServletRequest request) {
 
         List<LrcLyric> lyricList = submitRequest.getLyricList();
         MultipartFile file = submitRequest.getFile();
@@ -58,59 +53,24 @@ public class SpeakingService {
         if (!supportQuizCategory.isSpeaking())
             throw new CustomException(ErrorCode.UN_SUPPORTED_QUIZ_LANG);
 
-
-        // 0. 녹음 파일 저장. 테스트용도로 저장해놓음. 나중에 삭제.
-        //saveAudioFile(submitRequest);
         // 1. 전처리 1 - audio 파일을 lrc파일에 맞게 분할하고 사이에 temp audio 삽입
         File preprocessingAudio = audioPreprocess(submitRequest);
 
         // 2. whisper 전송
         WhisperTranscriptionResponse transcription = createTranscription(preprocessingAudio, member.getLangType().getIso639Value());
 
-        System.out.println("lrcLyric: ");
-
-        for (LrcLyric lrcLyric : lyricList) {
-            System.out.println(lrcLyric.getText());
-        }
-
-        System.out.println("Whisper Segments: ");
-
-        System.out.println(transcription);
-
-        for (WhisperSegment segment : transcription.getSegments()) {
-            System.out.println(segment.getText());
-        }
-        // 3. 전처리 2 - 세그먼트와 lyric 줄 싱크 맞추기, 대소문자 변경, 특수문자 제거
-        List<WhisperSegment> whisperSegments = synchronizeLyricsAndSegments(lyricList, transcription);
+        List<WhisperSegment> whisperSegments = transcription.getSegments();
+        // 3. 후처리 2 - 세그먼트와 lyric 줄 싱크 맞추기, 대소문자 변경, 특수문자 제거
+        //List<WhisperSegment> whisperSegments = synchronizeLyricsAndSegments(lyricList, transcription);
         convertGradableFormat(lyricList, whisperSegments);
 
         // 4. 채점
-        grade(lyricList, whisperSegments);
+        AnswerSpeakingDto answerSpeaking = grade(lyricList, member, transcription);
 
         // 5. 랭킹
-        return whisperSegments;
+        return answerSpeaking;
     }
 
-    private void saveAudioFile(SpeakingSubmitRequest submitRequest) {
-        MultipartFile file = submitRequest.getFile();
-        if (file.isEmpty()) {
-            throw new IllegalStateException("파일이 비어 있습니다.");
-        }
-
-        try {
-            String fileName = UUID.randomUUID() + ".m4a";
-            Path directory = Paths.get(AUDIO_PATH).toAbsolutePath();
-            if (!Files.exists(directory)) {
-                Files.createDirectories(directory); // 디렉토리 생성
-            }
-            File uploadFile = new File(directory + File.separator + fileName);
-            System.out.println(uploadFile.getAbsolutePath());
-            file.transferTo(uploadFile.toPath());
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("파일 저장 중 오류 발생", e);
-        }
-    }
 
 
     private void convertGradableFormat(List<LrcLyric> answerLyrics, List<WhisperSegment> submitLyrics) {
@@ -121,11 +81,13 @@ public class SpeakingService {
     private void removeSpecialChar(List<LrcLyric> answerLyrics, List<WhisperSegment> submitLyrics) {
         for (int i = 0; i < answerLyrics.size(); i++) {
             LrcLyric lrcLyricLine = answerLyrics.get(i);
-            WhisperSegment submitLyricLine = submitLyrics.get(i);
 
             lrcLyricLine.setText(lrcLyricLine.getText().replaceAll("[^a-zA-Z0-9\\s]", ""));
-            submitLyricLine.setText(submitLyricLine.getText().replaceAll("[^a-zA-Z0-9\\s]", ""));
+        }
 
+        for (int i = 0; i < submitLyrics.size(); i++) {
+            WhisperSegment submitLyricLine = submitLyrics.get(i);
+            submitLyricLine.setText(submitLyricLine.getText().replaceAll("[^a-zA-Z0-9\\s]", ""));
         }
     }
 
@@ -133,35 +95,67 @@ public class SpeakingService {
 
         for (int i = 0; i < answerLyrics.size(); i++) {
             LrcLyric lrcLyricLine = answerLyrics.get(i);
-            WhisperSegment submitLyricLine = submitLyrics.get(i);
 
             lrcLyricLine.setText(lrcLyricLine.getText().toLowerCase());
+        }
+
+        for (int i = 0; i < submitLyrics.size(); i++) {
+            WhisperSegment submitLyricLine = submitLyrics.get(i);
             submitLyricLine.setText(submitLyricLine.getText().toLowerCase());
         }
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public String grade(List<LrcLyric> answerLyrics, List<WhisperSegment> submitLyrics) {
+    public AnswerSpeakingDto grade(List<LrcLyric> answerLyrics, Member member, WhisperTranscriptionResponse transcriptionResponse) {
 
+        List<WhisperSegment> submitLyrics = transcriptionResponse.getSegments();
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit");
-        double similarity = 0.0;
+        int allTokenSize = 0;
+        int wrongTokenSize = 0;
+        StringBuilder answerSheet = new StringBuilder();
 
         for (int i = 0; i < answerLyrics.size(); i++) {
             LrcLyric lrcLyricLine = answerLyrics.get(i);
-            WhisperSegment submitLyricLine = submitLyrics.get(i);
-
             StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
             CoreDocument doc = new CoreDocument(lrcLyricLine.getText());
             pipeline.annotate(doc);
             Set<String> allTokens = new HashSet<>();
             doc.tokens().forEach(token -> allTokens.add(token.word()));
-            List<String> rightSubmitTokens = gradeByLine(lrcLyricLine.getText(), submitLyricLine.getText());
+            allTokenSize += allTokens.size();
+            String lyricLineText = lrcLyricLine.getText();
 
-            similarity += (rightSubmitTokens.size() / allTokens.size());
+            if(i < submitLyrics.size()) {
+
+                WhisperSegment submitLyricLine = submitLyrics.get(i);
+                List<String> wrongWords = gradeByLine(lrcLyricLine.getText(), submitLyricLine.getText());
+                wrongTokenSize += wrongWords.size();
+
+                for(String wrongWord : wrongWords) {
+                    answerSheet.append(lyricLineText.replaceAll("(?i)\\b" + wrongWord + "\\b", "__" + wrongWord));
+                }
+            } else {
+                answerSheet.append(lyricLineText.replaceAll("\\b(\\w+)", "__$1"));
+            }
+
+            // 사전에 등재되어 있지 않은 단어나 수사, 감탄사 로직 추가. (아직 사전 api 허가 못받음)
 
         }
-        return null;
+
+        log.info("answerSheet={}", answerSheet);
+
+        AnswerSpeaking answerSpeaking = AnswerSpeaking.builder()
+                //.musicId()
+                .markedText(answerSheet.toString())
+                .submit(transcriptionResponse.getText())
+                .score(wrongTokenSize / allTokenSize)
+                .member(member)
+                .build();
+
+        answerSpeakingRepository.save(answerSpeaking);
+
+
+        return new AnswerSpeakingDto(answerSpeaking);
     }
 
     private List<String> gradeByLine(String answerTextLine, String submitTextLine) {
@@ -185,46 +179,7 @@ public class SpeakingService {
         return intersection.stream().toList();
     }
 
-    private List<WhisperSegment> synchronizeLyricsAndSegments(List<LrcLyric> lrcLyrics, WhisperTranscriptionResponse transcription) {
-        List<WhisperSegment> segments = transcription.getSegments();
 
-        // size가 같을경우 후처리가 필요없음.
-        if (lrcLyrics.size() == segments.size()) {
-            return segments;
-        }
-
-        log.info("Lyric Size is Not Matched. Start Progress of Whisper Transcription");
-
-        // lrcLyrics.size() > segments.size()일 상황은 없음.
-        if (lrcLyrics.size() > segments.size()) {
-            log.info("Segment Lines is shorter than lrcLyrics");
-            throw new CustomException(ErrorCode.AUDIO_PRE_PROCESSING_ERROR);
-        }
-
-        // lrcLyrics.size() < segments.size()일 경우 전처리.
-        for (int i = 0; i < segments.size(); i++) {
-            if (i != segments.size() - 1) {
-                if (segments.get(i + 1).getStart() - segments.get(i).getEnd() < SILENCE_LENGTH) {
-                    log.info("Segmented By Whisper Model");
-                    log.info("LrcLyric = {}", lrcLyrics.get(i).getText());
-                    log.info("Divided Segment1 ={}", segments.get(i).getText());
-                    log.info("Divided Segment2 ={}", segments.get(i + 1).getText());
-
-                    WhisperSegment whisperSegment = segments.get(i);
-                    WhisperSegment nextSegment = segments.get(i + 1);
-                    whisperSegment.setEnd(nextSegment.getEnd());
-                    whisperSegment.setText(whisperSegment.getText() + nextSegment.getText());
-                    segments.remove(nextSegment);
-                }
-
-                if (lrcLyrics.size() == segments.size()) {
-                    break;
-                }
-            }
-        }
-
-        return segments;
-    }
 
 
     private WhisperTranscriptionResponse createTranscription(File audioFile, String langCode) {
@@ -262,8 +217,6 @@ public class SpeakingService {
             AudioInputStream silenceStream = AudioSystem.getAudioInputStream(new File(directory + File.separator + "silence.wav"));
             byte[] silenceData = new byte[(int) silenceStream.getFrameLength() * silenceStream.getFormat().getFrameSize()];
             silenceStream.read(silenceData);
-            ByteArrayInputStream silenceBAIS = new ByteArrayInputStream(silenceData);
-            AudioInputStream silenceAudioStream = new AudioInputStream(silenceBAIS, audioFormat, 2000);
 
             for (LrcLyric lrcLyric : lrcLyrics) {
                 AudioInputStream originalStream = AudioSystem.getAudioInputStream(requestAudioFile);
@@ -272,10 +225,12 @@ public class SpeakingService {
 
                 long framesOfAudioToCopy = (long) ((lrcLyric.getDurMs()) * (audioFormat.getFrameRate() / 1000));
                 AudioInputStream shortenedStream = new AudioInputStream(originalStream, audioFormat, framesOfAudioToCopy);
+                ByteArrayInputStream silenceBAISForThisLoop = new ByteArrayInputStream(silenceData);
+                AudioInputStream silenceAudioStreamForThisLoop = new AudioInputStream(silenceBAISForThisLoop, audioFormat, silenceData.length / audioFormat.getFrameSize());
 
                 // 오디오 조각과 사일런스 추가
                 audioParts.add(shortenedStream);
-                audioParts.add(silenceAudioStream);
+                audioParts.add(silenceAudioStreamForThisLoop);
             }
 
             // 오디오 스트림 병합
@@ -318,5 +273,62 @@ public class SpeakingService {
             return totalLength;
         }
     }
+
+//    private static void testLog(List<LrcLyric> lyricList, WhisperTranscriptionResponse transcription) {
+//        System.out.println("lrcLyric: ");
+//
+//        for (LrcLyric lrcLyric : lyricList) {
+//            System.out.println(lrcLyric.getText());
+//        }
+//
+//        System.out.println("Whisper Segments: ");
+//
+//        System.out.println(transcription);
+//
+//        for (WhisperSegment segment : transcription.getSegments()) {
+//            System.out.println(segment.getText());
+//        }
+//    }
+//
+//    private List<WhisperSegment> synchronizeLyricsAndSegments(List<LrcLyric> lrcLyrics, WhisperTranscriptionResponse transcription) {
+//        List<WhisperSegment> segments = transcription.getSegments();
+//
+//        // size가 같을경우 후처리가 필요없음.
+//        if (lrcLyrics.size() == segments.size()) {
+//            return segments;
+//        }
+//
+//        log.info("Lyric Size is Not Matched. Start Progress of Whisper Transcription");
+//
+//        // lrcLyrics.size() > segments.size()일 상황은 없음.
+//        if (lrcLyrics.size() > segments.size()) {
+//            log.info("Segment Lines is shorter than lrcLyrics");
+//            throw new CustomException(ErrorCode.AUDIO_PRE_PROCESSING_ERROR);
+//        }
+//
+//        // lrcLyrics.size() < segments.size()일 경우 전처리.
+//        for (int i = 0; i < segments.size(); i++) {
+//            if (i != segments.size() - 1) {
+//                if (segments.get(i + 1).getStart() - segments.get(i).getEnd() < SILENCE_LENGTH) {
+//                    log.info("Segmented By Whisper Model");
+//                    log.info("LrcLyric = {}", lrcLyrics.get(i).getText());
+//                    log.info("Divided Segment1 ={}", segments.get(i).getText());
+//                    log.info("Divided Segment2 ={}", segments.get(i + 1).getText());
+//
+//                    WhisperSegment whisperSegment = segments.get(i);
+//                    WhisperSegment nextSegment = segments.get(i + 1);
+//                    whisperSegment.setEnd(nextSegment.getEnd());
+//                    whisperSegment.setText(whisperSegment.getText() + nextSegment.getText());
+//                    segments.remove(nextSegment);
+//                }
+//
+//                if (lrcLyrics.size() == segments.size()) {
+//                    break;
+//                }
+//            }
+//        }
+//
+//        return segments;
+//    }
 
 }
