@@ -13,7 +13,7 @@ import java.util.Map;
 public class RankingDto {
 
     private Long id;
-    private Long musicId;
+    private String musicId;
     private Map<Long, Double> score_list;
 
     public RankingDto(Ranking ranking) {

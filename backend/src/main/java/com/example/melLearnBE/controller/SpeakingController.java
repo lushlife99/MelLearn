@@ -31,7 +31,10 @@ public class SpeakingController {
                 .file(file)
                 .lyricList(lyricList)
                 .build();
-        return speakingService.submit(submitRequest, musicId, request);
+
+        AnswerSpeakingDto submit = speakingService.submit(submitRequest, musicId, request);
+
+        return submit;
     }
 
 }
