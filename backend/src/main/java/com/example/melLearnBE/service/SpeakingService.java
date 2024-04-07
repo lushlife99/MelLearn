@@ -59,10 +59,10 @@ public class SpeakingService {
         // 2. whisper 전송
         WhisperTranscriptionResponse transcription = createTranscription(preprocessingAudio, member.getLangType().getIso639Value());
 
-        List<WhisperSegment> whisperSegments = transcription.getSegments();
+
         // 3. 후처리 2 - 세그먼트와 lyric 줄 싱크 맞추기, 대소문자 변경, 특수문자 제거
         //List<WhisperSegment> whisperSegments = synchronizeLyricsAndSegments(lyricList, transcription);
-        convertGradableFormat(lyricList, whisperSegments);
+        convertGradableFormat(lyricList, transcription);
 
         // 4. 채점
         AnswerSpeakingDto answerSpeaking = grade(musicId, lyricList, member, transcription);
@@ -73,15 +73,14 @@ public class SpeakingService {
 
 
 
-    private void convertGradableFormat(List<LrcLyric> answerLyrics, List<WhisperSegment> submitLyrics) {
-        convertLyricToLowerCase(answerLyrics, submitLyrics);
-        removeSpecialChar(answerLyrics, submitLyrics);
+    private void convertGradableFormat(List<LrcLyric> answerLyrics, WhisperTranscriptionResponse transcription) {
+        convertLyricToLowerCase(answerLyrics, transcription.getSegments());
+        removeSpecialChar(answerLyrics, transcription.getSegments());
     }
 
     private void removeSpecialChar(List<LrcLyric> answerLyrics, List<WhisperSegment> submitLyrics) {
         for (int i = 0; i < answerLyrics.size(); i++) {
             LrcLyric lrcLyricLine = answerLyrics.get(i);
-
             lrcLyricLine.setText(lrcLyricLine.getText().replaceAll("[^a-zA-Z0-9\\s]", ""));
         }
 
@@ -111,8 +110,8 @@ public class SpeakingService {
         List<WhisperSegment> submitLyrics = transcriptionResponse.getSegments();
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit");
-        int allTokenSize = 0;
-        int wrongTokenSize = 0;
+        double allTokenSize = 0;
+        double wrongTokenSize = 0;
         StringBuilder answerSheet = new StringBuilder();
 
         for (int i = 0; i < answerLyrics.size(); i++) {
@@ -132,8 +131,10 @@ public class SpeakingService {
                 wrongTokenSize += wrongWords.size();
 
                 for(String wrongWord : wrongWords) {
-                    answerSheet.append(lyricLineText.replaceAll("(?i)\\b" + wrongWord + "\\b", "__" + wrongWord));
+                    lyricLineText = lyricLineText.replaceAll("(?i)\\b" + wrongWord + "\\b", "__" + wrongWord);
                 }
+                answerSheet.append(lyricLineText + "\n");
+
             } else {
                 answerSheet.append(lyricLineText.replaceAll("\\b(\\w+)", "__$1"));
             }
@@ -141,11 +142,12 @@ public class SpeakingService {
             // 사전에 등재되어 있지 않은 단어나 수사, 감탄사 로직 추가. (아직 사전 api 허가 못받음)
 
         }
+
         AnswerSpeaking answerSpeaking = AnswerSpeaking.builder()
                 .musicId(musicId)
                 .markedText(answerSheet.toString())
                 .submit(transcriptionResponse.getText())
-                .score(wrongTokenSize / allTokenSize * 100)
+                .score(100.0 - (wrongTokenSize / allTokenSize * 100.0))
                 .member(member)
                 .build();
 
@@ -170,10 +172,9 @@ public class SpeakingService {
         doc1.tokens().forEach(token -> words1.add(token.word()));
         doc2.tokens().forEach(token -> words2.add(token.word()));
 
-        Set<String> intersection = new HashSet<>(words1);
-        intersection.retainAll(words2);
-
-        return intersection.stream().toList();
+        Set<String> difference = new HashSet<>(words1);
+        difference.removeAll(words2);
+        return difference.stream().toList();
     }
 
 

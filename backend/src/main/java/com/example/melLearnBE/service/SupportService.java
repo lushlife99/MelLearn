@@ -45,8 +45,6 @@ public class SupportService {
             return supportQuizCategories;
 
         DetectLang detectLang = naverCloudClient.detectLanguage(pureLyric);
-        System.out.println(detectLang.getLangCode());
-        System.out.println(member.getLangType().getIso639Value());
         if(member.getLangType().getIso639Value().equals(detectLang.getLangCode())) {
             supportQuizCategories.setListening(true);
             supportQuizCategories.setReading(true);
