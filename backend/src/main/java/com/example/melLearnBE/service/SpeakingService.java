@@ -104,7 +104,6 @@ public class SpeakingService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public AnswerSpeakingDto grade(String musicId, List<LrcLyric> answerLyrics, Member member, WhisperTranscriptionResponse transcriptionResponse) {
 
         List<WhisperSegment> submitLyrics = transcriptionResponse.getSegments();
