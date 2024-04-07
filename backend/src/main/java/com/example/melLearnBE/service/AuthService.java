@@ -1,6 +1,6 @@
 package com.example.melLearnBE.service;
 
-import com.example.melLearnBE.dto.model.AuthRequest;
+import com.example.melLearnBE.dto.request.AuthRequest;
 import com.example.melLearnBE.dto.model.TokenInfo;
 import com.example.melLearnBE.enums.Language;
 import com.example.melLearnBE.enums.LearningLevel;

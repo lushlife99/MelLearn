@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
     /* 400 BAD_REQUEST : 잘못된 요청 */
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다"),
+    UN_SUPPORTED_QUIZ_LANG(HttpStatus.BAD_REQUEST, "지원하지 않는 언어의 가사입니다."),
+    UN_SUPPORTED_AUDIO_EXTENSION(HttpStatus.BAD_REQUEST, "지원하지 않는 오디오 확장자입니다."),
 
     /* 401 UNAUTHORIZED : 인증되지 않은 사용자 */
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "일치하는 계정이 없습니다"),
@@ -24,7 +26,8 @@ public enum ErrorCode {
     ALREADY_EXIST_USERID(HttpStatus.CONFLICT, "이미 존재하는 userId 입니다"),
 
     /* 500 INTERNAL_SERVER_ERROR : 서버오류 */
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류")
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류"),
+    AUDIO_PRE_PROCESSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "오디오 전처리 에러"),
     ;
 
     private final HttpStatus httpStatus;
