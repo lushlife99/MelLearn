@@ -141,14 +141,11 @@ public class SpeakingService {
             // 사전에 등재되어 있지 않은 단어나 수사, 감탄사 로직 추가. (아직 사전 api 허가 못받음)
 
         }
-
-        log.info("answerSheet={}", answerSheet);
-
         AnswerSpeaking answerSpeaking = AnswerSpeaking.builder()
                 .musicId(musicId)
                 .markedText(answerSheet.toString())
                 .submit(transcriptionResponse.getText())
-                .score(wrongTokenSize / allTokenSize)
+                .score(wrongTokenSize / allTokenSize * 100)
                 .member(member)
                 .build();
 
