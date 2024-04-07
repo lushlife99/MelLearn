@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.List;
 
@@ -16,7 +17,7 @@ import java.util.List;
 public class WhisperTranscriptionRequest implements Serializable {
 
     private String model;
-    private MultipartFile file;
+    private File file;
     private String response_format;
     private String language;
     private String prompt;
