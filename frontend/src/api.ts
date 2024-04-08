@@ -56,6 +56,27 @@ const handleResponseInterceptor = async (
   }
   return Promise.reject(error.toJSON());
 };
+
+const handleSpotifyRequestInterceptor = (
+  config: InternalAxiosRequestConfig
+): InternalAxiosRequestConfig => {
+  const token = localStorage.getItem("spotify_access_token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+};
+const handleSpotifyResponseInterceptor = async (
+  error: AxiosError
+): Promise<AxiosResponse> => {
+  if (error.response?.status === 401) {
+    console.log("err");
+    window.location.href = "/"; //로그인 창으로 리다이렉션
+  }
+  return Promise.reject(error.toJSON());
+};
+/* local Server */
 axiosApi.interceptors.request.use(
   handleRequestInterceptor,
   (error: AxiosError) => {
@@ -66,7 +87,16 @@ axiosApi.interceptors.response.use(
   (response) => response,
   handleResponseInterceptor
 );
-
-/* 특정 아티스트 정보 */
+/* spotify */
+axiosSpotify.interceptors.request.use(
+  handleSpotifyRequestInterceptor,
+  (error: AxiosError) => {
+    return Promise.reject(error);
+  }
+);
+axiosSpotify.interceptors.response.use(
+  (response) => response,
+  handleSpotifyResponseInterceptor
+);
 
 export default axiosApi;

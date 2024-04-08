@@ -68,3 +68,8 @@ export interface TrackMetaData {
 export interface CurrentTimeData {
   progress_ms: number;
 }
+export interface LyricData {
+  startMs: number;
+  durMs: number;
+  text: string;
+}

@@ -10,7 +10,7 @@ const charSlice = createSlice({
   initialState,
   reducers: {
     setChartData: (state, action: PayloadAction<ChartData>) => {
-      state.chartData = action.payload;
+      return { ...state, chartData: action.payload };
     },
   },
 });
