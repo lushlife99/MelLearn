@@ -14,14 +14,13 @@ public class QuizDto {
 
     private Long id;
     private String question;
-    private List<String> selection;
+    private List<String> optionList;
     private int answer;
     private String comment;
-
     public QuizDto(Quiz quiz) {
         this.id = quiz.getId();
         this.question = quiz.getQuestion();
-        this.selection = quiz.getSelection();
+        this.optionList = quiz.getOptionList();
         this.answer = quiz.getAnswer();
         this.comment = quiz.getComment();
     }

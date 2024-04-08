@@ -19,7 +19,6 @@ public class QuizController {
 
     @PostMapping
     public QuizListDto getQuizList(@RequestBody QuizRequest quizRequest, HttpServletRequest request) {
-        System.out.println(quizRequest);
         return quizService.getQuizList(quizRequest, request);
     }
 }

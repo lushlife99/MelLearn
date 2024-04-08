@@ -1,5 +1,7 @@
 package com.example.melLearnBE.service;
 
+import com.example.melLearnBE.adapter.LocalDateTimeTypeAdapter;
+import com.example.melLearnBE.dto.model.QuizDto;
 import com.example.melLearnBE.dto.model.QuizListDto;
 import com.example.melLearnBE.dto.request.QuizRequest;
 import com.example.melLearnBE.dto.request.openAI.ChatGPTRequest;
@@ -13,24 +15,27 @@ import com.example.melLearnBE.error.CustomException;
 import com.example.melLearnBE.error.ErrorCode;
 import com.example.melLearnBE.jwt.JwtTokenProvider;
 import com.example.melLearnBE.model.Member;
+import com.example.melLearnBE.model.Quiz;
 import com.example.melLearnBE.model.QuizList;
 import com.example.melLearnBE.openFeign.openAIClient.OpenAIClient;
 import com.example.melLearnBE.openFeign.openAIClient.OpenAIClientConfig;
 import com.example.melLearnBE.repository.QuizListRepository;
 import com.example.melLearnBE.repository.QuizRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.JSONPObject;
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.MalformedJsonException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.json.JsonObject;
+import java.io.File;
+import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,7 +52,6 @@ public class QuizService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final static String ROLE_USER = "user";
     private final static String ROLE_SYSTEM = "system";
-    private final Environment env;
 
     /**
      * 동시성 고려해서 코드 업데이트 해야함.
@@ -81,21 +85,57 @@ public class QuizService {
                     .level(level.getValue())
                     .build();
 
-
             ChatRequest vocaRequest = ChatRequest.builder()
-                    .system(env.getProperty("prompt.vocabulary"))
+                    .system(getPrompt(quizType))
                     .question(question.toString())
                     .build();
 
-            System.out.println(vocaRequest);
-            //ChatGPTResponse chatGPTResponse = requestGPT(vocaRequest);
+
+            int retries = 0;
+            final int maxRetries = 3;
+            boolean success = false;
+
+            while (!success && retries < maxRetries) {
+                try {
+                    ChatGPTResponse chatGPTResponse = requestGPT(vocaRequest);
+                    String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
+                    System.out.println(jsonContent);
+
+                    JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
+                    JsonArray probListJsonArray = jsonObject.getAsJsonArray("probList");
+                    Type listType = new TypeToken<List<Quiz>>(){}.getType();
+                    Gson gson = new GsonBuilder()
+                            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
+                            .create();
+                    List<Quiz> quizzes = gson.fromJson(probListJsonArray, listType);
+
+                    QuizList quizList = QuizList.builder()
+                            .quizzes(quizzes)
+                            .quizType(quizType)
+                            .level(level.getValue())
+                            .musicId(quizRequest.getMusicId())
+                            .build();
+                    List<Quiz> savedQuizzes = quizRepository.saveAll(quizzes.stream().toList());
+                    QuizList savedQuizList = quizListRepository.save(quizList);
+                    savedQuizList.setQuizzes(savedQuizzes);
+
+                    success = true;
+                    return new QuizListDto(savedQuizList);
+                } catch (Exception e) {
+                    retries++;
+                    e.printStackTrace();
+                    if (retries >= maxRetries) {
+                        throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+                    }
+                }
+            }
 
         } else throw new CustomException(ErrorCode.UN_SUPPORTED_QUIZ_TYPE);
 
         return null;
     }
 
-    public ChatGPTResponse requestGPT(ChatRequest chatRequest){
+    private ChatGPTResponse requestGPT(ChatRequest chatRequest){
         Message userMessage = Message.builder()
                 .role(ROLE_USER)
                 .content(chatRequest.getQuestion())
@@ -113,5 +153,15 @@ public class QuizService {
                 .messages(messages)
                 .build();
         return openAIClient.chat(chatGPTRequest);
+    }
+
+    private String getPrompt(QuizType quizType) {
+        String filePath = "." + File.separator + "prompt" + File.separator + quizType.toString() + ".txt";
+
+        try {
+            return new String(Files.readAllBytes(Paths.get(filePath)));
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
 }

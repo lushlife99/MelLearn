@@ -19,9 +19,10 @@ public class Quiz {
     @Id @GeneratedValue
     private Long id;
     private String question;
+    private String word;
     @ElementCollection
     @Builder.Default
-    private List<String> selection = new ArrayList<>(4);
+    private List<String> optionList = new ArrayList<>(4);
     private int answer;
     private String comment;
     @ManyToOne
