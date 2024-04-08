@@ -27,7 +27,7 @@ public class SupportController {
         return supportService.getSupportLang();
     }
 
-    @GetMapping("/quiz/category")
+    @PostMapping("/quiz/category")
     @Operation(summary = "특정 노래가 지원하는 문제 카테고리 조회", description = "서버에서 지원하는 5가지 카테고리의 문제 유형의 지원을 boolean 형식으로 리턴")
     public SupportQuizCategories getSupportQuizCategory(@RequestBody List<LrcLyric> lyric, HttpServletRequest request) {
         return supportService.getSupportQuizCategory(lyric, request);
