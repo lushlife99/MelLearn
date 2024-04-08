@@ -37,7 +37,9 @@ Comment : 정답 A에서 'monster'는 문자적인 의미가 아닌 비유적으
 
 - 5개의 퀴즈를 출력하는 형식입니다.
 
-'{\"probList\":[{\"question\":\"\'Very unmanageable day\' What is the meaning of \'unmanageable\' in this sentence?\",\"optionList\":[\"not capable of being controlled or dealt with\",\"not scheduled properly\",\"physically larger than usual\",\"lacking in sunshine\"],\"word\":\"unmanageable\",\"answer\":\"1\",\"comment\":\"\'Very unmanageable day\'에서 \'unmanageable\'은 일상의 사건이나 상황이 너무 복잡하거나 어려워서 쉽게 다루거나 제어할 수 없을 때 사용되는 형용사입니다. 이 경우, \'unmanageable\'은 그 날이 너무 혼란스럽거나 예측할 수 없는 상황들로 가득 차서 일상적인 관리나 대처가 힘든 상태를 의미합니다. 선택지 B, C, D는 이 문맥에서 \'unmanageable\'의 의미와 직접적으로 관련이 없습니다. B는 일정이 제대로 계획되지 않았음을, C는 물리적 크기와 관련된 의미를, D는 날씨 상태와 관련된 의미를 나타내지만, 이들은 \'unmanageable\'이 표현하고자 하는 복잡하고 제어하기 어려운 상황의 본질과는 거리가 있습니다. 따라서 정답 A는 이 구절에서 \'unmanageable\'이 의미하는 바를 가장 잘 반영합니다.\"}]}'
+
+{"probList":[{"question":"'Very unmanageable day' What is the meaning of 'unmanageable' in this sentence?","optionList":["not capable of being controlled or dealt with","not scheduled properly","physically larger than usual","lacking in sunshine"],"word":"unmanageable","answer":"1","comment":"'Very unmanageable day'에서 'unmanageable'은 일상의 사건이나 상황이 너무 복잡하거나 어려워서 쉽게 다루거나 제어할 수 없을 때 사용되는 형용사입니다. 이 경우, 'unmanageable'은 그 날이 너무 혼란스럽거나 예측할 수 없는 상황들로 가득 차서 일상적인 관리나 대처가 힘든 상태를 의미합니다. 선택지 B, C, D는 이 문맥에서 'unmanageable'의 의미와 직접적으로 관련이 없습니다. B는 일정이 제대로 계획되지 않았음을, C는 물리적 크기와 관련된 의미를, D는 날씨 상태와 관련된 의미를 나타내지만, 이들은 'unmanageable'이 표현하고자 하는 복잡하고 제어하기 어려운 상황의 본질과는 거리가 있습니다. 따라서 정답 A는 이 구절에서 'unmanageable'이 의미하는 바를 가장 잘 반영합니다."}]}
+
 
 위의 형식은 단지 하나의 퀴즈 형식일 뿐입니다. 당신은 이 형식에 맞춰 총 5개의 퀴즈를 생성해야 합니다.
 
@@ -81,6 +83,6 @@ Comment : 정답 A에서 'monster'는 문자적인 의미가 아닌 비유적으
 
 - It is a form that outputs 5 quizzes.
 
-{\"probList\":[{\"question\":\"\'Very unmanageable day\' What is the meaning of \'unmanageable\' in this sentence?\",\"optionList\":[\"not capable of being controlled or dealt with\",\"not scheduled properly\",\"physically larger than usual\",\"lacking in sunshine\"],\"word\":\"unmanageable\",\"answer\":\"1\",\"comment\":\"\'Very unmanageable day\'에서 \'unmanageable\'은 일상의 사건이나 상황이 너무 복잡하거나 어려워서 쉽게 다루거나 제어할 수 없을 때 사용되는 형용사입니다. 이 경우, \'unmanageable\'은 그 날이 너무 혼란스럽거나 예측할 수 없는 상황들로 가득 차서 일상적인 관리나 대처가 힘든 상태를 의미합니다. 선택지 B, C, D는 이 문맥에서 \'unmanageable\'의 의미와 직접적으로 관련이 없습니다. B는 일정이 제대로 계획되지 않았음을, C는 물리적 크기와 관련된 의미를, D는 날씨 상태와 관련된 의미를 나타내지만, 이들은 \'unmanageable\'이 표현하고자 하는 복잡하고 제어하기 어려운 상황의 본질과는 거리가 있습니다. 따라서 정답 A는 이 구절에서 \'unmanageable\'이 의미하는 바를 가장 잘 반영합니다.\"}]}
+{"probList":[{"question":"'Very unmanageable day' What is the meaning of 'unmanageable' in this sentence?","optionList":["not capable of being controlled or dealt with","not scheduled properly","physically larger than usual","lacking in sunshine"],"word":"unmanageable","answer":"1","comment":"'Very unmanageable day'에서 'unmanageable'은 일상의 사건이나 상황이 너무 복잡하거나 어려워서 쉽게 다루거나 제어할 수 없을 때 사용되는 형용사입니다. 이 경우, 'unmanageable'은 그 날이 너무 혼란스럽거나 예측할 수 없는 상황들로 가득 차서 일상적인 관리나 대처가 힘든 상태를 의미합니다. 선택지 B, C, D는 이 문맥에서 'unmanageable'의 의미와 직접적으로 관련이 없습니다. B는 일정이 제대로 계획되지 않았음을, C는 물리적 크기와 관련된 의미를, D는 날씨 상태와 관련된 의미를 나타내지만, 이들은 'unmanageable'이 표현하고자 하는 복잡하고 제어하기 어려운 상황의 본질과는 거리가 있습니다. 따라서 정답 A는 이 구절에서 'unmanageable'이 의미하는 바를 가장 잘 반영합니다."}]}
 
 The format above is just one quiz format. You have to produce a total of 5 quizzes to match this format.
