@@ -1,5 +1,5 @@
 import { useQuery } from "react-query";
-import { axiosSpotify, axiosSpotifyScraper } from "../api";
+import { axiosSpotify } from "../api";
 import { useLocation, useNavigate } from "react-router-dom";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import Spinner from "react-bootstrap/Spinner";

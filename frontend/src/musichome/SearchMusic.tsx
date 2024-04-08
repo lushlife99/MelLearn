@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaMagnifyingGlass } from "react-icons/fa6";
-import { axiosSpotify, axiosSpotifyScraper } from "../api";
+import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../api";
 import { Link, useNavigate } from "react-router-dom";
 import "../css/scroll.css";
 import { useQuery } from "react-query";
@@ -22,6 +22,7 @@ interface SearchTrack {
     name: string;
     type: string;
     uri: string;
+    duration_ms: number;
   }[];
 }
 
@@ -62,7 +63,15 @@ export const SearchMusic = () => {
       },
     });
   };
-  const goSpeakingTest = (track: any) => {
+  const goSpeakingTest = async (track: any) => {
+    console.log(track);
+    const res = await axiosSpotifyScraper.get(
+      `/track/lyrics?trackId=${track.id}&format=json`
+    );
+
+    // if (res.status === 200) {
+    // const res2 = await axiosApi.get(`/api/support/quiz/category?${res.data}`);
+    // }
     navigate("/speaking", {
       state: {
         track,
@@ -114,13 +123,19 @@ export const SearchMusic = () => {
                       className="rounded-md"
                     />
                     <div className="flex flex-col justify-between ml-4 ">
-                      <span className="text-bold text-[white] mb-1">
+                      <span className="text-bold text-[white] ">
                         {track.name.length > 30
-                          ? `${track.name.slice(0, 30)}...`
+                          ? `${track.name.slice(0, 25)}...`
                           : track.name}
                       </span>
                       <span className="text-[#B3B3B3] text-sm font-semibold">
                         {track.artists[0].name}
+                      </span>
+                      <span className="text-[#B3B3B3] text-sm">
+                        {Math.floor(track.duration_ms / 1000 / 60)}:
+                        {Math.ceil((track.duration_ms / 1000) % 60) < 10
+                          ? `0${Math.ceil((track.duration_ms / 1000) % 60)}`
+                          : Math.ceil((track.duration_ms / 1000) % 60)}
                       </span>
                     </div>
                   </div>

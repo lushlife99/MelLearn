@@ -2,10 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../api";
 import axios from "axios";
-
-interface Lyric {
-  time: number;
-  lyric: string;
+interface Window {
+  webkitAudioContext: typeof AudioContext;
 }
 
 const Speaking = () => {
@@ -15,21 +13,8 @@ const Speaking = () => {
   const chunks = useRef<Blob[]>([]);
   const location = useLocation();
   const { track } = location.state;
-  const [lyricData, setLyricData] = useState<Lyric[]>([]);
-
-  const [stop, setStop] = useState(false);
 
   const [test, setTest] = useState();
-
-  const timeStringToMs = (timeString: string) => {
-    const [min, sec] = timeString.split(":");
-    const [seconds, milliseconds] = sec.split(".");
-    return (
-      parseInt(min) * 60 * 1000 +
-      parseInt(seconds) * 1000 +
-      parseInt(milliseconds)
-    );
-  };
 
   const getLyric = async () => {
     const res = await axiosSpotifyScraper.get(
@@ -37,23 +22,66 @@ const Speaking = () => {
     );
 
     setTest(res.data); // 가사 보낼용 -> 이걸로 사용
-    // const lines = res.data.split("\n");
-    // const lyricArr: Lyric[] = [];
-    // lines.forEach((line: string) => {
-    //   const match = line.match(/^\[(\d{2}:\d{2}\.\d{2})\](.*)$/);
-    //   if (match) {
-    //     const time = timeStringToMs(match[1]);
-    //     const lyric = match[2];
-    //     lyricArr.push({ time, lyric });
-
-    //     //console.log(`Time: ${timeStringToMs(time)}, Lyrics: ${lyrics}`);
-    //   }
-    // });
-    // setLyricData(lyricArr);
   };
   useEffect(() => {
     getLyric();
   }, []);
+  async function convertToWav(blob: Blob): Promise<Blob> {
+    const audioContext = new AudioContext();
+    const reader = new FileReader();
+
+    return new Promise((resolve, reject) => {
+      reader.onload = function () {
+        audioContext.decodeAudioData(
+          reader.result as ArrayBuffer,
+          function (decodedData) {
+            const offlineAudioContext = new OfflineAudioContext({
+              numberOfChannels: 1,
+              length: decodedData.length,
+              sampleRate: decodedData.sampleRate,
+            });
+            const source = offlineAudioContext.createBufferSource();
+            source.buffer = decodedData;
+
+            offlineAudioContext.oncomplete = function (event) {
+              const wavBuffer = event.renderedBuffer;
+
+              // 'AudioBuffer'를 'Uint8Array'로 변환
+              const wavData = new Uint8Array(
+                wavBuffer.length * wavBuffer.numberOfChannels * 2
+              );
+              let offset = 0;
+              for (
+                let channel = 0;
+                channel < wavBuffer.numberOfChannels;
+                channel++
+              ) {
+                const channelData = wavBuffer.getChannelData(channel);
+                for (let i = 0; i < channelData.length; i++) {
+                  const sample = Math.max(-1, Math.min(1, channelData[i]));
+                  wavData[offset++] =
+                    sample < 0 ? sample * 0x8000 : sample * 0x7fff;
+                }
+              }
+
+              const wavBlob = new Blob([wavData], { type: "audio/wav" });
+              resolve(wavBlob);
+            };
+
+            source.connect(offlineAudioContext.destination);
+            source.start();
+            offlineAudioContext.startRendering();
+          }
+        );
+      };
+
+      reader.onerror = function (event: any) {
+        reject(event.target.error);
+      };
+
+      reader.readAsArrayBuffer(blob);
+    });
+  }
 
   const accessMicrophone = async () => {
     try {
@@ -62,15 +90,14 @@ const Speaking = () => {
       mediaStream.current = stream;
       mediaRecorder.current = new MediaRecorder(stream);
       mediaRecorder.current.ondataavailable = (e) => {
-        const wavAudioData = new Blob([e.data], {
-          type: "audio/wav",
-        });
+        const wavAudioData = new Blob([e.data]);
         chunks.current = [];
         chunks.current.push(wavAudioData);
       };
-      mediaRecorder.current.onstop = () => {
-        const recordedBlob = new Blob(chunks.current);
-        const url = URL.createObjectURL(recordedBlob);
+      mediaRecorder.current.onstop = async () => {
+        const recordedBlob = new Blob(chunks.current, { type: "audio/wav" });
+        const wavBlob = await convertToWav(recordedBlob);
+        const url = URL.createObjectURL(wavBlob);
         setRecordedUrl(url);
 
         // 녹음 파일 임시 다운로드
@@ -80,7 +107,6 @@ const Speaking = () => {
         a.download = "recorded_audio.wav";
         a.click();
         window.URL.revokeObjectURL(url);
-        //
       };
       mediaRecorder.current.start();
     } catch (error) {
@@ -102,8 +128,6 @@ const Speaking = () => {
     });
     formData.append("lyricList", lyricsBlob, "lyricList.json"); // 파일명은 선택사항
 
-    //formData.append("lyricList", JSON.stringify(test));
-
     if (mediaRecorder.current && mediaRecorder.current.state === "recording") {
       mediaRecorder.current.stop();
       // const res = await axiosApi.post(
@@ -120,6 +144,33 @@ const Speaking = () => {
       mediaStream.current.getTracks().forEach((track) => {
         track.stop();
       });
+    }
+  };
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (event.target.files && event.target.files.length > 0) {
+      const file = event.target.files[0];
+      const formData = new FormData();
+      formData.append("file", file);
+      const lyricsBlob = new Blob([JSON.stringify(test)], {
+        type: "application/json",
+      });
+      formData.append("lyricList", lyricsBlob, "lyricList.json");
+      const musicId = new Blob([JSON.stringify(track.id)], {
+        type: "application/json",
+      });
+      formData.append("musicId", musicId, "musicId.json");
+      const res = await axiosApi.post(
+        "/api/problem/speaking/transcription",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log(res.data);
     }
   };
 
@@ -145,6 +196,7 @@ const Speaking = () => {
   return (
     <div>
       <audio controls src={recordedUrl} />
+      <input type="file" onChange={handleFileUpload} />
       <button className="bg-[blue]" onClick={accessMicrophone}>
         녹음 시작
       </button>
