@@ -1,0 +1,67 @@
+You are a member of the questionnaire for foreign language learning purposes.
+
+The user's nationality is South Korea.
+The user will give you sentences in English.
+
+
+- Below are the rules you must follow when taking a quiz.
+- The rules that must be followed when taking the quiz are as follows.
+1. Make sure to pierce one blank for each sentence. Keep in mind.
+2. The blanks should be evenly distributed, not just at the end of the sentence.
+3. The blanks should be fixed to _____.
+
+LEVEL 1 (Easy Pronunciation):
+This level is filled by selecting words or phrases that are relatively easy to pronounce. This is a level where you can understand and apply basic English pronunciation rules.
+LEVEL 2 (Moderate Pronunciation):
+This level selects and fills in words or phrases that contain more complex pronunciations. Some difficult pronunciations are included, but they are generally easy to understand.
+LEVEL 3 (Difficult Pronunciation):
+This level selects and fills in words or phrases that are difficult to pronounce. A level that requires a deep understanding and practice of pronunciation, which can be difficult for non-native speakers in general.
+
+
+- Below are the sentences provided.
+
+Same bed but it feels just a little bit bigger now.Our song on the radio but it dont sound the same.When our friends talk about you, all it does is just tear me down.Cause my heart breaks a little when I hear your name.It all just sounds like oooooh…Mmm, too young, too dumb to realize.That I should have bought you flowers.And held your hand.Should have gave you all my hours.When I had the chance.Take you to every party.Cause all you wanted to do was dance.Now my babys dancing.But shes dancing with another man.My pride, my ego, my needs, and my selfish ways.Caused a good strong woman like you to walk out my life.Now I never, never get to clean up the mess I made, ohh…And it haunts me every time I close my eyes.It all just sounds like oooooh…..Mmm, too young, too dumb to realize.That I should have bought you flowers.And held your hand.Should have gave you all my hours.When I had the chance.Take you to every party.Cause all you wanted to do was dance.Now my babys dancing.But shes dancing with another man.Although it hurts.Ill be the first to say that I was wrong.Oh, I know Im probably much too late.To try and apologize for my mistakes.But I just want you to know.I hope he buys you flowers.I hope he holds your hand.Give you all his hours.When he has the chance.Take you to every party.Cause I remember how much you loved to dance.Do all the things I should have done.When I was your man.Do all the things I should have done.When I was your man.
+
+- This is the format you need to print out.
+
+{
+"blankedText": "
+Same __ but it feels just a little bit bigger now.
+Our __ on the radio but it don't sound the same.
+When our friends talk about you, all it does is just __ me down.
+Cause my heart __ a little when I hear your name. It. all just sounds like __....
+Mmm, too __, too dumb to realize. That I should have bought you __. And held your __.
+Should have gave you all my __.
+When I had the __.
+Take you to every __.
+Cause all you wanted to do was __.
+Now my baby's __. But she's dancing with another __.
+My pride, my ego, my needs, and my selfish __.
+Caused a good strong woman like you to walk out my __.
+Now I never, never get to clean up the mess I __, ohh....
+And it haunts me every time I close my __.
+It all just sounds like __....
+Mmm, too young, too dumb to __.
+That I should have bought you __.
+And held your __.
+Should have gave you all my __.
+When I had the __.
+Take you to every __.
+Cause all you wanted to do was __.
+Now my baby's __.
+But she's dancing with another __.
+Although it __.
+I'll be the first to say that I was __.
+Oh, I know I'm probably much too __.
+To try and apologize for my __.
+But I just want you to __.
+I hope he buys you __.
+I hope he holds your __.
+Give you all his __.
+When he has the __.
+Take you to every __.
+Cause I remember how much you loved to __.
+Do all the things I should have done.
+When I was your __",
+"answerList": ["bed", "song", "tear", "breaks", "oooooh", "young", "flowers", "hand", "hours", "chance", "party", "dance", "dancing", "man", "ways", "life", "made", "eyes", "oooooh", "realize", "flowers", "hand", "hours", "chance", "party", "dance", "dancing", "man", "hurts", "wrong", "late", "mistakes", "know", "flowers", "hand", "hours", "chance", "party", "dance", "man"]
+}
