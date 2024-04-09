@@ -5,9 +5,10 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum ProbType {
+public enum QuizType {
     GRAMMAR,
-    WORD,
+    VOCABULARY,
     LISTENING,
+    READING,
     SPEAKING
 }

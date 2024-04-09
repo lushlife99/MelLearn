@@ -1,9 +1,7 @@
 package com.example.melLearnBE.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import com.example.melLearnBE.enums.QuizType;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,12 +16,14 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Builder
-public class ProblemList {
+public class QuizList {
     @Id @GeneratedValue
     private Long id;
-    @OneToMany(mappedBy = "problemList")
-    private List<Problem> problems;
-    private Long musicId;
+    @Enumerated(value = EnumType.ORDINAL)
+    private QuizType quizType;
+    @OneToMany(mappedBy = "quizList")
+    private List<Quiz> quizzes;
+    private String musicId;
     private int level;
     @CreationTimestamp
     private LocalDateTime createdTime;

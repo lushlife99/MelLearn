@@ -18,7 +18,7 @@ public class Ranking {
 
     @Id @GeneratedValue
     private Long id;
-    private Long musicId;
+    private String musicId;
     @ElementCollection
     @CollectionTable(
             name = "score_list",
