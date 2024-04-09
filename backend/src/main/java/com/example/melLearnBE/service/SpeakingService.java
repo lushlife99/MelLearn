@@ -3,18 +3,18 @@ package com.example.melLearnBE.service;
 import com.example.melLearnBE.dto.request.LrcLyric;
 import com.example.melLearnBE.dto.request.SpeakingSubmitRequest;
 import com.example.melLearnBE.dto.request.openAI.WhisperTranscriptionRequest;
-import com.example.melLearnBE.dto.response.AnswerSpeakingDto;
+import com.example.melLearnBE.dto.model.SpeakingSubmitDto;
 import com.example.melLearnBE.dto.response.SupportQuizCategories;
 import com.example.melLearnBE.dto.response.openAI.WhisperSegment;
 import com.example.melLearnBE.dto.response.openAI.WhisperTranscriptionResponse;
 import com.example.melLearnBE.error.CustomException;
 import com.example.melLearnBE.error.ErrorCode;
 import com.example.melLearnBE.jwt.JwtTokenProvider;
-import com.example.melLearnBE.model.AnswerSpeaking;
+import com.example.melLearnBE.model.SpeakingSubmit;
 import com.example.melLearnBE.model.Member;
 import com.example.melLearnBE.openFeign.openAIClient.OpenAIClient;
 import com.example.melLearnBE.openFeign.openAIClient.OpenAIClientConfig;
-import com.example.melLearnBE.repository.AnswerSpeakingRepository;
+import com.example.melLearnBE.repository.SpeakingSubmitRepository;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,15 +35,15 @@ import java.util.*;
 @Slf4j
 public class SpeakingService {
 
-    private final AnswerSpeakingRepository answerSpeakingRepository;
+    private final SpeakingSubmitRepository speakingSubmitRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final SupportService supportService;
-    private final OpenAIClient openAIClient;
-    private final OpenAIClientConfig openAIClientConfig;
+    private final OpenAIService openAIService;
+
     private static final String AUDIO_PATH = "." + File.separator + "audio" + File.separator;
 
     @Transactional
-    public AnswerSpeakingDto submit(SpeakingSubmitRequest submitRequest, String musicId, HttpServletRequest request) {
+    public SpeakingSubmitDto submit(SpeakingSubmitRequest submitRequest, String musicId, HttpServletRequest request) {
 
         List<LrcLyric> lyricList = submitRequest.getLyricList();
         MultipartFile file = submitRequest.getFile();
@@ -56,7 +56,7 @@ public class SpeakingService {
         File preprocessingAudio = audioPreprocess(submitRequest);
 
         // 2. whisper 전송
-        WhisperTranscriptionResponse transcription = createTranscription(preprocessingAudio, member.getLangType().getIso639Value());
+        WhisperTranscriptionResponse transcription = openAIService.createTranscription(preprocessingAudio, member.getLangType().getIso639Value());
 
 
         // 3. 후처리 2 - 세그먼트와 lyric 줄 싱크 맞추기, 대소문자 변경, 특수문자 제거
@@ -64,13 +64,11 @@ public class SpeakingService {
         convertGradableFormat(lyricList, transcription);
 
         // 4. 채점
-        AnswerSpeakingDto answerSpeaking = grade(musicId, lyricList, member, transcription);
+        SpeakingSubmitDto answerSpeaking = grade(musicId, lyricList, member, transcription);
 
         // 5. 랭킹
         return answerSpeaking;
     }
-
-
 
     private void convertGradableFormat(List<LrcLyric> answerLyrics, WhisperTranscriptionResponse transcription) {
         convertLyricToLowerCase(answerLyrics, transcription.getSegments());
@@ -103,7 +101,7 @@ public class SpeakingService {
         }
     }
 
-    public AnswerSpeakingDto grade(String musicId, List<LrcLyric> answerLyrics, Member member, WhisperTranscriptionResponse transcriptionResponse) {
+    public SpeakingSubmitDto grade(String musicId, List<LrcLyric> answerLyrics, Member member, WhisperTranscriptionResponse transcriptionResponse) {
 
         List<WhisperSegment> submitLyrics = transcriptionResponse.getSegments();
         Properties props = new Properties();
@@ -141,7 +139,7 @@ public class SpeakingService {
 
         }
 
-        AnswerSpeaking answerSpeaking = AnswerSpeaking.builder()
+        SpeakingSubmit speakingSubmit = SpeakingSubmit.builder()
                 .musicId(musicId)
                 .markedText(answerSheet.toString())
                 .submit(transcriptionResponse.getText())
@@ -149,10 +147,10 @@ public class SpeakingService {
                 .member(member)
                 .build();
 
-        answerSpeakingRepository.save(answerSpeaking);
+        speakingSubmitRepository.save(speakingSubmit);
 
 
-        return new AnswerSpeakingDto(answerSpeaking);
+        return new SpeakingSubmitDto(speakingSubmit);
     }
 
     private List<String> gradeByLine(String answerTextLine, String submitTextLine) {
@@ -178,19 +176,7 @@ public class SpeakingService {
 
 
 
-    private WhisperTranscriptionResponse createTranscription(File audioFile, String langCode) {
 
-        WhisperTranscriptionRequest whisperTranscriptionRequest = WhisperTranscriptionRequest.builder()
-                .model(openAIClientConfig.getAudioModel())
-                .file(audioFile)
-                .timestamp_granularities(Collections.singletonList("segment"))
-                .language(langCode)
-                .response_format("verbose_json")
-                .build();
-        WhisperTranscriptionResponse transcription = openAIClient.createTranscription(whisperTranscriptionRequest);
-
-        return transcription;
-    }
 
     private File audioPreprocess(SpeakingSubmitRequest submitRequest) {
         MultipartFile file = submitRequest.getFile();

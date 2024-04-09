@@ -12,5 +12,7 @@ import lombok.NoArgsConstructor;
 public class ChatQuestion {
 
     private int level;
-    private String lyric;
+    private String lang;
+    private int totalProblem;
+    private String text;
 }

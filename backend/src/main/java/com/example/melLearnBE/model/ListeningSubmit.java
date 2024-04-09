@@ -1,20 +1,20 @@
 package com.example.melLearnBE.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Builder
-public class AnswerProblem {
+public class ListeningSubmit {
 
     @Id
     @GeneratedValue
@@ -23,4 +23,9 @@ public class AnswerProblem {
     @ManyToOne
     private Member member;
 
+    @ManyToOne
+    private ListeningQuiz listeningQuiz;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    private List<String> submitAnswerList = new ArrayList<>();
 }

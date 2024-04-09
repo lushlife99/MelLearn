@@ -21,8 +21,10 @@ public class QuizList {
     private Long id;
     @Enumerated(value = EnumType.ORDINAL)
     private QuizType quizType;
-    @OneToMany(mappedBy = "quizList")
+    @OneToMany(mappedBy = "quizList", cascade = CascadeType.ALL)
     private List<Quiz> quizzes;
+    @OneToMany(mappedBy = "quizList", cascade = CascadeType.ALL)
+    private List<QuizSubmit> submitList;
     private String musicId;
     private int level;
     @CreationTimestamp

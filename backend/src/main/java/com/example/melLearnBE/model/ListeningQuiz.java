@@ -12,22 +12,20 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity
-public class Quiz {
+@Builder
+public class ListeningQuiz {
+
     @Id @GeneratedValue
     private Long id;
-    @Lob
-    private String question;
-    private String word;
-    @ElementCollection
-    @Builder.Default
-    private List<String> optionList = new ArrayList<>(4);
-    private int answer;
+    private String musicId;
+    private int level;
     @Column(columnDefinition="LONGTEXT")
-    private String comment;
-    @ManyToOne
-    private QuizList quizList;
-    private int submitCount;
-    private int correctCount;
+    private String blankedText;
+
+    @OneToMany(mappedBy = "listeningQuiz")
+    private List<ListeningSubmit> submitList = new ArrayList<>();
+
+    @ElementCollection(fetch = FetchType.LAZY) @Builder.Default
+    private List<String> answerList = new ArrayList<>();
 }
