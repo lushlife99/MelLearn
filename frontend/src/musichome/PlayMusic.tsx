@@ -9,12 +9,9 @@ import {
   FaPlayCircle,
   FaPauseCircle,
 } from "react-icons/fa";
-import { useSelector } from "react-redux";
-import { RootState } from "../redux/store";
 import { IoIosArrowRoundBack, IoIosArrowUp } from "react-icons/io";
 import { LuPencilLine } from "react-icons/lu";
 import { FaMicrophoneLines } from "react-icons/fa6";
-import { set } from "react-hook-form";
 import Lyric from "./Lyric";
 
 export interface CurrentTimeData {

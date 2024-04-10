@@ -15,6 +15,11 @@ import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import PlayMusic from "./musichome/PlayMusic";
 import Speaking from "./learning/Speaking";
+import { QuestionBoardV2 } from "./learning/QuestionBoardV2";
+import { Score } from "./learning/Score";
+import Commentary from "./learning/Commentary";
+import { Rank_yh } from "./learning/Rank_yh";
+import Listening from "./learning/Listening";
 
 function App() {
   return (
@@ -36,6 +41,12 @@ function App() {
           <Route path="/main4" element={<ArtistDetial />}></Route>
           <Route path="/playMusic" element={<PlayMusic />}></Route>
           <Route path="/speaking" element={<Speaking />}></Route>
+
+          <Route path="/question" element={<QuestionBoardV2 />}></Route>
+          <Route path="/score" element={<Score />}></Route>
+          <Route path="/comment" element={<Commentary />}></Route>
+          <Route path="/rank" element={<Rank_yh />}></Route>
+          <Route path="/ls" element={<Listening />}></Route>
         </Routes>
       </BrowserRouter>
     </Provider>

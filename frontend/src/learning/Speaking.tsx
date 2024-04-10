@@ -3,10 +3,6 @@ import { useLocation } from "react-router-dom";
 import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../api";
 import axios from "axios";
 
-interface Window {
-  webkitAudioContext: typeof AudioContext;
-}
-
 const Speaking = () => {
   const [recordedUrl, setRecordedUrl] = useState("");
   const mediaStream = useRef<MediaStream | null>(null);

@@ -16,14 +16,11 @@ import "../css/slider.css";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import Spinner from "react-bootstrap/Spinner";
-import axios from "axios";
 import { fetchArtistData } from "../redux/artist/artistAction";
 import { useQuery } from "react-query";
 import { setArtistData } from "../redux/artist/artistSlice";
 import { fetchChartData } from "../redux/chart/chartAction";
 import { setChartData } from "../redux/chart/chartSlice";
-import { setSpotifyPlayer } from "../redux/player/playerSlice";
-import { axiosSpotify } from "../api";
 import { fetchMetaData } from "../redux/trackMeta/trackMetaAction";
 import { setTrackMetaData } from "../redux/trackMeta/trackMetaSlice";
 
