@@ -21,7 +21,6 @@ interface Artist {
 export const PoplularArtistList = (): JSX.Element => {
   const { artistData } = useSelector((state: RootState) => state.artist);
   const navigation = useNavigate();
-  const location = useLocation();
 
   const goHome = () => {
     navigation(-1);

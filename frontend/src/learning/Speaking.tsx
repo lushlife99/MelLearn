@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../api";
 import axios from "axios";
+
 interface Window {
   webkitAudioContext: typeof AudioContext;
 }
@@ -13,6 +14,7 @@ const Speaking = () => {
   const chunks = useRef<Blob[]>([]);
   const location = useLocation();
   const { track } = location.state;
+  console.log(track);
 
   const [test, setTest] = useState();
 
@@ -26,62 +28,45 @@ const Speaking = () => {
   useEffect(() => {
     getLyric();
   }, []);
-  async function convertToWav(blob: Blob): Promise<Blob> {
-    const audioContext = new AudioContext();
-    const reader = new FileReader();
+  const [id, setId] = useState();
 
-    return new Promise((resolve, reject) => {
-      reader.onload = function () {
-        audioContext.decodeAudioData(
-          reader.result as ArrayBuffer,
-          function (decodedData) {
-            const offlineAudioContext = new OfflineAudioContext({
-              numberOfChannels: 1,
-              length: decodedData.length,
-              sampleRate: decodedData.sampleRate,
-            });
-            const source = offlineAudioContext.createBufferSource();
-            source.buffer = decodedData;
-
-            offlineAudioContext.oncomplete = function (event) {
-              const wavBuffer = event.renderedBuffer;
-
-              // 'AudioBuffer'를 'Uint8Array'로 변환
-              const wavData = new Uint8Array(
-                wavBuffer.length * wavBuffer.numberOfChannels * 2
-              );
-              let offset = 0;
-              for (
-                let channel = 0;
-                channel < wavBuffer.numberOfChannels;
-                channel++
-              ) {
-                const channelData = wavBuffer.getChannelData(channel);
-                for (let i = 0; i < channelData.length; i++) {
-                  const sample = Math.max(-1, Math.min(1, channelData[i]));
-                  wavData[offset++] =
-                    sample < 0 ? sample * 0x8000 : sample * 0x7fff;
-                }
-              }
-
-              const wavBlob = new Blob([wavData], { type: "audio/wav" });
-              resolve(wavBlob);
-            };
-
-            source.connect(offlineAudioContext.destination);
-            source.start();
-            offlineAudioContext.startRendering();
-          }
-        );
+  const convert = async () => {
+    const res = await axios.get(`https://api.convertio.co/convert/${id}/dl`);
+    console.log(res.data);
+  };
+  const convertStatus = async () => {
+    const res = await axios.get(
+      `https://api.convertio.co/convert/${id}/status`
+    );
+    console.log("상태", res.data.data.step);
+  };
+  const convertWebMToWAV = async (audioUrl: string) => {
+    console.log(audioUrl);
+    try {
+      const requestBody = {
+        apikey: "774b220833b0a6c13636283904a1ab93",
+        input: "raw",
+        file: audioUrl,
+        filename: "audio.webm",
+        outputformat: "wav",
       };
 
-      reader.onerror = function (event: any) {
-        reject(event.target.error);
-      };
+      const response = await axios.post(
+        "https://api.convertio.co/convert",
+        requestBody
+      );
+      //console.log("a", response.data.data.id);
+      setId(response.data.data.id);
 
-      reader.readAsArrayBuffer(blob);
-    });
-  }
+      // const downloadUrl = response.data.data.output.url;
+      // const wavFile = await axios.get(downloadUrl, { responseType: "blob" });
+      // console.log("c", wavFile.data);
+      // return wavFile.data;
+    } catch (error) {
+      console.error("Error converting to WAV:", error);
+      throw error;
+    }
+  };
 
   const accessMicrophone = async () => {
     try {
@@ -95,27 +80,24 @@ const Speaking = () => {
         chunks.current.push(wavAudioData);
       };
       mediaRecorder.current.onstop = async () => {
-        const recordedBlob = new Blob(chunks.current, { type: "audio/wav" });
-        const wavBlob = await convertToWav(recordedBlob);
-        const url = URL.createObjectURL(wavBlob);
-        setRecordedUrl(url);
-
-        // 녹음 파일 임시 다운로드
-        const a = document.createElement("a");
-        document.body.appendChild(a);
-        a.href = url;
-        a.download = "recorded_audio.wav";
-        a.click();
-        window.URL.revokeObjectURL(url);
+        const recordedBlob = new Blob(chunks.current, { type: "audio/webm" });
+        //const wav = await convertWebMToWAV(recordedBlob);
+        const url = URL.createObjectURL(recordedBlob);
+        await convertWebMToWAV(url);
+        // setRecordedUrl(url);
+        // // 녹음 파일 임시 다운로드
+        // const a = document.createElement("a");
+        // document.body.appendChild(a);
+        // a.href = url;
+        // a.download = "recorded_audio.wav";
+        // a.click();
+        // window.URL.revokeObjectURL(url);
       };
       mediaRecorder.current.start();
     } catch (error) {
       console.error("마이크 접근 에러", error);
     }
   };
-  // const lyricList = [{ startMs: 0, durMs: 1000, text: "Sample text" }];
-  // console.log(typeof lyricList, lyricList);
-  // console.log(typeof test, test);
 
   const stopRecording = async () => {
     /*  테스트용 */
@@ -203,6 +185,9 @@ const Speaking = () => {
       <button className="bg-[blue]" onClick={stopRecording}>
         녹음 중지
       </button>
+      <button onClick={convertStatus}>상태</button>
+      <button onClick={convert}>변환</button>
+
       <button onClick={playMusic}>노래 재생</button>
       <button onClick={pause}>정지</button>
     </div>

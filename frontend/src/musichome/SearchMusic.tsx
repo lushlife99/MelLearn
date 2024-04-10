@@ -7,6 +7,8 @@ import { useQuery } from "react-query";
 import { FaPlay } from "react-icons/fa";
 import { LuPencilLine } from "react-icons/lu";
 import Spinner from "react-bootstrap/Spinner";
+import { IoIosArrowDown } from "react-icons/io";
+import { Menu } from "antd";
 interface SearchTrack {
   items: {
     album: {
@@ -26,11 +28,18 @@ interface SearchTrack {
   }[];
 }
 
+interface Category {
+  name: string;
+  value: boolean;
+}
+
 export const SearchMusic = () => {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const [isCategory, setIsCategory] = useState<boolean>(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedTrack, setSelectedTrack] = useState();
 
-  // TODO 작업중
   const getArtistAlbum = async (search: string) => {
     const response = await axiosSpotify.get(`/search?q=${search}&type=track`);
     return response.data.tracks;
@@ -63,25 +72,68 @@ export const SearchMusic = () => {
       },
     });
   };
-  const goSpeakingTest = async (track: any) => {
-    console.log(track);
+  const goStudy = async (track: any) => {
+    setSelectedTrack(track);
+    setIsCategory(true);
+    /* 서버에 가사 전송 하기 위함 */
     const res = await axiosSpotifyScraper.get(
       `/track/lyrics?trackId=${track.id}&format=json`
     );
-
-    // if (res.status === 200) {
-    // const res2 = await axiosApi.get(`/api/support/quiz/category?${res.data}`);
-    // }
-    navigate("/speaking", {
-      state: {
-        track,
-      },
-    });
+    const res2 = await axiosApi.post(`/api/support/quiz/category`, res.data);
+    const categoriesArray: Category[] = Object.entries(res2.data).map(
+      ([name, value]) => ({
+        name,
+        value: value as boolean,
+      })
+    );
+    setCategories(categoriesArray);
+  };
+  const handleMenuClick = (e: any) => {
+    switch (e.key) {
+      case "speaking":
+        navigate("/speaking", {
+          state: {
+            track: selectedTrack,
+          },
+        });
+        break;
+      case "listening":
+        break;
+      case "reading":
+        break;
+      case "vocabulary":
+        break;
+      case "grammar":
+        break;
+    }
   };
 
   return (
     <div className="flex justify-center w-full h-screen">
-      <div className="flex flex-col items-center w-full bg-[black] max-w-[450px] px-8 py-12 ">
+      {isCategory && (
+        <div className="absolute bottom-0 w-[450px] z-10 bg-black rounded-t-2xl">
+          <IoIosArrowDown
+            onClick={() => setIsCategory(false)}
+            className="w-6 h-6 mt-2 ml-4 fill-[#B3B3B3] hover:fill-white"
+          />
+          <Menu
+            theme="dark"
+            mode="vertical"
+            className="text-lg font-bold bg-black"
+            onSelect={handleMenuClick}
+            items={categories.map((category, index) => ({
+              key: category.name,
+              label: `${index + 1}. ${category.name}`,
+              disabled: !category.value,
+            }))}
+          />
+        </div>
+      )}
+      <div
+        className={`flex flex-col items-center w-full bg-[black] max-w-[450px] px-8 py-12 ${
+          isCategory ? "opacity-45" : "opacity-100"
+        }`}
+      >
         {/* 검색 창 */}
         <form
           onSubmit={handleSubmit}
@@ -133,9 +185,9 @@ export const SearchMusic = () => {
                       </span>
                       <span className="text-[#B3B3B3] text-sm">
                         {Math.floor(track.duration_ms / 1000 / 60)}:
-                        {Math.ceil((track.duration_ms / 1000) % 60) < 10
-                          ? `0${Math.ceil((track.duration_ms / 1000) % 60)}`
-                          : Math.ceil((track.duration_ms / 1000) % 60)}
+                        {Math.floor((track.duration_ms / 1000) % 60) < 10
+                          ? `0${Math.floor((track.duration_ms / 1000) % 60)}`
+                          : Math.floor((track.duration_ms / 1000) % 60)}
                       </span>
                     </div>
                   </div>
@@ -148,7 +200,7 @@ export const SearchMusic = () => {
                       <span className="font-bold">재생</span>
                     </button>
                     <button
-                      onClick={() => goSpeakingTest(track)}
+                      onClick={() => goStudy(track)}
                       className="bg-[white] w-32 rounded-2xl h-8 hover:opacity-60 flex items-center justify-center"
                     >
                       <LuPencilLine className="mr-2 fill-black" />

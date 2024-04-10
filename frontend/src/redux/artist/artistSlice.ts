@@ -10,7 +10,7 @@ const artistSlice = createSlice({
   initialState,
   reducers: {
     setArtistData: (state, action: PayloadAction<ArtistData>) => {
-      return { ...state, lyricData: action.payload };
+      return { ...state, artistData: action.payload };
     },
   },
 });

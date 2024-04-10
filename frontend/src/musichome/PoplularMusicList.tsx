@@ -1,13 +1,12 @@
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import "../css/scroll.css";
 
 export const PopularMusicList = (): JSX.Element => {
   const { chartData } = useSelector((state: RootState) => state.chart);
   const navigation = useNavigate();
-  const location = useLocation();
 
   const goHome = () => {
     navigation("/home");

@@ -33,22 +33,6 @@ function PlayMusic() {
 
   const { track } = location.state;
 
-  const currentPlaying = async () => {
-    const res = await axiosSpotify.get("/me/player/currently-playing");
-    if (res.data.item === undefined) {
-      setCurrentTime(0); // 처음 재생일때 재생시간 0:00
-    } else {
-      if (track.id === res.data.item.id) {
-        // 내가 선택한 곡이랑 이미 재생 중인 곡이랑 같을 경우
-        setCurrentTime(res.data.progress_ms);
-        setIsPlaying(res.data.is_playing);
-        startProgressBar();
-      } else {
-        // 내가 선택한 곡이랑 이미 재생 중인 곡이 다를경우
-        setCurrentTime(0);
-      }
-    }
-  };
   const play = async () => {
     const res = await axiosSpotify.put("/me/player/play", {
       uris: ["spotify:track:" + track.id],
@@ -101,6 +85,15 @@ function PlayMusic() {
 
     if (res2.status === 202) {
       startProgressBar();
+      setIsPlaying(true);
+    }
+  };
+  const dragResume = async (progressMs: number) => {
+    const res = await axiosSpotify.put("/me/player/play", {
+      uris: ["spotify:track:" + track.id],
+      position_ms: progressMs,
+    });
+    if (res.status === 202) {
       setIsPlaying(true);
     }
   };
@@ -172,16 +165,16 @@ function PlayMusic() {
         {/* progress Bar */}
         <div
           className="w-full h-2 mt-12 bg-gray-200 rounded-full cursor-pointer"
-          // onClick={(e) => {
-          //   const rect = e.currentTarget.getBoundingClientRect();
-          //   const clickX = e.clientX - rect.left;
-          //   const progressPercentage = (clickX / rect.width) * 100;
-          //   const progressMs = (progressPercentage / 100) * track.duration_ms;
-          //   console.log(progressMs, currentTime);
-
-          //   setCurrentTime(progressMs);
-          //   resume();
-          // }}
+          onClick={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const progressPercentage = (clickX / rect.width) * 100;
+            const progressMs = (progressPercentage / 100) * track.duration_ms;
+            console.log(progressMs, currentTime);
+            //stopProgressBar();
+            setCurrentTime(progressMs);
+            dragResume(progressMs);
+          }}
         >
           <div
             className={`h-full bg-green-500 rounded-full transition-all duration-500 ease-in-out`}
@@ -199,9 +192,9 @@ function PlayMusic() {
           </span>
           <span className=" text-[#B3B3B3]">
             {Math.floor(track.duration_ms / 1000 / 60)}:
-            {Math.ceil((track.duration_ms / 1000) % 60) < 10
-              ? `0${Math.ceil((track.duration_ms / 1000) % 60)}`
-              : Math.ceil((track.duration_ms / 1000) % 60)}
+            {Math.floor((track.duration_ms / 1000) % 60) < 10
+              ? `0${Math.floor((track.duration_ms / 1000) % 60)}`
+              : Math.floor((track.duration_ms / 1000) % 60)}
           </span>
         </div>
         {/* 버튼 div */}
