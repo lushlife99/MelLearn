@@ -1,7 +1,9 @@
 import React, { useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import axiosApi from "../api";
+import axiosApi, { axiosSpotify } from "../api";
 import axios from "axios";
+import { transcode } from "buffer";
+import { FaGalacticSenate } from "react-icons/fa6";
 
 function Callback() {
   const location = useLocation();
@@ -10,22 +12,80 @@ function Callback() {
   const code = queryParams.get("code");
   const nav = useNavigate();
 
+  // spotify 내 로컬에 device 설치
+  const transferDevice = async (devcieId: string, player: Spotify.Player) => {
+    localStorage.setItem("deviceId", devcieId);
+    const response = await axiosSpotify.put(`/me/player`, {
+      device_ids: [devcieId],
+      play: true,
+    });
+  };
+
   // access_token으로 유저 정보 조회
   const fetchProfile = async (token: string) => {
     const res = await axios.get("https://api.spotify.com/v1/me", {
       headers: { Authorization: `Bearer ${token}` },
     });
+    /* 계정 연동 성공시 device Transfer */
+    if (res.status === 200) {
+      const script = document.createElement("script");
+      script.src = "https:/sdk.scdn.co/spotify-player.js";
+      script.async = true;
+      document.body.appendChild(script);
 
-    const { id } = res.data;
+      window.onSpotifyWebPlaybackSDKReady = () => {
+        const player = new Spotify.Player({
+          name: "MelLearn",
+          getOAuthToken: (cb) => {
+            cb(token);
+          },
 
-    const response = await axiosApi.post("/api/member/spotifyAccount", null, {
-      params: {
-        accountId: id,
-      },
-    });
-    if (response.status === 200) {
-      nav("/home");
+          volume: 0.5,
+        });
+        player.addListener("ready", ({ device_id }) => {
+          transferDevice(device_id, player);
+        });
+        player.addListener("not_ready", ({ device_id }) => {
+          console.log("Device ID has gone offline", device_id);
+        });
+
+        player.addListener("initialization_error", ({ message }) => {
+          console.error("초기화 에러", message);
+        });
+
+        player.addListener("authentication_error", ({ message }) => {
+          console.error("인증에러", message);
+        });
+
+        player.addListener("account_error", ({ message }) => {
+          console.error("계정에러", message);
+        });
+        player.connect().then(async (success) => {
+          /* 장치 연동 성공시 스포티파이 ID 값 보내줌 */
+          // 여기에 음악 차트 데이터 인기가수데이터 받아오는거 받아와서
+          // 홈화면에서 로딩 없애기
+          if (success) {
+            const response = await axiosApi.post(
+              "/api/member/spotifyAccount",
+              null,
+              {
+                params: {
+                  accountId: id,
+                },
+              }
+            );
+            /* 성공시 홈 화면으로 이동*/
+            if (response.status === 200) {
+              nav("/home");
+            }
+
+            // dispatch(setSpotifyPlayer(player));
+          }
+        });
+      };
     }
+    const { id } = res.data;
+    //res.stats === 2000
   };
 
   // 유저의 access_token 가져오기
@@ -51,6 +111,7 @@ function Callback() {
     // member access token 가져오기
     const res = await fetch("https://accounts.spotify.com/api/token", payload);
     const { access_token } = await res.json();
+    localStorage.setItem("spotify_access_token", access_token);
     // member access_token으로 spotify 프로필 조회
     fetchProfile(access_token);
   };

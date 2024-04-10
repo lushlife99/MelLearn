@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BgCircle from "../components/BgCircle";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import BottomNavigation from "@mui/material/BottomNavigation";
@@ -16,12 +16,13 @@ import "../css/slider.css";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import Spinner from "react-bootstrap/Spinner";
-import axios from "axios";
 import { fetchArtistData } from "../redux/artist/artistAction";
 import { useQuery } from "react-query";
 import { setArtistData } from "../redux/artist/artistSlice";
 import { fetchChartData } from "../redux/chart/chartAction";
 import { setChartData } from "../redux/chart/chartSlice";
+import { fetchMetaData } from "../redux/trackMeta/trackMetaAction";
+import { setTrackMetaData } from "../redux/trackMeta/trackMetaSlice";
 
 interface Artist {
   id: string;
@@ -51,7 +52,6 @@ function MusicHome() {
       staleTime: 1800000,
     }
   );
-
   const { data: artistData, isLoading: artistLoading } = useQuery(
     "artists",
     fetchArtistData,
@@ -62,6 +62,7 @@ function MusicHome() {
       staleTime: 1800000,
     }
   );
+  console.log(artistData);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setPage(newValue);
@@ -85,9 +86,31 @@ function MusicHome() {
 
   const goDetailArtist = (artist: Artist) => {
     navigation(`/main4?artistId=${artist.id}`, {
-      state: { prevPath: location.pathname, artist },
+      state: { artist },
     });
   };
+
+  const goPlayMusic = async (track: any) => {
+    const metaData = await fetchMetaData(track.id);
+    dispatch(setTrackMetaData(metaData));
+
+    navigation("/playMusic", {
+      state: {
+        track,
+      },
+    });
+  };
+  if (chartLoading || artistLoading) {
+    return (
+      <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
+        <div className="relative bg-[#9bd1e5] overflow-hidden w-full max-w-[450px] h-screen  flex flex-col ">
+          <div className="flex items-center justify-center h-[300%]">
+            <Spinner className="border" variant="primary" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   //리액트 쿼리 사용 -> 메인화면 올때 멤버 정보를 받아서 langtype으로 en ,jp 구분해서
   //플레이리스트를 보여줘야함
@@ -148,36 +171,31 @@ function MusicHome() {
               모두 보기
             </Link>
           </div>
-          {!artistLoading ? (
-            <Swiper
-              spaceBetween={10}
-              slidesPerView={3.3}
-              modules={[Pagination]}
-              loop={true}
-              className="mySwiper"
-            >
-              {artistData?.artists.slice(0, 10).map((artist, index) => (
-                <SwiperSlide
-                  key={index}
-                  className="swiper-slide-mini hover:bg-slate-400 "
-                  onClick={() => goDetailArtist(artist)}
-                >
-                  <img
-                    src={artist.visuals.avatar[0].url}
-                    alt="Artist Cover"
-                    className="p-2"
-                  />
-                  <span className="pb-3 text-sm font-extrabold">
-                    {artist.name}
-                  </span>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          ) : (
-            <div className="flex items-center justify-center h-[300%]">
-              <Spinner className="border" variant="primary" />
-            </div>
-          )}
+
+          <Swiper
+            spaceBetween={10}
+            slidesPerView={3.3}
+            modules={[Pagination]}
+            loop={true}
+            className="mySwiper"
+          >
+            {artistData?.artists.slice(0, 10).map((artist, index) => (
+              <SwiperSlide
+                key={index}
+                className="swiper-slide-mini hover:bg-slate-400 "
+                onClick={() => goDetailArtist(artist)}
+              >
+                <img
+                  src={artist.visuals.avatar[0].url}
+                  alt="Artist Cover"
+                  className="p-2"
+                />
+                <span className="pb-3 text-sm font-extrabold">
+                  {artist.name}
+                </span>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
 
         {/* 인기 음악*/}
@@ -193,52 +211,49 @@ function MusicHome() {
             </Link>
           </div>
 
-          {!chartLoading ? (
-            <Swiper
-              spaceBetween={10}
-              slidesPerView={2.1}
-              modules={[Pagination]}
-              loop={true}
-              className="mySwiper"
-            >
-              {chartData?.tracks.slice(0, 10).map((track, index) => (
-                <SwiperSlide
-                  key={index}
-                  className="swiper-slide-mid hover:bg-slate-400"
-                >
-                  <img
-                    src={track.album.cover[0]?.url}
-                    className="p-2"
-                    alt="Album Cover"
-                  />
-                  <span className="px-3 overflow-hidden text-lg font-extrabold whitespace-nowrap overflow-ellipsis">
-                    {track.name}
-                  </span>
-                  <div className="flex px-3 overflow-hidden overflow-ellipsis">
-                    {track.artists.length < 4 ? (
-                      track.artists.map((artist, index) => (
-                        <span
-                          key={index}
-                          className=" text-[#93989D] font-semibold text-sm whitespace-nowrap "
-                        >
-                          {artist.name}
-                          {index !== track.artists.length - 1 && ", "}
-                        </span>
-                      ))
-                    ) : (
-                      <span className=" text-[#93989D] font-semibold text-sm">
-                        Various Artists
+          <Swiper
+            spaceBetween={10}
+            slidesPerView={2.1}
+            modules={[Pagination]}
+            loop={true}
+            className="mySwiper"
+          >
+            {chartData?.tracks.slice(0, 10).map((track, index) => (
+              <SwiperSlide
+                key={index}
+                className="swiper-slide-mid hover:bg-slate-400"
+                onClick={() => {
+                  goPlayMusic(track);
+                }}
+              >
+                <img
+                  src={track.album.images[0]?.url}
+                  className="p-2"
+                  alt="Album Cover"
+                />
+                <span className="px-3 overflow-hidden text-lg font-extrabold whitespace-nowrap overflow-ellipsis">
+                  {track.name}
+                </span>
+                <div className="flex px-3 overflow-hidden overflow-ellipsis">
+                  {track.artists.length < 4 ? (
+                    track.artists.map((artist, index) => (
+                      <span
+                        key={index}
+                        className=" text-[#93989D] font-semibold text-sm whitespace-nowrap "
+                      >
+                        {artist.name}
+                        {index !== track.artists.length - 1 && ", "}
                       </span>
-                    )}
-                  </div>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          ) : (
-            <div className="flex items-center justify-center h-[300%]">
-              <Spinner className="border" variant="primary" />
-            </div>
-          )}
+                    ))
+                  ) : (
+                    <span className=" text-[#93989D] font-semibold text-sm">
+                      Various Artists
+                    </span>
+                  )}
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
 
         {/* <div className="bottom-0 left-0 right-0 z-10 w-full "> */}

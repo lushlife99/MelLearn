@@ -12,5 +12,5 @@ public enum LearningLevel {
     Advanced(3),
 
     ;
-    private final int level;
+    private final int value;
 }

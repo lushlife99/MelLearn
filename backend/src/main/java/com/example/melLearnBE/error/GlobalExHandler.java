@@ -1,6 +1,6 @@
 package com.example.melLearnBE.error;
 
-import com.example.melLearnBE.dto.model.ErrorResponse;
+import com.example.melLearnBE.dto.response.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

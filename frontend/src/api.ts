@@ -9,13 +9,23 @@ const axiosApi = axios.create({
   withCredentials: true,
 });
 
-/* Spotify API 호출용 */
-export const axiosSpotify = axios.create({
+/* Spotify Scraper API 호출용 */
+export const axiosSpotifyScraper = axios.create({
   baseURL: "https://spotify-scraper.p.rapidapi.com/v1",
   withCredentials: true,
   headers: {
     "X-RapidAPI-Key": process.env.REACT_APP_SPOTIFY_SCRAPER,
     "X-RapidAPI-Host": "spotify-scraper.p.rapidapi.com",
+  },
+});
+
+const accessToken = localStorage.getItem("spotify_access_token");
+
+export const axiosSpotify = axios.create({
+  baseURL: "https://api.spotify.com/v1",
+  headers: {
+    Authorization: "Bearer " + accessToken,
+    "Content-Type": "application/json",
   },
 });
 
@@ -46,6 +56,27 @@ const handleResponseInterceptor = async (
   }
   return Promise.reject(error.toJSON());
 };
+
+const handleSpotifyRequestInterceptor = (
+  config: InternalAxiosRequestConfig
+): InternalAxiosRequestConfig => {
+  const token = localStorage.getItem("spotify_access_token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+};
+const handleSpotifyResponseInterceptor = async (
+  error: AxiosError
+): Promise<AxiosResponse> => {
+  if (error.response?.status === 401) {
+    console.log("err");
+    window.location.href = "/"; //로그인 창으로 리다이렉션
+  }
+  return Promise.reject(error.toJSON());
+};
+/* local Server */
 axiosApi.interceptors.request.use(
   handleRequestInterceptor,
   (error: AxiosError) => {
@@ -56,7 +87,16 @@ axiosApi.interceptors.response.use(
   (response) => response,
   handleResponseInterceptor
 );
-
-/* 특정 아티스트 정보 */
+/* spotify */
+axiosSpotify.interceptors.request.use(
+  handleSpotifyRequestInterceptor,
+  (error: AxiosError) => {
+    return Promise.reject(error);
+  }
+);
+axiosSpotify.interceptors.response.use(
+  (response) => response,
+  handleSpotifyResponseInterceptor
+);
 
 export default axiosApi;
