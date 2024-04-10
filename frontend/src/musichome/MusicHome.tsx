@@ -270,7 +270,7 @@ function MusicHome() {
           />
           <BottomNavigationAction
             className="hover:bg-slate-400"
-            label="단어장"
+            label="문제집"
             icon={<MenuBookIcon />}
           />
           <BottomNavigationAction

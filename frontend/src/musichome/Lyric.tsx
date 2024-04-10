@@ -7,15 +7,17 @@ import Spinner from "react-bootstrap/Spinner";
 import { Transition } from "@headlessui/react";
 import "../css/scroll.css";
 import { IoIosArrowDown } from "react-icons/io";
+import { current } from "@reduxjs/toolkit";
 
 interface LyricProps {
   trackId: string;
   isLyric: boolean;
   setIsLyric: React.Dispatch<React.SetStateAction<boolean>>;
+  currentTime: number;
 }
 
 function Lyric(props: LyricProps) {
-  const { trackId, isLyric, setIsLyric } = props;
+  const { trackId, isLyric, setIsLyric, currentTime } = props;
   const getFetchLyric = async () => {
     const res = await axiosSpotifyScraper.get(
       `/track/lyrics?trackId=${trackId}&format=json`
@@ -28,7 +30,6 @@ function Lyric(props: LyricProps) {
   >(["lyric", trackId], getFetchLyric, {
     staleTime: 10800000,
   });
-  console.log("s", trackId);
 
   if (lyricLoading) {
     return (
@@ -53,7 +54,14 @@ function Lyric(props: LyricProps) {
       <div className="scrollbar flex flex-col items-start w-full max-w-[450px]   py-2 overflow-y-auto h-screen">
         {lyricData?.map((lyric, index) => (
           <div key={index}>
-            <p className="text-[#B3B3B3] hover:text-[white] text-2xl font-semibold">
+            <p
+              className={`text-${
+                currentTime >= lyric.startMs &&
+                currentTime <= lyric.startMs + lyric.durMs
+                  ? "white"
+                  : "#B3B3B3"
+              } hover:text-[white] text-2xl font-semibold`}
+            >
               {lyric.text}
             </p>
           </div>
