@@ -6,6 +6,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,11 +20,12 @@ public class AnswerSpeaking {
     @Id @GeneratedValue
     private Long id;
     private String musicId;
-
     @ManyToOne
     private Member member;
-
-    @Lob
-    private String markedLyric;
+    @Column(columnDefinition="LONGTEXT")
+    private String submit;
+    @Column(columnDefinition="LONGTEXT")
+    private String markedText;
     private double score;
+
 }

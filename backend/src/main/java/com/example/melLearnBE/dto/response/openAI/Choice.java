@@ -1,5 +1,6 @@
-package com.example.melLearnBE.dto.request.openAI;
+package com.example.melLearnBE.dto.response.openAI;
 
+import com.example.melLearnBE.dto.request.openAI.Message;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
