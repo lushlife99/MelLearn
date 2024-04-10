@@ -1,5 +1,6 @@
 package com.example.melLearnBE.model;
 
+import com.example.melLearnBE.enums.LearningLevel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,6 +20,8 @@ public class ListeningSubmit {
     @Id
     @GeneratedValue
     private Long id;
+    @Enumerated(value = EnumType.ORDINAL)
+    private LearningLevel level;
 
     @ManyToOne
     private Member member;
@@ -28,4 +31,6 @@ public class ListeningSubmit {
 
     @ElementCollection(fetch = FetchType.LAZY)
     private List<String> submitAnswerList = new ArrayList<>();
+
+    private double score;
 }

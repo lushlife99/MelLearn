@@ -8,7 +8,7 @@ The user will give you sentences in English.
 - The rules that must be followed when taking the quiz are as follows.
 1. Make sure to pierce one blank for each sentence. Keep in mind.
 2. The blanks should be evenly distributed, not just at the end of the sentence.
-3. The blanks should be fixed to _____.
+3. The blanks should be fixed to __.
 
 LEVEL 1 (Easy Pronunciation):
 This level is filled by selecting words or phrases that are relatively easy to pronounce. This is a level where you can understand and apply basic English pronunciation rules.

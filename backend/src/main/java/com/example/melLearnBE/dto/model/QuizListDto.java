@@ -28,7 +28,7 @@ public class QuizListDto {
             quizzes.add(new QuizDto(quiz));
         }
         this.musicId = quizList.getMusicId();
-        this.level = quizList.getLevel();
+        this.level = quizList.getLevel().getValue();
         this.createdTime = quizList.getCreatedTime();
     }
 }

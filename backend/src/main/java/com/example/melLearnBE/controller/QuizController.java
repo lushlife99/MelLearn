@@ -26,10 +26,6 @@ public class QuizController {
         return quizService.getQuizList(quizRequest, request);
     }
 
-    @PostMapping("/submit")
-    public QuizSubmitDto submit(@RequestBody QuizSubmitRequest quizSubmitRequest, HttpServletRequest request) {
-        return quizService.submit(quizSubmitRequest, request);
-    }
 
     @PostMapping("/listening")
     public ListeningQuizDto getListeningQuiz(@RequestBody QuizRequest quizRequest, HttpServletRequest request) {

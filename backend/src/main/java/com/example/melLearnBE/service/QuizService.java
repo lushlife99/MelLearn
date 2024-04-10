@@ -2,8 +2,10 @@ package com.example.melLearnBE.service;
 
 import com.example.melLearnBE.adapter.LocalDateTimeTypeAdapter;
 import com.example.melLearnBE.dto.model.ListeningQuizDto;
+import com.example.melLearnBE.dto.model.ListeningSubmitDto;
 import com.example.melLearnBE.dto.model.QuizListDto;
 import com.example.melLearnBE.dto.model.QuizSubmitDto;
+import com.example.melLearnBE.dto.request.ListeningSubmitRequest;
 import com.example.melLearnBE.dto.request.QuizRequest;
 import com.example.melLearnBE.dto.request.QuizSubmitRequest;
 import com.example.melLearnBE.dto.request.openAI.ChatQuestion;
@@ -15,10 +17,7 @@ import com.example.melLearnBE.error.CustomException;
 import com.example.melLearnBE.error.ErrorCode;
 import com.example.melLearnBE.jwt.JwtTokenProvider;
 import com.example.melLearnBE.model.*;
-import com.example.melLearnBE.repository.ListeningQuizRepository;
-import com.example.melLearnBE.repository.QuizListRepository;
-import com.example.melLearnBE.repository.QuizRepository;
-import com.example.melLearnBE.repository.QuizSubmitRepository;
+import com.example.melLearnBE.repository.*;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
@@ -27,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -48,6 +48,7 @@ public class QuizService {
     private final QuizListRepository quizListRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final OpenAIService openAIService;
+    private final ListeningSubmitRepository listeningSubmitRepository;
 
 
     /**
@@ -69,6 +70,40 @@ public class QuizService {
                 .build();
 
         return new QuizSubmitDto(quizSubmitRepository.save(quizSubmit));
+    }
+
+    public ListeningSubmitDto listeningSubmit(ListeningSubmitRequest submitRequest, HttpServletRequest request) {
+        Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
+        ListeningQuiz listeningQuiz = listeningQuizRepository.findByMusicIdAndLevel(submitRequest.getMusicId(), member.getLevel().getValue())
+                .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
+
+        List<String> answerList = listeningQuiz.getAnswerList();
+        List<String> submitWordList = submitRequest.getSubmitWordList();
+        int correctCount = 0;
+
+        if(answerList.size() != submitWordList.size()) {
+            throw new CustomException(ErrorCode.REQUEST_ARRAY_SIZE_NOT_MATCHED);
+        }
+
+        for(int i = 0; i < answerList.size(); i++) {
+            String answerWord = answerList.get(i);
+            String submitWord = submitWordList.get(i);
+
+            if (answerWord.equals(submitWord.trim())) {
+                submitWordList.set(i, answerWord);
+                correctCount++;
+            }
+        }
+
+        ListeningSubmit listeningSubmit = ListeningSubmit.builder()
+                .listeningQuiz(listeningQuiz)
+                .submitAnswerList(submitWordList)
+                .member(member)
+                .score((correctCount * 100) / answerList.size())
+                .build();
+
+        return new ListeningSubmitDto(listeningSubmitRepository.save(listeningSubmit));
+
     }
 
     private void calCorrectRate(QuizSubmitRequest submitRequest, QuizList quizList) {
@@ -159,7 +194,7 @@ public class QuizService {
                 QuizList quizList = QuizList.builder()
                         .quizzes(quizzes)
                         .quizType(quizType)
-                        .level(member.getLevel().getValue())
+                        .level(member.getLevel())
                         .createdTime(LocalDateTime.now())
                         .musicId(quizRequest.getMusicId())
                         .build();
@@ -209,7 +244,6 @@ public class QuizService {
                 ChatGPTResponse chatGPTResponse = openAIService.requestGPT(listeningRequest);
                 String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
                 JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
-                System.out.println(jsonObject);
                 Type listType = new TypeToken<ListeningQuiz>(){}.getType();
                 Gson gson = new GsonBuilder()
                         .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
@@ -217,7 +251,7 @@ public class QuizService {
                         .create();
                 ListeningQuiz listeningQuiz = gson.fromJson(jsonObject, listType);
 
-                listeningQuiz.setLevel(member.getLevel().getValue());
+                listeningQuiz.setLevel(member.getLevel());
                 listeningQuiz.setMusicId(listeningQuiz.getMusicId());
                 listeningQuiz.setSubmitList(new ArrayList<>());
 
@@ -274,7 +308,7 @@ public class QuizService {
                         .quizzes(quizzes)
                         .createdTime(LocalDateTime.now())
                         .quizType(quizType)
-                        .level(member.getLevel().getValue())
+                        .level(member.getLevel())
                         .musicId(quizRequest.getMusicId())
                         .build();
 

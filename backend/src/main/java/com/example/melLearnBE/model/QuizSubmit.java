@@ -1,5 +1,6 @@
 package com.example.melLearnBE.model;
 
+import com.example.melLearnBE.enums.LearningLevel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

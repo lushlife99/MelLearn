@@ -1,5 +1,6 @@
 package com.example.melLearnBE.model;
 
+import com.example.melLearnBE.enums.LearningLevel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,7 +20,8 @@ public class ListeningQuiz {
     @Id @GeneratedValue
     private Long id;
     private String musicId;
-    private int level;
+    @Enumerated(value = EnumType.ORDINAL)
+    private LearningLevel level;
     @Column(columnDefinition="LONGTEXT")
     private String blankedText;
 
