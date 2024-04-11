@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { axiosSpotifyScraper } from "../api";
+import { axiosSpotify, axiosSpotifyScraper } from "../api";
 import { useLocation } from "react-router-dom";
 import { useQuery } from "react-query";
 import { LyricData } from "../redux/type";
@@ -13,11 +13,20 @@ interface LyricProps {
   trackId: string;
   isLyric: boolean;
   setIsLyric: React.Dispatch<React.SetStateAction<boolean>>;
+  setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
   currentTime: number;
+  lyricClick: boolean;
 }
 
 function Lyric(props: LyricProps) {
-  const { trackId, isLyric, setIsLyric, currentTime } = props;
+  const {
+    trackId,
+    isLyric,
+    setIsLyric,
+    currentTime,
+    lyricClick,
+    setCurrentTime,
+  } = props;
   const getFetchLyric = async () => {
     const res = await axiosSpotifyScraper.get(
       `/track/lyrics?trackId=${trackId}&format=json`
@@ -31,6 +40,16 @@ function Lyric(props: LyricProps) {
     staleTime: 10800000,
   });
 
+  const lyricTimeline = async (progressMs: number) => {
+    if (lyricClick) {
+      setCurrentTime(progressMs);
+      const res = await axiosSpotify.put("/me/player/play", {
+        uris: ["spotify:track:" + trackId],
+        position_ms: progressMs,
+      });
+    }
+  };
+
   if (lyricLoading) {
     return (
       <div className="flex justify-center w-full h-screen">
@@ -40,7 +59,6 @@ function Lyric(props: LyricProps) {
       </div>
     );
   }
-  console.log(lyricData);
 
   return (
     <div
@@ -55,6 +73,7 @@ function Lyric(props: LyricProps) {
         {lyricData?.map((lyric, index) => (
           <div key={index}>
             <p
+              onClick={() => lyricTimeline(lyric.startMs)}
               className={`text-${
                 currentTime >= lyric.startMs &&
                 currentTime <= lyric.startMs + lyric.durMs

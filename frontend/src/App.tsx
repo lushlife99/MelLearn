@@ -20,6 +20,7 @@ import { Score } from "./learning/Score";
 import Commentary from "./learning/Commentary";
 import { Rank_yh } from "./learning/Rank_yh";
 import Listening from "./learning/Listening";
+import SelectCategory from "./learning/SelectCategory";
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
 
           <Route path="/main4" element={<ArtistDetial />}></Route>
           <Route path="/playMusic" element={<PlayMusic />}></Route>
+          <Route path="/category" element={<SelectCategory />}></Route>
           <Route path="/speaking" element={<Speaking />}></Route>
 
           <Route path="/question" element={<QuestionBoardV2 />}></Route>

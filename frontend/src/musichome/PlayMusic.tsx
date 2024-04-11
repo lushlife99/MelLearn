@@ -9,22 +9,13 @@ import {
   FaPlayCircle,
   FaPauseCircle,
 } from "react-icons/fa";
-import {
-  IoIosArrowDown,
-  IoIosArrowRoundBack,
-  IoIosArrowUp,
-} from "react-icons/io";
+import { IoIosArrowRoundBack, IoIosArrowUp } from "react-icons/io";
 import { LuPencilLine } from "react-icons/lu";
 import { FaMicrophoneLines } from "react-icons/fa6";
 import Lyric from "./Lyric";
-import { Menu } from "antd";
 
 export interface CurrentTimeData {
   progress_ms: number;
-}
-interface Category {
-  name: string;
-  value: boolean;
 }
 
 function PlayMusic() {
@@ -36,9 +27,6 @@ function PlayMusic() {
     useState<ReturnType<typeof setInterval>>();
   const [duration, setDuration] = useState<number>(0); //트랙 시간 길이
   const [isLyric, setIsLyric] = useState<boolean>(false);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isCategory, setIsCategory] = useState<boolean>(false);
-  const [selectedTrack, setSelectedTrack] = useState();
 
   const { track } = location.state;
 
@@ -137,64 +125,18 @@ function PlayMusic() {
     setIsLyric(true);
   };
   const goStudy = async (track: any) => {
-    setSelectedTrack(track);
-    setIsCategory(true);
-    /* 서버에 가사 전송 하기 위함 */
-    const res = await axiosSpotifyScraper.get(
-      `/track/lyrics?trackId=${track.id}&format=json`
-    );
-    const res2 = await axiosApi.post(`/api/support/quiz/category`, res.data);
-    const categoriesArray: Category[] = Object.entries(res2.data).map(
-      ([name, value]) => ({
-        name,
-        value: value as boolean,
-      })
-    );
-    setCategories(categoriesArray);
+    navigate("category", {
+      state: {
+        track,
+      },
+    });
   };
-  const handleMenuClick = (e: any) => {
-    switch (e.key) {
-      case "speaking":
-        navigate("/speaking", {
-          state: {
-            track: selectedTrack,
-          },
-        });
-        break;
-      case "listening":
-        break;
-      case "reading":
-        break;
-      case "vocabulary":
-        break;
-      case "grammar":
-        break;
-    }
-  };
+  const lyricClick = true;
 
   const progressPercentage = (currentTime / duration) * 100;
 
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
-      {isCategory && (
-        <div className="absolute bottom-0 w-[450px] z-10 bg-black rounded-t-2xl">
-          <IoIosArrowDown
-            onClick={() => setIsCategory(false)}
-            className="w-6 h-6 mt-2 ml-4 fill-[#B3B3B3] hover:fill-white"
-          />
-          <Menu
-            theme="dark"
-            mode="vertical"
-            className="text-lg font-bold bg-black"
-            onSelect={handleMenuClick}
-            items={categories.map((category, index) => ({
-              key: category.name,
-              label: `${index + 1}. ${category.name}`,
-              disabled: !category.value,
-            }))}
-          />
-        </div>
-      )}
       <div className="relative bg-[black] overflow-hidden w-full max-w-[450px] h-screen  flex flex-col px-5">
         <IoIosArrowRoundBack
           onClick={goBack}
@@ -206,7 +148,9 @@ function PlayMusic() {
             trackId={track.id}
             isLyric={isLyric}
             setIsLyric={setIsLyric}
+            setCurrentTime={setCurrentTime}
             currentTime={currentTime}
+            lyricClick={lyricClick}
           />
         )}
         {/* 앪범 커버 */}

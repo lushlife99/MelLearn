@@ -155,6 +155,7 @@ const Speaking = () => {
     navigate(-1);
   };
   const progressPercentage = (currentTime / duration) * 100;
+  const lyricClick = false;
 
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
@@ -178,6 +179,8 @@ const Speaking = () => {
                 isLyric={isLyric}
                 setIsLyric={setIsLyric}
                 currentTime={currentTime}
+                lyricClick={lyricClick}
+                setCurrentTime={setCurrentTime}
               />
             )}
             <img

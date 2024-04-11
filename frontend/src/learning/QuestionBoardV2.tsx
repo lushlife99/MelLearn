@@ -3,6 +3,12 @@ import Input from "@mui/joy/Input";
 import { Button, LinearProgress, Radio, RadioGroup } from "@mui/joy";
 import DoDisturbAltIcon from "@mui/icons-material/DoDisturbAlt";
 import { FormControlLabel } from "@mui/material";
+import BgCircle from "../components/BgCircle";
+import { useNavigate } from "react-router-dom";
+import { IoIosArrowRoundBack } from "react-icons/io";
+import { BsCheckCircle } from "react-icons/bs";
+import { GiCancel } from "react-icons/gi";
+import "../css/scroll.css";
 
 // TODO 결과보기 했을 때 랭크나오게
 
@@ -70,10 +76,11 @@ export const QuestionBoardV2 = (): JSX.Element => {
   const [isCorrect, setIsCorrect] = useState(null); // 정답 확인 상태
   const [isLast, setIsLast] = useState(null);
 
+  const navigate = useNavigate();
+
   const handleNext = async () => {
     // 다음 문제로 이동
     const nextIndex = index + 1; // % words.length
-
     if (nextIndex === words.length) {
       console.log("QuestionBoard -  마지막 문제 ");
       setProgress(100);
@@ -90,10 +97,11 @@ export const QuestionBoardV2 = (): JSX.Element => {
     setIsCorrect(null); // 정답 확인 상태 초기화
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     // 사용자가 답을 제출했을 때 실행되는 함수
     const currentQuestion = words[index];
-    console.log(userAnswer);
+    console.log(userAnswer, 100, currentQuestion.answer);
     if (userAnswer === currentQuestion.answer) {
       // 정답인 경우
       // @ts-ignore
@@ -113,133 +121,109 @@ export const QuestionBoardV2 = (): JSX.Element => {
   useEffect(() => {}, [index]);
 
   return (
-    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full">
-      <div className="bg-[#9bd1e5] overflow-hidden w-[360px] h-[800px] relative">
-        <div className="absolute w-[597px] h-[668px] top-[156px] left-[-182px]">
-          <div className="absolute w-[500px] h-[500px] top-0 left-0 bg-[#d1faff2b] rounded-[250px]" />
-          <div className="absolute w-[170px] h-[170px] top-[498px] left-[393px] bg-[#a4d8e9] rounded-[85px]" />
-          <p className="absolute w-[308px] top-[109px] left-[204px] [font-family:'Baloo_Tamma-Regular',Helvetica] font-normal text-black text-[20px] text-center tracking-[-0.10px] leading-[40px]">
-            {words[index].question}
-          </p>
-          <div className="flex flex-col w-[393px] items-start gap-[12px] px-[16px] py-0 absolute top-[38px] left-[204px]">
-            <div className="relative w-[361px] mt-[-1.00px] [font-family:'Baloo_Tamma-Regular',Helvetica] font-normal text-light-modeprimary  text-blue-600 text-[35px] tracking-[-0.14px] leading-[24px]">
-              Q{index + 1}
-            </div>
+    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
+      <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col px-8">
+        <BgCircle />
+        <div className="z-10">
+          <IoIosArrowRoundBack className="w-10 h-10 mt-8 fill-black hover:opacity-60" />
+          <div className="flex items-center justify-center mt-8 mb-12">
+            <LinearProgress determinate value={progress} className="h-4" />
+            {/*    question 문제 받고 value 해주면 될듯 */}
           </div>
+
+          {/* 문제 */}
+
+          {words.map(
+            (word, idx) =>
+              idx === index && (
+                <div key={idx}>
+                  <span className="text-[#007AFF] text-3xl font-extrabold">
+                    Q{index + 1}.
+                  </span>
+                  <p className="mt-2 mb-12 text-2xl font-extrabold text-black">
+                    {word.question}
+                  </p>
+                  <RadioGroup
+                    className=" radio-buttons-group-focus"
+                    onChange={(e: any) => setUserAnswer(e.target.value)}
+                  >
+                    {word.optionList.map((option, idx) => (
+                      <FormControlLabel
+                        key={idx}
+                        value={idx + 1}
+                        control={<Radio className="items-center mr-2" />}
+                        label={
+                          <div className="flex flex-col items-start">
+                            <div className="flex items-center mb-1">
+                              <span className="text-[black] text-lg font-extrabold mr-2">
+                                {idx + 1}.
+                              </span>
+                              <span className="text-[black] text-lg ">
+                                {option}
+                              </span>
+                            </div>
+                          </div>
+                        }
+                      />
+                    ))}
+                  </RadioGroup>
+                </div>
+              )
+          )}
 
           <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSubmit();
-            }}
+            onSubmit={handleSubmit}
+            className="flex justify-center w-full mt-28"
           >
-            {/*<Input*/}
-            {/*    className="!h-[56px] !absolute !left-[225px] !bg-white !w-[267px] !top-[265px]"*/}
-            {/*    placeholder="Try to submit with no text!"*/}
-            {/*    required*/}
-            {/*    value={userAnswer}*/}
-            {/*    onChange={(e) => setUserAnswer(e.target.value)}*/}
-            {/*/>*/}
-            <RadioGroup
-              className=" radio-buttons-group-focus !h-[56px] !absolute !left-[225px]  !w-[267px] !top-[265px]"
-              onChange={(e) => setUserAnswer(e.target.value)}
-              value={userAnswer}
-            >
-              <FormControlLabel
-                style={{ marginBottom: "5px" }}
-                value="1"
-                control={<Radio style={{ marginRight: "10px" }} />}
-                label={words[index].optionList[0]}
-              />
-              <FormControlLabel
-                style={{ marginBottom: "5px" }}
-                value="2"
-                control={<Radio style={{ marginRight: "10px" }} />}
-                label={words[index].optionList[1]}
-              />
-              <FormControlLabel
-                style={{ marginBottom: "5px" }}
-                value="3"
-                control={<Radio style={{ marginRight: "10px" }} />}
-                label={words[index].optionList[2]}
-              />
-              <FormControlLabel
-                style={{ marginBottom: "5px" }}
-                value="4"
-                control={<Radio style={{ marginRight: "10px" }} />}
-                label={words[index].optionList[3]}
-              />
-            </RadioGroup>
-            <Button
-              className="!h-[35px] !w-[80px] !absolute !left-[300px]  !top-[450px]"
-              onClick={handleSubmit}
-            >
-              제출
-            </Button>
-
-            {isCorrect !== null && (
-              <div>
-                {isCorrect ? (
-                  <div>
-                    <p className="!flex  !absolute !left-[320px] !w-[336px] !top-[520px]">
-                      정답입니다!
-                    </p>
-                    <Button
-                      className="!flex !absolute !left-[200px] !w-[336px] !top-[559px]"
-                      type="button"
-                      onClick={handleNext}
-                    >
-                      다음 문제
-                    </Button>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="flex-column rounded bg-white !absolute !left-[200px] !w-[336px] !top-[100px] !h-[450px]">
-                      <p style={{ color: "red" }}>
-                        <DoDisturbAltIcon></DoDisturbAltIcon>
-                        오답입니다
-                      </p>
-                      <p>{words[index].comment}</p>
-                    </div>
-                    <Button
-                      color="danger"
-                      className="!flex !absolute !left-[200px] !w-[336px] !top-[559px]"
-                      type="button"
-                      onClick={handleNext}
-                    >
-                      다음 문제
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div>
-              {isLast ? (
-                <div>
-                  <Button
-                    className="!flex !absolute !left-[200px] !w-[336px] !top-[559px]"
-                    type="button"
-                  >
-                    결과보기
-                  </Button>
-                </div>
-              ) : (
-                <> </>
-              )}
-            </div>
+            <input
+              className="bg-[#007AFF] w-[70%] h-10 text-white rounded-lg hover:opacity-60"
+              type="submit"
+              value="정답 확인"
+            />
           </form>
         </div>
-        <div className="absolute w-[354px] h-[139px] top-[-20px] left-[-22px]">
-          <div className="absolute w-[139px] h-[139px] top-0 left-0 bg-[#a4d8e9] rounded-[69.5px]" />
-          <div className="flex flex-col w-[292px] items-center absolute top-[118px] left-[62px]">
-            <div className="flex w-[354px] items-center justify-center pt-[8px] pb-0 px-[16px] relative flex-[0_0_auto] ml-[-31.00px] mr-[-31.00px]">
-              <LinearProgress determinate value={progress} />
-              {/*    question 문제 받고 value 해주면 될듯 */}
+      </div>
+
+      {isCorrect !== null && (
+        <div className="fixed bottom-0 w-[450px] bg-white z-10 h-96 rounded-t-3xl">
+          <div className="flex flex-col items-start justify-center px-4">
+            <div className="flex items-center mt-3">
+              {isCorrect ? (
+                <BsCheckCircle className={"w-7 h-7 fill-[#007AFF] mr-2"} />
+              ) : (
+                <GiCancel className="w-7 h-7 fill-[#D53F36] mr-2" />
+              )}
+              <span
+                className={`text-[${
+                  isCorrect ? "#007AFF" : "#D53F36"
+                }] text-xl font-extrabold`}
+              >
+                {isCorrect ? "Great!" : "Wrong!"}
+              </span>
+            </div>
+            <span className="mt-4 mb-1 text-lg font-extrabold text-black">
+              Comment:
+            </span>
+            <span
+              className={`pl-3 text-lg h-28 font-extrabold ${
+                isCorrect ? "" : "overflow-y-auto "
+              }`}
+            >
+              {isCorrect ? "정답입니다." : words[index].comment}
+            </span>
+            <div className="flex justify-center w-full mt-20 ">
+              <button
+                className={`bg-[${
+                  isCorrect ? "#007AFF" : "#D53F36"
+                }] w-[80%] h-10 text-white rounded-lg hover:opacity-60`}
+                onClick={handleNext}
+              >
+                {isLast ? "결과 보기" : "다음 문제"}
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
