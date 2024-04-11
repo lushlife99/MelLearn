@@ -1,5 +1,6 @@
 package com.example.melLearnBE.model;
 
+import com.example.melLearnBE.enums.LearningLevel;
 import com.example.melLearnBE.enums.QuizType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -21,10 +22,13 @@ public class QuizList {
     private Long id;
     @Enumerated(value = EnumType.ORDINAL)
     private QuizType quizType;
-    @OneToMany(mappedBy = "quizList")
+    @Enumerated(value = EnumType.ORDINAL)
+    private LearningLevel level;
+    @OneToMany(mappedBy = "quizList", cascade = CascadeType.ALL)
     private List<Quiz> quizzes;
+    @OneToMany(mappedBy = "quizList", cascade = CascadeType.ALL)
+    private List<QuizSubmit> submitList;
     private String musicId;
-    private int level;
     @CreationTimestamp
     private LocalDateTime createdTime;
 }

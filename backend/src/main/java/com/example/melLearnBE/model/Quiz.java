@@ -1,6 +1,5 @@
 package com.example.melLearnBE.model;
 
-import com.example.melLearnBE.enums.QuizType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,13 +17,17 @@ import java.util.List;
 public class Quiz {
     @Id @GeneratedValue
     private Long id;
+    @Lob
     private String question;
     private String word;
     @ElementCollection
     @Builder.Default
     private List<String> optionList = new ArrayList<>(4);
     private int answer;
+    @Column(columnDefinition="LONGTEXT")
     private String comment;
     @ManyToOne
     private QuizList quizList;
+    private int submitCount;
+    private int correctCount;
 }
