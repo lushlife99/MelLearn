@@ -68,7 +68,7 @@ function SelectCategory() {
         });
       }
 
-      console.log(res.data);
+      console.log(category, res.data);
     } else if (category === "speaking") {
       navigate("/speaking", {
         state: {
