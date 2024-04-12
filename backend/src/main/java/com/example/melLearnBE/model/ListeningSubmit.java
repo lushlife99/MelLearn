@@ -30,6 +30,7 @@ public class ListeningSubmit {
     private ListeningQuiz listeningQuiz;
 
     @ElementCollection(fetch = FetchType.LAZY)
+    @Builder.Default
     private List<String> submitAnswerList = new ArrayList<>();
 
     private double score;

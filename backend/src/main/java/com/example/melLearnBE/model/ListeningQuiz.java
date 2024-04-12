@@ -28,6 +28,6 @@ public class ListeningQuiz {
     @OneToMany(mappedBy = "listeningQuiz")
     private List<ListeningSubmit> submitList = new ArrayList<>();
 
-    @ElementCollection(fetch = FetchType.LAZY) @Builder.Default
+    @ElementCollection(fetch = FetchType.LAZY)
     private List<String> answerList = new ArrayList<>();
 }
