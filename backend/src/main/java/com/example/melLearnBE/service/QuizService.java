@@ -58,7 +58,7 @@ public class QuizService {
 
     public QuizSubmitDto submit(QuizSubmitRequest submitRequest, HttpServletRequest request) {
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-        QuizList quizList = quizListRepository.findByMusicIdAndQuizTypeAndLevel(submitRequest.getMusicId(), submitRequest.getQuizType(), member.getLevel().getValue())
+        QuizList quizList = quizListRepository.findByMusicIdAndQuizTypeAndLevel(submitRequest.getMusicId(), submitRequest.getQuizType(), member.getLevel())
                 .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
 
         calCorrectRate(submitRequest, quizList);
@@ -119,11 +119,13 @@ public class QuizService {
     }
     @Transactional
     public QuizListDto getQuizList(QuizRequest quizRequest, HttpServletRequest request) {
+        System.out.println(1);
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-        Optional<QuizList> optionalQuizList = quizListRepository.findByMusicIdAndQuizTypeAndLevel(quizRequest.getMusicId(), quizRequest.getQuizType(), member.getLevel().getValue());
+        Optional<QuizList> optionalQuizList = quizListRepository.findByMusicIdAndQuizTypeAndLevel(quizRequest.getMusicId(), quizRequest.getQuizType(), member.getLevel());
         if(optionalQuizList.isEmpty()) {
             return createQuizList(quizRequest, member);
         } else {
+            System.out.println(2);
             QuizList quizList = optionalQuizList.get();
             QuizListDto quizListDto = new QuizListDto(quizList);
             return quizListDto;
@@ -286,7 +288,7 @@ public class QuizService {
                 .system(getPrompt(quizType))
                 .question(question.toString())
                 .build();
-
+        System.out.println("vocaRequest = " + vocaRequest);
         int retries = 0;
         final int maxRetries = 3;
         boolean success = false;
@@ -294,6 +296,7 @@ public class QuizService {
         while (!success && retries < maxRetries) {
             try {
                 ChatGPTResponse chatGPTResponse = openAIService.requestGPT(vocaRequest);
+                System.out.println("chatGPTResponse = " + chatGPTResponse);
                 String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
                 JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
                 JsonArray probListJsonArray = jsonObject.getAsJsonArray("probList");

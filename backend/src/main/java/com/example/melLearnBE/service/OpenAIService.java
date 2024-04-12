@@ -78,4 +78,5 @@ public class OpenAIService {
                 .build();
         return openAIClient.chat(chatGPTRequest);
     }
+
 }
