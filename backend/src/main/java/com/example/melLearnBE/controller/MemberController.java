@@ -34,6 +34,7 @@ public class MemberController {
     @PutMapping("/info")
     @Operation(summary = "멤버 정보 변경", description = "비밀번호, userId를 제외한 정보를 변경")
     public MemberDto updateMemberInfo(@RequestBody MemberDto memberDto, HttpServletRequest request) {
+        System.out.println(memberDto);
         return memberService.updateMemberProfile(memberDto, request);
     }
 }
