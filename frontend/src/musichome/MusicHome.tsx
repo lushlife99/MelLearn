@@ -52,6 +52,7 @@ function MusicHome() {
       staleTime: 1800000,
     }
   );
+
   const { data: artistData, isLoading: artistLoading } = useQuery(
     "artists",
     fetchArtistData,
@@ -62,7 +63,7 @@ function MusicHome() {
       staleTime: 1800000,
     }
   );
-  console.log(artistData);
+  console.log(chartData);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setPage(newValue);

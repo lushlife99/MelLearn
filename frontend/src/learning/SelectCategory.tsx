@@ -76,7 +76,12 @@ function SelectCategory() {
         },
       });
     } else {
-      //리스닝
+      const res = await axiosApi.post(`/api/quiz/${category}`, {
+        musicId: track.id,
+        quizType: category.toUpperCase(),
+        lyric,
+      });
+      console.log(res.data);
     }
   };
   useEffect(() => {
