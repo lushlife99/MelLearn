@@ -4,20 +4,25 @@ import { Button, LinearProgress, Radio, RadioGroup } from "@mui/joy";
 import DoDisturbAltIcon from "@mui/icons-material/DoDisturbAlt";
 import { FormControlLabel } from "@mui/material";
 import BgCircle from "../components/BgCircle";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import { BsCheckCircle } from "react-icons/bs";
 import { GiCancel } from "react-icons/gi";
 import "../css/scroll.css";
+import axiosApi from "../api";
 
 // TODO 결과보기 했을 때 랭크나오게
 
 export const QuestionBoardV2 = (): JSX.Element => {
   const [index, setIndex] = useState(0); // 현재 문제 인덱스
   const [answerCount, setAnswerCount] = useState(0); // 맞은 문제 개수
+  const location = useLocation();
+  const { category, track } = location.state;
 
   const [words, setWords] = useState([
     {
+      id: 0,
+
       question:
         "'Very unmanageable day' What is the meaning of 'unmanageable' in this sentence?",
       optionList: [
@@ -97,24 +102,33 @@ export const QuestionBoardV2 = (): JSX.Element => {
     setIsCorrect(null); // 정답 확인 상태 초기화
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // 사용자가 답을 제출했을 때 실행되는 함수
     const currentQuestion = words[index];
-    console.log(userAnswer, 100, currentQuestion.answer);
-    if (userAnswer === currentQuestion.answer) {
-      // 정답인 경우
-      // @ts-ignore
-      setIsCorrect(true);
-      const nextCount = answerCount + 1;
-      setAnswerCount(nextCount);
 
-      console.log("success");
+    if (isLast) {
+      console.log("서버에 전송");
+      const res = await axiosApi.post(`/api/quiz/submit/${category}`, {
+        musicId: track.id,
+        quizType: category.toUpperCase(),
+      });
+      console.log(res.data);
     } else {
-      // 오답인 경우
-      // @ts-ignore
-      setIsCorrect(false);
-      console.log("fail");
+      if (userAnswer === currentQuestion.answer) {
+        // 정답인 경우
+        // @ts-ignore
+        setIsCorrect(true);
+        const nextCount = answerCount + 1;
+        setAnswerCount(nextCount);
+
+        console.log("success");
+      } else {
+        // 오답인 경우
+        // @ts-ignore
+        setIsCorrect(false);
+        console.log("fail");
+      }
     }
   };
 
@@ -127,7 +141,7 @@ export const QuestionBoardV2 = (): JSX.Element => {
         <div className="z-10">
           <IoIosArrowRoundBack className="w-10 h-10 mt-8 fill-black hover:opacity-60" />
           <div className="flex items-center justify-center mt-8 mb-12">
-            <LinearProgress determinate value={progress} className="h-4" />
+            <LinearProgress determinate value={progress} />
             {/*    question 문제 받고 value 해주면 될듯 */}
           </div>
 
@@ -178,7 +192,7 @@ export const QuestionBoardV2 = (): JSX.Element => {
             <input
               className="bg-[#007AFF] w-[70%] h-10 text-white rounded-lg hover:opacity-60"
               type="submit"
-              value="정답 확인"
+              value={isLast ? "결과 확인 " : "정답 확인"}
             />
           </form>
         </div>
@@ -218,7 +232,7 @@ export const QuestionBoardV2 = (): JSX.Element => {
                 }] w-[80%] h-10 text-white rounded-lg hover:opacity-60`}
                 onClick={handleNext}
               >
-                {isLast ? "결과 보기" : "다음 문제"}
+                다음 문제
               </button>
             </div>
           </div>

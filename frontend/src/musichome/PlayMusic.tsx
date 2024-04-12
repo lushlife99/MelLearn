@@ -125,7 +125,7 @@ function PlayMusic() {
     setIsLyric(true);
   };
   const goStudy = async (track: any) => {
-    navigate("category", {
+    navigate("/category", {
       state: {
         track,
       },
