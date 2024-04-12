@@ -167,7 +167,6 @@ public class QuizService {
                 .userInput(question.toString() + "\n" + promptDetailUtil.get(member, quizRequest))
                 .build();
 
-        System.out.println("readingRequest = " + readingRequest);
         int retries = 0;
         final int maxRetries = 3;
         boolean success = false;
@@ -333,7 +332,6 @@ public class QuizService {
         throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
     }
 
-
     private QuizListDto createVocaQuiz(QuizRequest quizRequest, Member member) {
         QuizType quizType = quizRequest.getQuizType();
         ChatQuestion question = ChatQuestion.builder()
@@ -354,6 +352,7 @@ public class QuizService {
         while (!success && retries < maxRetries) {
             try {
                 ChatGPTResponse chatGPTResponse = openAIService.requestGPT(vocaRequest);
+                System.out.println("chatGPTResponse = " + chatGPTResponse);
                 String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
                 JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
                 JsonArray probListJsonArray = jsonObject.getAsJsonArray("probList");
@@ -399,7 +398,7 @@ public class QuizService {
 
         String filePath;
         if(quizType.equals(QuizType.VOCABULARY)) {
-            filePath = "." + File.pathSeparator + quizType + member.getLevel().toString();
+            filePath = "." + File.separator + "prompt" + File.separator + quizType + File.separator + member.getLevel().toString() + ".txt";
         } else {
             filePath = "." + File.separator + "prompt" + File.separator + quizType + ".txt";
         }
