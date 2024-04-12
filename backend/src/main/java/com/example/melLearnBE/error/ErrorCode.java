@@ -9,8 +9,10 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
     /* 400 BAD_REQUEST : 잘못된 요청 */
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다"),
-    UN_SUPPORTED_QUIZ_LANG(HttpStatus.BAD_REQUEST, "지원하지 않는 언어의 가사입니다."),
-    UN_SUPPORTED_AUDIO_EXTENSION(HttpStatus.BAD_REQUEST, "지원하지 않는 오디오 확장자입니다."),
+    UN_SUPPORTED_QUIZ_LANG(HttpStatus.BAD_REQUEST, "지원하지 않는 언어의 가사입니다"),
+    UN_SUPPORTED_AUDIO_EXTENSION(HttpStatus.BAD_REQUEST, "지원하지 않는 오디오 확장자입니다"),
+    UN_SUPPORTED_QUIZ_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 퀴즈 타입입니다"),
+    REQUEST_ARRAY_SIZE_NOT_MATCHED(HttpStatus.BAD_REQUEST, "배열 사이즈가 맞지 않습니다"),
 
     /* 401 UNAUTHORIZED : 인증되지 않은 사용자 */
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "일치하는 계정이 없습니다"),

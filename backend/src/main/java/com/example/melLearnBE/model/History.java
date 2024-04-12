@@ -21,7 +21,7 @@ public class History {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
     @OneToOne
-    private ProblemList problemList;
+    private QuizList quizList;
     @CreationTimestamp
     private LocalDateTime createdTime;
 

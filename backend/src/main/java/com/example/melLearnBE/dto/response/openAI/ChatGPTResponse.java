@@ -1,6 +1,5 @@
 package com.example.melLearnBE.dto.response.openAI;
 
-import com.example.melLearnBE.dto.request.openAI.Choice;
 import com.example.melLearnBE.dto.request.openAI.Usage;
 import lombok.Data;
 

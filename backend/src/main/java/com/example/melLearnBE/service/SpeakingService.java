@@ -2,26 +2,28 @@ package com.example.melLearnBE.service;
 
 import com.example.melLearnBE.dto.request.LrcLyric;
 import com.example.melLearnBE.dto.request.SpeakingSubmitRequest;
-import com.example.melLearnBE.dto.request.openAI.WhisperTranscriptionRequest;
-import com.example.melLearnBE.dto.response.AnswerSpeakingDto;
+import com.example.melLearnBE.dto.model.SpeakingSubmitDto;
 import com.example.melLearnBE.dto.response.SupportQuizCategories;
 import com.example.melLearnBE.dto.response.openAI.WhisperSegment;
 import com.example.melLearnBE.dto.response.openAI.WhisperTranscriptionResponse;
 import com.example.melLearnBE.error.CustomException;
 import com.example.melLearnBE.error.ErrorCode;
 import com.example.melLearnBE.jwt.JwtTokenProvider;
-import com.example.melLearnBE.model.AnswerSpeaking;
+import com.example.melLearnBE.model.SpeakingSubmit;
 import com.example.melLearnBE.model.Member;
-import com.example.melLearnBE.openFeign.openAIClient.OpenAIClient;
-import com.example.melLearnBE.openFeign.openAIClient.OpenAIClientConfig;
-import com.example.melLearnBE.repository.AnswerSpeakingRepository;
+import com.example.melLearnBE.repository.SpeakingSubmitRepository;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.bramp.ffmpeg.FFmpeg;
+import net.bramp.ffmpeg.FFmpegExecutor;
+import net.bramp.ffmpeg.FFprobe;
+import net.bramp.ffmpeg.builder.FFmpegBuilder;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,18 +38,22 @@ import java.util.*;
 @Slf4j
 public class SpeakingService {
 
-    private final AnswerSpeakingRepository answerSpeakingRepository;
+    private final SpeakingSubmitRepository speakingSubmitRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final SupportService supportService;
-    private final OpenAIClient openAIClient;
-    private final OpenAIClientConfig openAIClientConfig;
+    private final OpenAIService openAIService;
+    @Value("${ffmpeg.mpeg}")
+    private String ffmpegPath;
+    @Value("${ffmpeg.probe}")
+    private String ffprobePath;
+
+
     private static final String AUDIO_PATH = "." + File.separator + "audio" + File.separator;
 
     @Transactional
-    public AnswerSpeakingDto submit(SpeakingSubmitRequest submitRequest, String musicId, HttpServletRequest request) {
+    public SpeakingSubmitDto submit(SpeakingSubmitRequest submitRequest, String musicId, HttpServletRequest request) {
 
         List<LrcLyric> lyricList = submitRequest.getLyricList();
-        MultipartFile file = submitRequest.getFile();
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
         SupportQuizCategories supportQuizCategory = supportService.getSupportQuizCategory(lyricList, request);
         if (!supportQuizCategory.isSpeaking())
@@ -57,7 +63,7 @@ public class SpeakingService {
         File preprocessingAudio = audioPreprocess(submitRequest);
 
         // 2. whisper 전송
-        WhisperTranscriptionResponse transcription = createTranscription(preprocessingAudio, member.getLangType().getIso639Value());
+        WhisperTranscriptionResponse transcription = openAIService.createTranscription(preprocessingAudio, member.getLangType().getIso639Value());
 
 
         // 3. 후처리 2 - 세그먼트와 lyric 줄 싱크 맞추기, 대소문자 변경, 특수문자 제거
@@ -65,13 +71,11 @@ public class SpeakingService {
         convertGradableFormat(lyricList, transcription);
 
         // 4. 채점
-        AnswerSpeakingDto answerSpeaking = grade(musicId, lyricList, member, transcription);
+        SpeakingSubmitDto answerSpeaking = grade(musicId, lyricList, member, transcription);
 
         // 5. 랭킹
         return answerSpeaking;
     }
-
-
 
     private void convertGradableFormat(List<LrcLyric> answerLyrics, WhisperTranscriptionResponse transcription) {
         convertLyricToLowerCase(answerLyrics, transcription.getSegments());
@@ -104,7 +108,7 @@ public class SpeakingService {
         }
     }
 
-    public AnswerSpeakingDto grade(String musicId, List<LrcLyric> answerLyrics, Member member, WhisperTranscriptionResponse transcriptionResponse) {
+    public SpeakingSubmitDto grade(String musicId, List<LrcLyric> answerLyrics, Member member, WhisperTranscriptionResponse transcriptionResponse) {
 
         List<WhisperSegment> submitLyrics = transcriptionResponse.getSegments();
         Properties props = new Properties();
@@ -123,13 +127,13 @@ public class SpeakingService {
             allTokenSize += allTokens.size();
             String lyricLineText = lrcLyricLine.getText();
 
-            if(i < submitLyrics.size()) {
+            if (i < submitLyrics.size()) {
 
                 WhisperSegment submitLyricLine = submitLyrics.get(i);
                 List<String> wrongWords = gradeByLine(lrcLyricLine.getText(), submitLyricLine.getText());
                 wrongTokenSize += wrongWords.size();
 
-                for(String wrongWord : wrongWords) {
+                for (String wrongWord : wrongWords) {
                     lyricLineText = lyricLineText.replaceAll("(?i)\\b" + wrongWord + "\\b", "__" + wrongWord);
                 }
                 answerSheet.append(lyricLineText + "\n");
@@ -142,7 +146,7 @@ public class SpeakingService {
 
         }
 
-        AnswerSpeaking answerSpeaking = AnswerSpeaking.builder()
+        SpeakingSubmit speakingSubmit = SpeakingSubmit.builder()
                 .musicId(musicId)
                 .markedText(answerSheet.toString())
                 .submit(transcriptionResponse.getText())
@@ -150,10 +154,10 @@ public class SpeakingService {
                 .member(member)
                 .build();
 
-        answerSpeakingRepository.save(answerSpeaking);
+        speakingSubmitRepository.save(speakingSubmit);
 
 
-        return new AnswerSpeakingDto(answerSpeaking);
+        return new SpeakingSubmitDto(speakingSubmit);
     }
 
     private List<String> gradeByLine(String answerTextLine, String submitTextLine) {
@@ -177,46 +181,49 @@ public class SpeakingService {
     }
 
 
-
-
-    private WhisperTranscriptionResponse createTranscription(File audioFile, String langCode) {
-
-        WhisperTranscriptionRequest whisperTranscriptionRequest = WhisperTranscriptionRequest.builder()
-                .model(openAIClientConfig.getAudioModel())
-                .file(audioFile)
-                .timestamp_granularities(Collections.singletonList("segment"))
-                .language(langCode)
-                .response_format("verbose_json")
-                .build();
-        WhisperTranscriptionResponse transcription = openAIClient.createTranscription(whisperTranscriptionRequest);
-
-        return transcription;
-    }
-
     private File audioPreprocess(SpeakingSubmitRequest submitRequest) {
-        MultipartFile file = submitRequest.getFile();
+        MultipartFile multipartFile = submitRequest.getFile();
         List<LrcLyric> lrcLyrics = submitRequest.getLyricList();
         Path directory = Paths.get(AUDIO_PATH).toAbsolutePath();
 
-        try {
-            File requestAudioFile = new File(directory + File.separator + UUID.randomUUID() + ".wav");
-            file.transferTo(requestAudioFile);
 
+        try {
+            File originalFile = new File(directory + File.separator + multipartFile.getOriginalFilename());
+            multipartFile.transferTo(originalFile);
+
+            // FFmpeg을 사용하여 오디오 파일을 WAV 형식으로 변환
+            FFmpeg ffmpeg = new FFmpeg(new ClassPathResource(ffmpegPath).getURL().getPath());
+            FFprobe ffprobe = new FFprobe(new ClassPathResource(ffprobePath).getURL().getPath());
+
+            File convertedFile = new File(directory + File.separator + UUID.randomUUID() + ".wav");
+            FFmpegBuilder builder = new FFmpegBuilder()
+                    .setInput(originalFile.getAbsolutePath())
+                    .addOutput(convertedFile.getAbsolutePath())
+                    .setAudioCodec("pcm_s16le") // WAV 형식 오디오 코덱
+                    .setFormat("wav")
+                    .done();
+
+
+            FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
+            executor.createJob(builder).run();
+
+            // 변환된 오디오 파일을 사용하여 전처리 시작
             AudioFormat audioFormat;
-            try (AudioInputStream tempStream = AudioSystem.getAudioInputStream(requestAudioFile)) {
+            try (AudioInputStream tempStream = AudioSystem.getAudioInputStream(convertedFile)) {
                 audioFormat = tempStream.getFormat();
+            } catch (Exception e) {
+                throw new CustomException(ErrorCode.AUDIO_PRE_PROCESSING_ERROR);
             }
 
-            // 병합할 오디오 스트림 리스트
-            List<AudioInputStream> audioParts = new ArrayList<>();
 
-            // 사일런스 데이터 준비
-            AudioInputStream silenceStream = AudioSystem.getAudioInputStream(new File(directory + File.separator + "silence.wav"));
+            List<AudioInputStream> audioParts = new ArrayList<>();
+            File silenceFile = new File(directory + File.separator + "silence.wav");
+            AudioInputStream silenceStream = AudioSystem.getAudioInputStream(silenceFile);
             byte[] silenceData = new byte[(int) silenceStream.getFrameLength() * silenceStream.getFormat().getFrameSize()];
             silenceStream.read(silenceData);
 
             for (LrcLyric lrcLyric : lrcLyrics) {
-                AudioInputStream originalStream = AudioSystem.getAudioInputStream(requestAudioFile);
+                AudioInputStream originalStream = AudioSystem.getAudioInputStream(convertedFile);
                 long framesToSkip = lrcLyric.getStartMs() * (long) (audioFormat.getFrameRate() / 1000);
                 originalStream.skip(framesToSkip * audioFormat.getFrameSize());
 
@@ -225,13 +232,12 @@ public class SpeakingService {
                 ByteArrayInputStream silenceBAISForThisLoop = new ByteArrayInputStream(silenceData);
                 AudioInputStream silenceAudioStreamForThisLoop = new AudioInputStream(silenceBAISForThisLoop, audioFormat, silenceData.length / audioFormat.getFrameSize());
 
-                // 오디오 조각과 사일런스 추가
                 audioParts.add(shortenedStream);
                 audioParts.add(silenceAudioStreamForThisLoop);
             }
 
             // 오디오 스트림 병합
-            AudioInputStream concatenatedStream = new SequenceAudioInputStream(audioFormat, audioParts);
+            AudioInputStream concatenatedStream = new SequenceAudioInputStream(audioFormat, Arrays.stream(audioParts.stream().toArray(AudioInputStream[]::new)).toList());
 
             // 최종 오디오 파일 저장
             File preProcessingAudio = new File(directory + File.separator + "pre" + UUID.randomUUID() + ".wav");
@@ -243,7 +249,6 @@ public class SpeakingService {
             throw new CustomException(ErrorCode.AUDIO_PRE_PROCESSING_ERROR);
         }
     }
-
     class SequenceAudioInputStream extends AudioInputStream {
         public SequenceAudioInputStream(AudioFormat audioFormat, List<AudioInputStream> audioInputStreams) {
             super(new SequenceInputStream(Collections.enumeration(getInputStreams(audioInputStreams))), audioFormat, getFrameLength(audioInputStreams));
@@ -270,62 +275,4 @@ public class SpeakingService {
             return totalLength;
         }
     }
-
-//    private static void testLog(List<LrcLyric> lyricList, WhisperTranscriptionResponse transcription) {
-//        System.out.println("lrcLyric: ");
-//
-//        for (LrcLyric lrcLyric : lyricList) {
-//            System.out.println(lrcLyric.getText());
-//        }
-//
-//        System.out.println("Whisper Segments: ");
-//
-//        System.out.println(transcription);
-//
-//        for (WhisperSegment segment : transcription.getSegments()) {
-//            System.out.println(segment.getText());
-//        }
-//    }
-//
-//    private List<WhisperSegment> synchronizeLyricsAndSegments(List<LrcLyric> lrcLyrics, WhisperTranscriptionResponse transcription) {
-//        List<WhisperSegment> segments = transcription.getSegments();
-//
-//        // size가 같을경우 후처리가 필요없음.
-//        if (lrcLyrics.size() == segments.size()) {
-//            return segments;
-//        }
-//
-//        log.info("Lyric Size is Not Matched. Start Progress of Whisper Transcription");
-//
-//        // lrcLyrics.size() > segments.size()일 상황은 없음.
-//        if (lrcLyrics.size() > segments.size()) {
-//            log.info("Segment Lines is shorter than lrcLyrics");
-//            throw new CustomException(ErrorCode.AUDIO_PRE_PROCESSING_ERROR);
-//        }
-//
-//        // lrcLyrics.size() < segments.size()일 경우 전처리.
-//        for (int i = 0; i < segments.size(); i++) {
-//            if (i != segments.size() - 1) {
-//                if (segments.get(i + 1).getStart() - segments.get(i).getEnd() < SILENCE_LENGTH) {
-//                    log.info("Segmented By Whisper Model");
-//                    log.info("LrcLyric = {}", lrcLyrics.get(i).getText());
-//                    log.info("Divided Segment1 ={}", segments.get(i).getText());
-//                    log.info("Divided Segment2 ={}", segments.get(i + 1).getText());
-//
-//                    WhisperSegment whisperSegment = segments.get(i);
-//                    WhisperSegment nextSegment = segments.get(i + 1);
-//                    whisperSegment.setEnd(nextSegment.getEnd());
-//                    whisperSegment.setText(whisperSegment.getText() + nextSegment.getText());
-//                    segments.remove(nextSegment);
-//                }
-//
-//                if (lrcLyrics.size() == segments.size()) {
-//                    break;
-//                }
-//            }
-//        }
-//
-//        return segments;
-//    }
-
 }

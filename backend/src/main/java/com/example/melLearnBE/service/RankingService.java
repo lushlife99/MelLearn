@@ -4,10 +4,10 @@ import com.example.melLearnBE.dto.model.RankingDto;
 import com.example.melLearnBE.error.CustomException;
 import com.example.melLearnBE.error.ErrorCode;
 import com.example.melLearnBE.jwt.JwtTokenProvider;
-import com.example.melLearnBE.model.AnswerSpeaking;
+import com.example.melLearnBE.model.SpeakingSubmit;
 import com.example.melLearnBE.model.Member;
 import com.example.melLearnBE.model.Ranking;
-import com.example.melLearnBE.repository.AnswerSpeakingRepository;
+import com.example.melLearnBE.repository.SpeakingSubmitRepository;
 import com.example.melLearnBE.repository.RankingRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -24,12 +24,12 @@ public class RankingService {
 
     private final RankingRepository rankingRepository;
     private final JwtTokenProvider jwtTokenProvider;
-    private final AnswerSpeakingRepository answerSpeakingRepository;
+    private final SpeakingSubmitRepository speakingSubmitRepository;
     @Transactional
     public RankingDto updateRanking(String musicId, HttpServletRequest request) {
         Optional<Ranking> optionalRanking = rankingRepository.findByMusicId(musicId);
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-        AnswerSpeaking answerSpeaking = answerSpeakingRepository.findByMusicIdAndMember(musicId, member.getId()).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
+        SpeakingSubmit speakingSubmit = speakingSubmitRepository.findByMusicIdAndMember(musicId, member).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
         Ranking ranking;
         if(optionalRanking.isPresent()) {
             ranking = optionalRanking.get();
@@ -41,15 +41,14 @@ public class RankingService {
         }
 
         Map<Long, Double> scoreList = ranking.getScore_list();
-        scoreList.put(member.getId(), answerSpeaking.getScore());
+        scoreList.put(member.getId(), speakingSubmit.getScore());
 
         return new RankingDto(rankingRepository.save(ranking));
     }
 
     @Transactional(readOnly = true)
-    public RankingDto getRanking(String musicId, HttpServletRequest request) {
+    public RankingDto getRanking(String musicId) {
         Optional<Ranking> optionalRanking = rankingRepository.findByMusicId(musicId);
-        Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
         if(optionalRanking.isEmpty()) {
             return new RankingDto();
         }

@@ -15,14 +15,14 @@ public class HistoryDto {
     private Long id;
     private double score;
     private MemberDto user;
-    private ProblemListDto problemList;
+    private QuizListDto problemList;
     private LocalDateTime createdTime;
 
     public HistoryDto(History history) {
         this.id = history.getId();
         this.score = history.getScore();
         this.user = new MemberDto(history.getMember());
-        this.problemList = new ProblemListDto(history.getProblemList());
+        this.problemList = new QuizListDto(history.getQuizList());
         this.createdTime = history.getCreatedTime();
     }
 }
