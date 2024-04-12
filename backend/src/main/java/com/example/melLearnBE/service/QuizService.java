@@ -73,8 +73,9 @@ public class QuizService {
     }
 
     public ListeningSubmitDto listeningSubmit(ListeningSubmitRequest submitRequest, HttpServletRequest request) {
+
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-        ListeningQuiz listeningQuiz = listeningQuizRepository.findByMusicIdAndLevel(submitRequest.getMusicId(), member.getLevel().getValue())
+        ListeningQuiz listeningQuiz = listeningQuizRepository.findByMusicIdAndLevel(submitRequest.getMusicId(), member.getLevel())
                 .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
 
         List<String> answerList = listeningQuiz.getAnswerList();
@@ -144,8 +145,9 @@ public class QuizService {
 
     @Transactional
     public ListeningQuizDto getListeningQuiz(QuizRequest quizRequest, HttpServletRequest request) {
+        System.out.println("QuizService.getListeningQuiz");
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-        Optional<ListeningQuiz> optionalListeningQuiz = listeningQuizRepository.findByMusicIdAndLevel(quizRequest.getMusicId(), member.getLevel().getValue());
+        Optional<ListeningQuiz> optionalListeningQuiz = listeningQuizRepository.findByMusicIdAndLevel(quizRequest.getMusicId(), member.getLevel());
         if(optionalListeningQuiz.isEmpty()) {
             return createListeningQuiz(quizRequest, member);
         } else {
@@ -244,6 +246,7 @@ public class QuizService {
         while (!success && retries < maxRetries) {
             try {
                 ChatGPTResponse chatGPTResponse = openAIService.requestGPT(listeningRequest);
+                System.out.println("chatGPTResponse = " + chatGPTResponse);
                 String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
                 JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
                 Type listType = new TypeToken<ListeningQuiz>(){}.getType();
