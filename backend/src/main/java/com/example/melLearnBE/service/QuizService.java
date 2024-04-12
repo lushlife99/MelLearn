@@ -12,6 +12,8 @@ import com.example.melLearnBE.dto.request.openAI.ChatQuestion;
 import com.example.melLearnBE.dto.request.openAI.ChatRequest;
 import com.example.melLearnBE.dto.response.openAI.ChatGPTResponse;
 import com.example.melLearnBE.dto.response.openAI.GrammarQuiz;
+import com.example.melLearnBE.dto.response.openAI.ListeningAnswer;
+import com.example.melLearnBE.enums.LearningLevel;
 import com.example.melLearnBE.enums.QuizType;
 import com.example.melLearnBE.error.CustomException;
 import com.example.melLearnBE.error.ErrorCode;
@@ -35,6 +37,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -284,18 +287,13 @@ public class QuizService {
 
     private ListeningQuizDto createListeningQuiz(QuizRequest quizRequest, Member member) {
         QuizType quizType = quizRequest.getQuizType();
-        ChatQuestion question = ChatQuestion.builder()
-                .text(quizRequest.getLyric())
-                .level(member.getLevel().getValue())
-                .totalProblem(5)
-                .lang(member.getLangType().getIso639Value())
-                .build();
 
         ChatRequest listeningRequest = ChatRequest.builder()
                 .system(getPrompt(quizType, member))
-                .userInput(question.toString())
+                .userInput(quizRequest.getLyric() + "\n" + promptDetailUtil.get(member, quizRequest))
                 .build();
 
+        System.out.println("listeningRequest = " + listeningRequest);
         int retries = 0;
         final int maxRetries = 3;
         boolean success = false;
@@ -303,19 +301,24 @@ public class QuizService {
         while (!success && retries < maxRetries) {
             try {
                 ChatGPTResponse chatGPTResponse = openAIService.requestGPT(listeningRequest);
+                System.out.println(chatGPTResponse);
                 String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
                 JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
-                Type listType = new TypeToken<ListeningQuiz>(){}.getType();
+                JsonArray probListJsonArray = jsonObject.getAsJsonArray("answerList");
                 Gson gson = new GsonBuilder()
                         .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
                         .setLenient()
                         .create();
-                ListeningQuiz listeningQuiz = gson.fromJson(jsonObject, listType);
 
-                listeningQuiz.setLevel(member.getLevel());
-                listeningQuiz.setMusicId(listeningQuiz.getMusicId());
-                listeningQuiz.setSubmitList(new ArrayList<>());
+                Type listType = new TypeToken<List<ListeningAnswer>>(){}.getType();
+                List<ListeningAnswer> answerContext = gson.fromJson(probListJsonArray, listType);
+                ListeningQuiz listeningQuiz = ListeningQuiz.builder()
+                        .level(member.getLevel())
+                        .musicId(quizRequest.getMusicId())
+                        .submitList(new ArrayList<>()).build();
 
+
+                blankToListeningText(quizRequest, member.getLevel(), answerContext, listeningQuiz);
                 listeningQuizRepository.save(listeningQuiz);
 
                 success = true;
@@ -352,7 +355,6 @@ public class QuizService {
         while (!success && retries < maxRetries) {
             try {
                 ChatGPTResponse chatGPTResponse = openAIService.requestGPT(vocaRequest);
-                System.out.println("chatGPTResponse = " + chatGPTResponse);
                 String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
                 JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
                 JsonArray probListJsonArray = jsonObject.getAsJsonArray("probList");
@@ -408,5 +410,48 @@ public class QuizService {
         } catch (Exception e) {
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private void blankToListeningText(QuizRequest quizRequest, LearningLevel level, List<ListeningAnswer> answerContext, ListeningQuiz listeningQuiz) {
+        String lyric = quizRequest.getLyric();
+        List<String> answerList = new ArrayList<>();
+        int totalBlankSize;
+        if(level.equals(LearningLevel.Beginner)) {
+            totalBlankSize = 10;
+        } else if(level.equals(LearningLevel.Intermediate)) {
+            totalBlankSize = 20;
+        } else totalBlankSize = 30;
+
+        String[] lyricArray = lyric.split("\n");
+        StringBuilder modifiedLyrics = new StringBuilder();
+
+        Collections.shuffle(answerContext);
+
+        for (int i = 0; i < lyricArray.length; i++) {
+            try {
+                String line = lyricArray[i];
+                String[] tokens = line.split(" ");
+
+                for (ListeningAnswer listeningAnswer : answerContext) {
+                    if (listeningAnswer.getLineIndex() == i) {
+                        tokens[listeningAnswer.getWordPos()] = "__";
+                        answerList.add(listeningAnswer.getAnswerWord());
+                    }
+                }
+
+                modifiedLyrics.append(String.join(" ", tokens));
+                modifiedLyrics.append("\n");
+
+                if(answerList.size() >= totalBlankSize) {
+                    break;
+                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+
+            }
+        }
+
+        listeningQuiz.setBlankedText(modifiedLyrics.toString());
+        listeningQuiz.setAnswerList(answerList);
+
     }
 }

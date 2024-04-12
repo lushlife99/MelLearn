@@ -14,8 +14,23 @@ public class PromptDetailUtil {
         QuizType quizType = quizRequest.getQuizType();
         LearningLevel level = member.getLevel();
         StringBuilder promptDetail = new StringBuilder();
+
+        if (quizType.equals(QuizType.LISTENING)) {
+            if(level.equals(LearningLevel.Beginner)) {
+                promptDetail.append(DetailedPromptInstruction.LISTENING_LEVEL1.getDetail());
+            } else if (level.equals(LearningLevel.Intermediate)) {
+                promptDetail.append(DetailedPromptInstruction.LISTENING_LEVEL2.getDetail());
+            } else if (level.equals(LearningLevel.Advanced)) {
+                promptDetail.append(DetailedPromptInstruction.LISTENING_LEVEL3.getDetail());
+            }
+
+            return promptDetail.toString();
+        }
+
         promptDetail.append(DetailedPromptInstruction.COMMON.getDetail() + " ");
+
         if (quizType.equals(QuizType.READING)) {
+
             if(level.equals(LearningLevel.Beginner)) {
                 promptDetail.append(DetailedPromptInstruction.READING_OPTIONLIST_LANG_LEVEL1.getDetail());
             } else {
@@ -31,6 +46,7 @@ public class PromptDetailUtil {
         } else if(quizType.equals(QuizType.VOCABULARY)) {
 
         }
+
         return promptDetail.toString();
     }
 }
