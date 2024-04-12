@@ -18,6 +18,7 @@ function SelectCategory() {
   const { track } = location.state;
 
   const [category, setCategory] = useState("");
+  const [serverLyric, setServerLyric] = useState("");
   const [lyric, setLyric] = useState();
 
   const {
@@ -26,23 +27,27 @@ function SelectCategory() {
     isError,
     refetch,
   } = useQuery<Category[]>(["categories", track.id], async () => {
-    //서버에 보낼 가사 데이터
+    //서버에 보낼 가사 데이터, 데이터 변환
     const res = await axiosSpotifyScraper.get(
+      `/track/lyrics?trackId=${track.id}`
+    );
+    const data = res.data;
+    let modifiedString = data.replace(/\[.*?\]/g, "");
+    modifiedString = modifiedString.replace(/\n/g, ".\n");
+    setServerLyric(modifiedString);
+
+    // 카테고리 조회용 가사
+    const res1 = await axiosSpotifyScraper.get(
       `/track/lyrics?trackId=${track.id}&format=json`
     );
-    const res2 = await axiosApi.post(`/api/support/quiz/category`, res.data);
+    setLyric(res1.data);
+    const res2 = await axiosApi.post(`/api/support/quiz/category`, res1.data);
+
     return Object.entries(res2.data).map(([name, value]) => ({
       name,
       value: value as boolean,
     }));
   });
-
-  const getLyric = async () => {
-    const res = await axiosSpotifyScraper.get(
-      `/track/lyrics?trackId=${track.id}`
-    );
-    setLyric(res.data);
-  };
 
   const handleMenuClick = (e: any) => {
     setCategory(e.key);
@@ -57,18 +62,17 @@ function SelectCategory() {
       const res = await axiosApi.post(`/api/quiz/${category}`, {
         musicId: track.id,
         quizType: category.toUpperCase(),
-        lyric,
+        lyric: serverLyric,
       });
       if (res.status === 200) {
         navigate("/question", {
           state: {
             category,
             track,
+            quiz: res.data,
           },
         });
       }
-
-      console.log(category, res.data);
     } else if (category === "speaking") {
       navigate("/speaking", {
         state: {
@@ -79,14 +83,10 @@ function SelectCategory() {
       const res = await axiosApi.post(`/api/quiz/${category}`, {
         musicId: track.id,
         quizType: category.toUpperCase(),
-        lyric,
+        lyric: serverLyric,
       });
-      console.log(res.data);
     }
   };
-  useEffect(() => {
-    getLyric();
-  }, []);
 
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">

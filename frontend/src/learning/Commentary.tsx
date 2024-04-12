@@ -1,9 +1,15 @@
 import React, { useState } from "react";
 import { Button } from "@mui/joy";
+import { useLocation, useNavigate } from "react-router-dom";
+import BgCircle from "../components/BgCircle";
+import { IoIosArrowRoundBack } from "react-icons/io";
 
 const pageSize = 2; // 페이지당 항목 수
 
 const Commentary = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { answer } = location.state;
   const [words, setWords] = useState([
     {
       question: "Im not a _____ of a redneck agenda",
@@ -68,84 +74,26 @@ const Commentary = () => {
   };
 
   return (
-    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen h-100 ">
-      <div className="relative bg-[#9bd1e5] w-full max-w-[450px] h-auto flex flex-col ">
-        {/*<div className="px-5 mt-24 z-1">*/}
-        {/*    {words.map((question, index) => (*/}
-        {/*        <div style={{*/}
-        {/*            backgroundColor: "white",*/}
-        {/*            borderRadius: "6px",*/}
-        {/*            margin: "10px",*/}
-        {/*            height: "250px",*/}
-        {/*            marginBottom: "30px"*/}
+    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
+      <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col px-8">
+        <BgCircle />
 
-        {/*        }}>*/}
-        {/*            <div*/}
-        {/*                style={{*/}
-        {/*                    color: true ?"blue":"red", // 맞으면 파란 틀리면 red 문제에 맞았는지 틀렸는지 boolean값 가져오기*/}
-        {/*                    fontSize: "30px",*/}
-        {/*                    marginBottom: "10px"*/}
-        {/*            }}*/}
-        {/*            >Q{index + 1}.</div>*/}
-        {/*            <div style={{*/}
-        {/*                fontSize: "25px",*/}
-        {/*                textAlign:"center",*/}
-        {/*                marginBottom: "10px",*/}
+        <div className="z-10 flex flex-col items-center justify-center h-full">
+          <div
+            className="flex justify-start w-[90%] mb-12"
+            onClick={() => navigate(-1)}
+          >
+            <IoIosArrowRoundBack className="w-10 h-10 fill-black hover:opacity-55" />
+          </div>
 
-        {/*            }}>*/}
-        {/*                /!*{question.question.replace("_____", (*!/*/}
-        {/*                /!*    <span style={{color: "green"}}>{question.answer}</span>*!/*/}
-        {/*                /!*))}*!/*/}
-        {/*                {question.question.includes("_____") ? question.question.split("_____").map((part, index) => {*/}
-        {/*                    if (index === 0) {*/}
-        {/*                        return (*/}
-        {/*                            <span key={index}>{part}</span>*/}
-        {/*                        );*/}
-        {/*                    } else {*/}
-        {/*                        return (*/}
-        {/*                            <span key={index}>*/}
-        {/*                                /!*정답이면 파랑 아니면 빨강 *!/*/}
-        {/*                                <span style={{ color: "green" }}>{question.answer}</span>*/}
-        {/*                                {part}*/}
-        {/*                            </span>*/}
-        {/*                        );*/}
-        {/*                    }*/}
-        {/*                }) : question.question}*/}
-        {/*            </div>*/}
-
-        {/*            Note: {question.commentary}*/}
-        {/*        </div>*/}
-        {/*    ))}*/}
-        {/*</div>*/}
-        <div className="px-5 mt-24 z-1">
           {getVisibleItems().map((question, index) => (
             <div
               key={index}
-              style={{
-                backgroundColor: "white",
-                borderRadius: "6px",
-                margin: "10px",
-                height: "250px",
-                marginBottom: "30px",
-              }}
+              className="mb-8 bg-white w-[90%] h-[35%] rounded-3xl p-4"
             >
               {/* 문제 표시 */}
-              <div
-                style={{
-                  color: true ? "blue" : "red", // 맞으면 파란 틀리면 red 문제에 맞았는지 틀렸는지 boolean값 가져오기
-                  fontSize: "30px",
-                  marginBottom: "10px",
-                }}
-              >
-                Q{(currentPage - 1) * pageSize + index + 1}.
-              </div>
-              <div
-                style={{
-                  fontSize: "25px",
-                  textAlign: "center",
-                  marginBottom: "10px",
-                }}
-              >
+              <div>Q{(currentPage - 1) * pageSize + index + 1}.</div>
+              <div>
                 {question.question.includes("_____")
                   ? question.question.split("_____").map((part, index) => {
                       if (index === 0) {
@@ -188,10 +136,6 @@ const Commentary = () => {
               </button>
             ))}
           </div>
-        </div>
-
-        <div className="w-[600px] flex justify-center">
-          <Button>이건 차라리 위에 뒤로가기 만들어버리자 </Button>
         </div>
       </div>
     </div>

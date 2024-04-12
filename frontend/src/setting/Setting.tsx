@@ -37,6 +37,7 @@ export const Setting = (): JSX.Element => {
     if (res.status === 200) {
       setLanguages(res.data);
     }
+    console.log(res.data);
   };
 
   //언어 선택 후 변경된 정보 전송
@@ -94,6 +95,7 @@ export const Setting = (): JSX.Element => {
   const goHome = () => {
     navigation("/home");
   };
+  console.log(member);
 
   useEffect(() => {
     getMember(); // 멤버 정보 불러오기
@@ -163,7 +165,7 @@ export const Setting = (): JSX.Element => {
             {/* 언어 설정 drop down */}
             <Navbar>
               <Nav variant="dark">
-                <NavDropdown title={langauge} onSelect={selectLanguage}>
+                <NavDropdown title={member?.langType} onSelect={selectLanguage}>
                   {languages &&
                     languages.map((lang: string, index: number) => (
                       <NavDropdown.Item key={index} eventKey={lang}>
@@ -180,7 +182,7 @@ export const Setting = (): JSX.Element => {
             {/* 난이도 설정 drop down */}
             <Navbar>
               <Nav variant="dark">
-                <NavDropdown title="Beginner" onSelect={selectLevel}>
+                <NavDropdown title={member?.level} onSelect={selectLevel}>
                   <NavDropdown.Item eventKey="Beginner">
                     Beginner
                   </NavDropdown.Item>
