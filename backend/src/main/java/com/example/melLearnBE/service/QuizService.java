@@ -18,15 +18,16 @@ import com.example.melLearnBE.error.ErrorCode;
 import com.example.melLearnBE.jwt.JwtTokenProvider;
 import com.example.melLearnBE.model.*;
 import com.example.melLearnBE.repository.*;
+import com.example.melLearnBE.util.PromptDetailUtil;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.lucene.store.Directory;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -48,6 +49,7 @@ public class QuizService {
     private final QuizListRepository quizListRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final OpenAIService openAIService;
+    private final PromptDetailUtil promptDetailUtil;
     private final ListeningSubmitRepository listeningSubmitRepository;
 
 
@@ -120,13 +122,11 @@ public class QuizService {
     }
     @Transactional
     public QuizListDto getQuizList(QuizRequest quizRequest, HttpServletRequest request) {
-        System.out.println(1);
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
         Optional<QuizList> optionalQuizList = quizListRepository.findByMusicIdAndQuizTypeAndLevel(quizRequest.getMusicId(), quizRequest.getQuizType(), member.getLevel());
         if(optionalQuizList.isEmpty()) {
             return createQuizList(quizRequest, member);
         } else {
-            System.out.println(2);
             QuizList quizList = optionalQuizList.get();
             QuizListDto quizListDto = new QuizListDto(quizList);
             return quizListDto;
@@ -137,7 +137,7 @@ public class QuizService {
         if(quizType.equals(QuizType.GRAMMAR)) {
             return createGrammarQuiz(quizRequest, member);
         } else if (quizType.equals(QuizType.READING)) {
-            return createVocaQuiz(quizRequest, member);
+            return createReadingQuiz(quizRequest, member);
         } else if (quizType.equals(QuizType.VOCABULARY)) {
             return createVocaQuiz(quizRequest, member);
         } else throw new CustomException(ErrorCode.UN_SUPPORTED_QUIZ_TYPE);
@@ -145,7 +145,6 @@ public class QuizService {
 
     @Transactional
     public ListeningQuizDto getListeningQuiz(QuizRequest quizRequest, HttpServletRequest request) {
-        System.out.println("QuizService.getListeningQuiz");
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
         Optional<ListeningQuiz> optionalListeningQuiz = listeningQuizRepository.findByMusicIdAndLevel(quizRequest.getMusicId(), member.getLevel());
         if(optionalListeningQuiz.isEmpty()) {
@@ -155,6 +154,64 @@ public class QuizService {
         }
     }
 
+    private QuizListDto createReadingQuiz(QuizRequest quizRequest, Member member) {
+        QuizType quizType = quizRequest.getQuizType();
+        ChatQuestion question = ChatQuestion.builder()
+                .text(quizRequest.getLyric())
+                .totalProblem(5)
+                .lang(member.getLangType().getIso639Value())
+                .level(member.getLevel().getValue())
+                .build();
+        ChatRequest readingRequest = ChatRequest.builder()
+                .system(getPrompt(quizType, member))
+                .userInput(question.toString() + "\n" + promptDetailUtil.get(member, quizRequest))
+                .build();
+
+        int retries = 0;
+        final int maxRetries = 3;
+        boolean success = false;
+
+        while (!success && retries < maxRetries) {
+            try {
+                ChatGPTResponse chatGPTResponse = openAIService.requestGPT(readingRequest);
+                String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
+                JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
+                JsonArray probListJsonArray = jsonObject.getAsJsonArray("probList");
+                Type listType = new TypeToken<List<Quiz>>(){}.getType();
+                Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
+                        .setLenient()
+                        .create();
+                List<Quiz> quizzes = gson.fromJson(probListJsonArray, listType);
+
+                QuizList quizList = QuizList.builder()
+                        .quizzes(quizzes)
+                        .createdTime(LocalDateTime.now())
+                        .quizType(quizType)
+                        .level(member.getLevel())
+                        .musicId(quizRequest.getMusicId())
+                        .build();
+
+                for (Quiz quiz : quizzes) {
+                    quiz.setQuizList(quizList);
+                }
+                List<Quiz> savedQuizzes = quizRepository.saveAll(quizzes.stream().toList());
+                QuizList savedQuizList = quizListRepository.save(quizList);
+                savedQuizList.setQuizzes(savedQuizzes);
+
+                success = true;
+                return new QuizListDto(savedQuizList);
+            } catch (Exception e) {
+                retries++;
+                e.printStackTrace();
+                if (retries >= maxRetries) {
+                    throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+                }
+            }
+        }
+
+        throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+    }
     private QuizListDto createGrammarQuiz(QuizRequest quizRequest, Member member) {
         QuizType quizType = quizRequest.getQuizType();
         ChatQuestion question = ChatQuestion.builder()
@@ -165,8 +222,8 @@ public class QuizService {
                 .build();
 
         ChatRequest grammarRequest = ChatRequest.builder()
-                .system(getPrompt(quizType))
-                .question(question.toString())
+                .system(getPrompt(quizType, member))
+                .userInput(question.toString() + "\n" + promptDetailUtil.get(member, quizRequest))
                 .build();
         int retries = 0;
         final int maxRetries = 3;
@@ -235,8 +292,8 @@ public class QuizService {
                 .build();
 
         ChatRequest listeningRequest = ChatRequest.builder()
-                .system(getPrompt(quizType))
-                .question(question.toString())
+                .system(getPrompt(quizType, member))
+                .userInput(question.toString())
                 .build();
 
         int retries = 0;
@@ -246,7 +303,6 @@ public class QuizService {
         while (!success && retries < maxRetries) {
             try {
                 ChatGPTResponse chatGPTResponse = openAIService.requestGPT(listeningRequest);
-                System.out.println("chatGPTResponse = " + chatGPTResponse);
                 String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
                 JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
                 Type listType = new TypeToken<ListeningQuiz>(){}.getType();
@@ -276,9 +332,7 @@ public class QuizService {
         throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
     }
 
-
     private QuizListDto createVocaQuiz(QuizRequest quizRequest, Member member) {
-
         QuizType quizType = quizRequest.getQuizType();
         ChatQuestion question = ChatQuestion.builder()
                 .text(quizRequest.getLyric())
@@ -288,10 +342,9 @@ public class QuizService {
                 .build();
 
         ChatRequest vocaRequest = ChatRequest.builder()
-                .system(getPrompt(quizType))
-                .question(question.toString())
+                .system(getPrompt(quizType, member))
+                .userInput(question.toString())
                 .build();
-        System.out.println("vocaRequest = " + vocaRequest);
         int retries = 0;
         final int maxRetries = 3;
         boolean success = false;
@@ -341,8 +394,14 @@ public class QuizService {
 
 
 
-    private String getPrompt(QuizType quizType) {
-        String filePath = "." + File.separator + "prompt" + File.separator + quizType.toString() + ".txt";
+    private String getPrompt(QuizType quizType, Member member) {
+
+        String filePath;
+        if(quizType.equals(QuizType.VOCABULARY)) {
+            filePath = "." + File.separator + "prompt" + File.separator + quizType + File.separator + member.getLevel().toString() + ".txt";
+        } else {
+            filePath = "." + File.separator + "prompt" + File.separator + quizType + ".txt";
+        }
 
         try {
             return new String(Files.readAllBytes(Paths.get(filePath)));

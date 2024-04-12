@@ -17,7 +17,7 @@ import java.util.List;
 public class Quiz {
     @Id @GeneratedValue
     private Long id;
-    @Lob
+    @Column(columnDefinition="LONGTEXT")
     private String question;
     private String word;
     @ElementCollection
