@@ -18,6 +18,7 @@ public class QuizSubmitDto {
 
     private Long id;
     private QuizListDto quizList;
+    @Builder.Default
     private List<Integer> submitAnswerList = new ArrayList<>();
 
     public QuizSubmitDto(QuizSubmit quizSubmit) {

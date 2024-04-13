@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,4 +27,6 @@ public class QuizSubmit {
     private QuizList quizList;
     @ElementCollection(fetch = FetchType.LAZY) @Builder.Default
     private List<Integer> submitAnswerList = new ArrayList<>(4);
+    private double score;
+    private LocalDateTime createdTime;
 }

@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -23,5 +26,7 @@ public class SpeakingSubmit {
     @Column(columnDefinition="LONGTEXT")
     private String markedText;
     private double score;
+    @CreationTimestamp
+    private LocalDateTime createdTime;
 
 }
