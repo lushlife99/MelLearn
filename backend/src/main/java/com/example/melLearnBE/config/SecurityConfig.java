@@ -50,7 +50,6 @@ public class SecurityConfig  {
                                 .requestMatchers("/api/**").authenticated()
                 );
 
-
         return http.build();
     }
 

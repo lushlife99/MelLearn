@@ -1,10 +1,15 @@
 package com.example.melLearnBE.dto.model;
 
 import com.example.melLearnBE.model.ListeningSubmit;
+import com.querydsl.core.annotations.QueryProjection;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
+@NoArgsConstructor
 public class ListeningSubmitDto {
 
     private Long id;
@@ -17,5 +22,13 @@ public class ListeningSubmitDto {
         this.answerList = listeningSubmit.getListeningQuiz().getAnswerList();
         this.submitAnswerList = listeningSubmit.getSubmitAnswerList();
         this.score = listeningSubmit.getScore();
+    }
+
+    @QueryProjection
+    public ListeningSubmitDto(Long id, List<String> answerList, List<String> submitAnswerList, double score) {
+        this.id = id;
+        this.answerList = answerList;
+        this.submitAnswerList = submitAnswerList;
+        this.score = score;
     }
 }

@@ -20,17 +20,18 @@ import com.example.melLearnBE.error.ErrorCode;
 import com.example.melLearnBE.jwt.JwtTokenProvider;
 import com.example.melLearnBE.model.*;
 import com.example.melLearnBE.repository.*;
+import com.example.melLearnBE.repository.querydsl.SubmitJpaRepository;
 import com.example.melLearnBE.util.PromptDetailUtil;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.lucene.store.Directory;
-import org.springframework.security.core.parameters.P;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.print.Pageable;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
@@ -54,6 +55,7 @@ public class QuizService {
     private final OpenAIService openAIService;
     private final PromptDetailUtil promptDetailUtil;
     private final ListeningSubmitRepository listeningSubmitRepository;
+    private final SubmitJpaRepository submitJpaRepository;
 
 
     /**
@@ -61,17 +63,35 @@ public class QuizService {
      * 아직 안했음.
      */
 
+    public Page getSubmitList(QuizType quizType, int pageNo, String sortBy, HttpServletRequest request) {
+        Member member = jwtTokenProvider.getMember(request)
+                .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
+
+        if(quizType.equals(QuizType.LISTENING)) {
+            return submitJpaRepository.findListeningSubmitWithPaging(member.getId(), pageNo, 10);
+        } else if (quizType.equals(QuizType.READING)) {
+
+        } else if (quizType.equals(QuizType.VOCABULARY)) {
+
+        } else if (quizType.equals(QuizType.GRAMMAR)) {
+
+        }
+
+        return null;
+    }
+
     public QuizSubmitDto submit(QuizSubmitRequest submitRequest, HttpServletRequest request) {
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
         QuizList quizList = quizListRepository.findByMusicIdAndQuizTypeAndLevel(submitRequest.getMusicId(), submitRequest.getQuizType(), member.getLevel())
                 .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
 
-        calCorrectRate(submitRequest, quizList);
+        double score = calCorrectRate(submitRequest, quizList);
 
         QuizSubmit quizSubmit = QuizSubmit.builder()
                 .quizList(quizList)
                 .submitAnswerList(submitRequest.getAnswers())
                 .member(member)
+                .score(score)
                 .build();
 
         return new QuizSubmitDto(quizSubmitRepository.save(quizSubmit));
@@ -112,16 +132,20 @@ public class QuizService {
 
     }
 
-    private void calCorrectRate(QuizSubmitRequest submitRequest, QuizList quizList) {
+    private double calCorrectRate(QuizSubmitRequest submitRequest, QuizList quizList) {
         List<Integer> submitAnswers = submitRequest.getAnswers();
         List<Quiz> quizzes = quizList.getQuizzes();
+        int totalCorrectCount = 0;
         for(int i = 0; i < 4; i++) {
             Quiz quiz = quizzes.get(i);
             quiz.setSubmitCount(quiz.getSubmitCount() + 1);
             if(quiz.getAnswer() == submitAnswers.get(i)) {
                 quiz.setCorrectCount(quiz.getCorrectCount() + 1);
+                totalCorrectCount++;
             }
         }
+
+         return totalCorrectCount * 100 / quizList.getQuizzes().size();
     }
     @Transactional
     public QuizListDto getQuizList(QuizRequest quizRequest, HttpServletRequest request) {
