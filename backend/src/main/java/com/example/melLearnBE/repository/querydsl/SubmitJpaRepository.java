@@ -1,7 +1,6 @@
 package com.example.melLearnBE.repository.querydsl;
 
-import com.example.melLearnBE.dto.model.ListeningSubmitDto;
-import com.example.melLearnBE.dto.model.QListeningSubmitDto;
+import com.example.melLearnBE.dto.model.*;
 import com.example.melLearnBE.enums.QuizType;
 import com.example.melLearnBE.model.*;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -14,20 +13,19 @@ import java.util.stream.Collectors;
 
 import static com.example.melLearnBE.model.QListeningQuiz.listeningQuiz;
 import static com.example.melLearnBE.model.QListeningSubmit.listeningSubmit;
+import static com.example.melLearnBE.model.QQuizSubmit.quizSubmit;
+import static com.example.melLearnBE.model.QSpeakingSubmit.speakingSubmit;
 
 @Repository
 public class SubmitJpaRepository {
 
-    private final EntityManager em;
     private final JPAQueryFactory queryFactory;
 
     public SubmitJpaRepository(EntityManager em) {
-        this.em = em;
         this.queryFactory = new JPAQueryFactory(em);
     }
 
-    public Page<QuizSubmit> findSubmitWithPaging(long memberId, QuizType quizType, int pageNumber, int pageSize) {
-        QQuizSubmit quizSubmit = QQuizSubmit.quizSubmit;
+    public Page<QuizSubmitDto> findSubmitWithPaging(long memberId, QuizType quizType, int pageNumber, int pageSize) {
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
@@ -46,14 +44,22 @@ public class SubmitJpaRepository {
                 .where(quizSubmit.quizList.quizType.eq(quizType))
                 .fetchCount();
 
-        return new PageImpl<>(results, pageable, total);
+        List<QuizSubmitDto> result = results.stream()
+                .map(submit -> new QuizSubmitDto(
+                        submit.getId(),
+                        new QuizListDto(submit.getQuizList()),
+                        submit.getSubmitAnswerList(),
+                        submit.getScore(),
+                        submit.getCreatedTime()))
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(result, pageable, total);
 
     }
 
     public Page<ListeningSubmitDto> findListeningSubmitWithPaging(long memberId, int pageNumber, int pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
-        QListeningSubmit listeningSubmit = QListeningSubmit.listeningSubmit;
 
         List<ListeningSubmit> results = queryFactory
                 .select(listeningSubmit)
@@ -75,16 +81,17 @@ public class SubmitJpaRepository {
         List<ListeningSubmitDto> result = results.stream()
                 .map(submit -> new ListeningSubmitDto(
                         submit.getId(),
-                        submit.getListeningQuiz().getAnswerList(),
+                        new ListeningQuizDto(submit.getListeningQuiz()),
+                        submit.getLevel(),
                         submit.getSubmitAnswerList(),
-                        submit.getScore()))
+                        submit.getScore(),
+                        submit.getCreatedTime()))
                 .collect(Collectors.toList());
 
         return new PageImpl<>(result, pageable, total);
     }
 
-    public Page<SpeakingSubmit> findSpeakingSubmitWithPaging(long memberId, int pageNumber, int pageSize) {
-        QSpeakingSubmit speakingSubmit = QSpeakingSubmit.speakingSubmit;
+    public Page<SpeakingSubmitDto> findSpeakingSubmitWithPaging(long memberId, int pageNumber, int pageSize) {
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
@@ -101,7 +108,17 @@ public class SubmitJpaRepository {
                 .where(speakingSubmit.member.id.eq(memberId))
                 .fetchCount();
 
-        return new PageImpl<>(results, pageable, total);
+        List<SpeakingSubmitDto> result = results.stream()
+                .map(submit -> new SpeakingSubmitDto(
+                        submit.getId(),
+                        submit.getMusicId(),
+                        submit.getSubmit(),
+                        submit.getMarkedText(),
+                        submit.getScore(),
+                        submit.getCreatedTime()))
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(result, pageable, total);
     }
 
 

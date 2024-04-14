@@ -69,15 +69,13 @@ public class QuizService {
 
         if(quizType.equals(QuizType.LISTENING)) {
             return submitJpaRepository.findListeningSubmitWithPaging(member.getId(), pageNo, 10);
-        } else if (quizType.equals(QuizType.READING)) {
-
-        } else if (quizType.equals(QuizType.VOCABULARY)) {
-
-        } else if (quizType.equals(QuizType.GRAMMAR)) {
-
+        } else if (quizType.equals(QuizType.READING) || quizType.equals(QuizType.VOCABULARY) || quizType.equals(QuizType.GRAMMAR)) {
+            return submitJpaRepository.findSubmitWithPaging(member.getId(), quizType, pageNo, 10);
+        } else if (quizType.equals(QuizType.SPEAKING)) {
+            return submitJpaRepository.findSpeakingSubmitWithPaging(member.getId(), pageNo, 10);
         }
 
-        return null;
+        throw new CustomException(ErrorCode.BAD_REQUEST);
     }
 
     public QuizSubmitDto submit(QuizSubmitRequest submitRequest, HttpServletRequest request) {
