@@ -36,6 +36,7 @@ export const QuestionBoardV2 = (): JSX.Element => {
     new Array(problem.quizzes.length).fill(0)
   );
   // 유저가 푼 문제 전체 답
+
   const [isLast, setIsLast] = useState<boolean>(false);
 
   const navigate = useNavigate();
@@ -69,10 +70,11 @@ export const QuestionBoardV2 = (): JSX.Element => {
         quizType: category.toUpperCase(),
         answers: answers,
       });
+
       if (res.status === 200) {
         navigate("/score", {
           state: {
-            answer: res.data,
+            comments: res.data,
           },
         });
       }

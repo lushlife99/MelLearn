@@ -2,8 +2,12 @@ import React, { useState } from "react";
 import Input from "@mui/material/Input";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/joy/Button";
+import { useLocation } from "react-router-dom";
 
 const Listening = () => {
+  const location = useLocation();
+  const { category, track, quiz } = location.state;
+  console.log(quiz);
   const [lylic, setLylic] = useState({
     blankedText:
       "Well, now then, mardy bum\n" +
@@ -37,7 +41,7 @@ const Listening = () => {
             className="absolute max-w-[400px]  top-[90px] left-[10px] [font-family:'Acme-Regular',Helvetica] font-normal text-white text-[20px] tracking-[1.44px] leading-[normal] overflow-hidden whitespace-normal"
             style={{ lineHeight: "35px" }}
           >
-            {lylic.blankedText.split("__").map((part, index) => (
+            {quiz.blankedText.split("__").map((part: any, index: number) => (
               <React.Fragment key={index}>
                 {part}
                 {index !== lylic.blankedText.split("__").length - 1 && (

@@ -48,7 +48,7 @@ function App() {
           <Route path="/score" element={<Score />}></Route>
           <Route path="/comment" element={<Commentary />}></Route>
           <Route path="/rank" element={<Rank_yh />}></Route>
-          <Route path="/ls" element={<Listening />}></Route>
+          <Route path="/listening" element={<Listening />}></Route>
         </Routes>
       </BrowserRouter>
     </Provider>

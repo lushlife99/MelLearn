@@ -6,12 +6,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 export const Score = (): JSX.Element => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { answer } = location.state;
+  const { comments } = location.state;
+  console.log(comments);
 
   const goCommentary = () => {
     navigate("/comment", {
       state: {
-        answer,
+        comments,
       },
     });
   };
@@ -29,7 +30,9 @@ export const Score = (): JSX.Element => {
                 <div className="flex flex-col items-center justify-center w-56 h-56 bg-[#ffffff] rounded-full relative border border-[#f8f8f8]">
                   <div className="flex items-center justify-center w-48 h-24 bg-[#55A2FD] rounded-t-full rounded-b-none overflow-hidden top-3 absolute"></div>
                   <span className="mt-24 mb-2 text-3xl font-bold">점수</span>
-                  <span className="text-[#55A2FD] text-5xl ">80</span>
+                  <span className="text-[#55A2FD] text-5xl ">
+                    {comments.score}
+                  </span>
                 </div>
               </div>
             </div>

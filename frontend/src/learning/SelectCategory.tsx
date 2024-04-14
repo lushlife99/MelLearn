@@ -85,6 +85,15 @@ function SelectCategory() {
         quizType: category.toUpperCase(),
         lyric: serverLyric,
       });
+      if (res.status === 200) {
+        navigate("/listening", {
+          state: {
+            category,
+            track,
+            quiz: res.data,
+          },
+        });
+      }
     }
   };
 

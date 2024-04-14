@@ -14,8 +14,8 @@ export const fetchChartData = async (): Promise<ChartData> => {
   const responses = await Promise.all(trackReq);
 
   const tracks = responses.map((res) => res.data);
-  //console.log(tracks);
-  //const playableTracks = tracks.filter((track) => track.is_playable);
-  return { tracks };
-  //return { tracks: playableTracks };
+
+  const playableTracks = tracks.filter((track) => track.preview_url !== null);
+
+  return { tracks: playableTracks };
 };
