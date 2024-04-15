@@ -73,8 +73,8 @@ public class QuizService {
         return quizCreationService.fetchOrCreateListeningQuizList(quizRequest, member);
     }
 
-    @Transactional
-    public QuizSubmitDto submit(QuizSubmitRequest submitRequest, HttpServletRequest request) {
+    @Async
+    public CompletableFuture<QuizSubmitDto> submit(QuizSubmitRequest submitRequest, HttpServletRequest request) {
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
         QuizList quizList = quizListRepository.findByMusicIdAndQuizTypeAndLevel(submitRequest.getMusicId(), submitRequest.getQuizType(), member.getLevel())
                 .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
@@ -88,10 +88,11 @@ public class QuizService {
                 .score(score)
                 .build();
 
-        return new QuizSubmitDto(quizSubmitRepository.save(quizSubmit));
+        return CompletableFuture.completedFuture(new QuizSubmitDto(quizSubmitRepository.save(quizSubmit)));
     }
 
-    public ListeningSubmitDto listeningSubmit(ListeningSubmitRequest submitRequest, HttpServletRequest request) {
+    @Async
+    public CompletableFuture<ListeningSubmitDto> listeningSubmit(ListeningSubmitRequest submitRequest, HttpServletRequest request) {
 
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
         ListeningQuiz listeningQuiz = listeningQuizRepository.findByMusicIdAndLevel(submitRequest.getMusicId(), member.getLevel())
@@ -122,7 +123,7 @@ public class QuizService {
                 .score((correctCount * 100) / answerList.size())
                 .build();
 
-        return new ListeningSubmitDto(listeningSubmitRepository.save(listeningSubmit));
+        return CompletableFuture.completedFuture(new ListeningSubmitDto(listeningSubmitRepository.save(listeningSubmit)));
 
     }
 

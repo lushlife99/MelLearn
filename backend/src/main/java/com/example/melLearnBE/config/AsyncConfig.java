@@ -7,15 +7,17 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @EnableAsync
 @Configuration
 public class AsyncConfig {
 
     private static int CORE_POOL_SIZE = 10;
-    private static int MAX_POOL_SIZE = 20;
-    private static int QUEUE_CAPACITY = 10;
+    private static int MAX_POOL_SIZE = 30;
+    private static int QUEUE_CAPACITY = 100;
     private static String THREAD_NAME_PREFIX = "async-quiz";
+    private static final boolean WAIT_TASK_COMPLETE = true;
 
     @Bean
     public Executor taskExecutor() {
@@ -24,6 +26,8 @@ public class AsyncConfig {
         executor.setMaxPoolSize(MAX_POOL_SIZE);
         executor.setQueueCapacity(QUEUE_CAPACITY);
         executor.setThreadNamePrefix(THREAD_NAME_PREFIX);
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.setWaitForTasksToCompleteOnShutdown(WAIT_TASK_COMPLETE);
         executor.initialize();
         return executor;
     }

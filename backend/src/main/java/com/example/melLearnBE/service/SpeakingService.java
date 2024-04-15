@@ -23,6 +23,7 @@ import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +33,7 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -50,8 +52,8 @@ public class SpeakingService {
 
     private static final String AUDIO_PATH = "." + File.separator + "audio" + File.separator;
 
-    @Transactional
-    public SpeakingSubmitDto submit(SpeakingSubmitRequest submitRequest, String musicId, HttpServletRequest request) {
+    @Async
+    public CompletableFuture<SpeakingSubmitDto> submit(SpeakingSubmitRequest submitRequest, String musicId, HttpServletRequest request) {
 
         List<LrcLyric> lyricList = submitRequest.getLyricList();
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
@@ -74,7 +76,7 @@ public class SpeakingService {
         SpeakingSubmitDto answerSpeaking = grade(musicId, lyricList, member, transcription);
 
         // 5. 랭킹
-        return answerSpeaking;
+        return CompletableFuture.completedFuture(answerSpeaking);
     }
 
     private void convertGradableFormat(List<LrcLyric> answerLyrics, WhisperTranscriptionResponse transcription) {

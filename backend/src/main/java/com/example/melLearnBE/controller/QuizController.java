@@ -9,6 +9,8 @@ import com.example.melLearnBE.error.CustomException;
 import com.example.melLearnBE.error.ErrorCode;
 import com.example.melLearnBE.model.ListeningQuiz;
 import com.example.melLearnBE.service.QuizService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.units.qual.C;
@@ -22,12 +24,14 @@ import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Quiz")
 @RequestMapping("/api/quiz")
 public class QuizController {
 
     private final QuizService quizService;
 
     @PostMapping({"/reading", "/vocabulary", "/grammar"})
+    @Operation(summary = "퀴즈 조회", description = "퀴즈 조회")
     public QuizListDto getQuizList(@RequestBody QuizRequest quizRequest, HttpServletRequest request) {
         try {
             return quizService.getQuizList(quizRequest, request).get();
@@ -39,6 +43,7 @@ public class QuizController {
     }
 
     @PostMapping("/listening")
+    @Operation(summary = "퀴즈 조회", description = "퀴즈 조회")
     public ListeningQuizDto getListeningQuiz(@RequestBody QuizRequest quizRequest, HttpServletRequest request) {
         try {
             return quizService.getListeningQuiz(quizRequest, request).get();
