@@ -148,15 +148,15 @@ public class QuizService {
          return totalCorrectCount * 100 / quizList.getQuizzes().size();
     }
     @Transactional
-    public QuizListDto getQuizList(QuizRequest quizRequest, HttpServletRequest request) {
+    public CompletableFuture<QuizListDto> getQuizList(QuizRequest quizRequest, HttpServletRequest request) {
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
         Optional<QuizList> optionalQuizList = quizListRepository.findByMusicIdAndQuizTypeAndLevel(quizRequest.getMusicId(), quizRequest.getQuizType(), member.getLevel());
         if(optionalQuizList.isEmpty()) {
-            return createQuizList(quizRequest, member);
+            return CompletableFuture.completedFuture(createQuizList(quizRequest, member));
         } else {
             QuizList quizList = optionalQuizList.get();
             QuizListDto quizListDto = new QuizListDto(quizList);
-            return quizListDto;
+            return CompletableFuture.completedFuture(quizListDto);
         }
     }
     public QuizListDto createQuizList(QuizRequest quizRequest, Member member) {
@@ -317,7 +317,6 @@ public class QuizService {
                 .userInput(addLineNumbers(quizRequest.getLyric()) + "\n" + promptDetailUtil.get(member, quizRequest))
                 .build();
 
-        System.out.println("listeningRequest = " + listeningRequest);
         int retries = 0;
         final int maxRetries = 3;
         boolean success = false;
@@ -467,22 +466,16 @@ public class QuizService {
             try {
                 String line = lyricArray[i];
                 String[] tokens = line.split(" ");
-                boolean test = false;
                 for (ListeningAnswer listeningAnswer : answerContext) {
                     if (listeningAnswer.getLineIndex() == i) {
                         for (int j = 0; j < tokens.length; j++) {
                             if (tokens[j].contains(listeningAnswer.getAnswerWord())) {
                                 tokens[j] = "__";
                                 answerList.add(listeningAnswer.getAnswerWord());
-                                test = true;
                                 break;
                             }
                         }
-                        if(test == false) {
-                            System.out.println("일치하는 단어가 없음");
-                            System.out.println("line = " + line);
-                            System.out.println("listeningAnswer.getAnswerWord() = " + listeningAnswer.getAnswerWord());
-                        }
+
                     }
                 }
 

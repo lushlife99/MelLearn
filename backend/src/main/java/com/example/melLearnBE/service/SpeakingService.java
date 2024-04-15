@@ -188,7 +188,7 @@ public class SpeakingService {
 
 
         try {
-            File originalFile = new File(directory + File.separator + multipartFile.getOriginalFilename());
+            File originalFile = new File(directory + File.separator + UUID.randomUUID());
             multipartFile.transferTo(originalFile);
 
             // FFmpeg을 사용하여 오디오 파일을 WAV 형식으로 변환
