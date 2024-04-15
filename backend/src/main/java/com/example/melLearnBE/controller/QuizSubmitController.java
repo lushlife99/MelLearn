@@ -32,11 +32,10 @@ public class QuizSubmitController {
 
     @GetMapping
     public ResponseEntity getSubmitList(@RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
-                                        @RequestParam(required = false, defaultValue = "createdAt", value = "sortBy") String sortBy,
                                         @RequestParam QuizType quizType,
                                         HttpServletRequest request) {
 
-        return new ResponseEntity(quizService.getSubmitList(quizType, pageNo, sortBy, request), HttpStatus.OK);
+        return new ResponseEntity(quizService.getSubmitList(quizType, pageNo, request), HttpStatus.OK);
     }
 
 }

@@ -45,7 +45,7 @@ public class QuizService {
      * 아직 안했음.
      */
 
-    public Page getSubmitList(QuizType quizType, int pageNo, String sortBy, HttpServletRequest request) {
+    public Page getSubmitList(QuizType quizType, int pageNo, HttpServletRequest request) {
         Member member = jwtTokenProvider.getMember(request)
                 .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
 
@@ -63,14 +63,12 @@ public class QuizService {
 
     @Async
     public CompletableFuture<QuizListDto> getQuizList(QuizRequest quizRequest, HttpServletRequest request) {
-        log.info("start quizRequest={}", quizRequest);
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
         return quizCreationService.fetchOrCreateQuizList(quizRequest, member);
     }
 
     @Async
     public CompletableFuture<ListeningQuizDto> getListeningQuiz(QuizRequest quizRequest, HttpServletRequest request) {
-        log.info("start quizRequest={}", quizRequest);
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
         return quizCreationService.fetchOrCreateListeningQuizList(quizRequest, member);
     }

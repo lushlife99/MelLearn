@@ -19,8 +19,8 @@ public class Music {
     private String musicId;
     @Enumerated(value = EnumType.ORDINAL)
     private Language language;
-    private Long liked;
-    private Long disLike;
+    private int liked;
+    private int disLike;
 
     private boolean checkCategoryAvailable;
     private boolean speaking;

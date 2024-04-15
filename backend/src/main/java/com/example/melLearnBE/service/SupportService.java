@@ -91,6 +91,7 @@ public class SupportService {
             music = Music.builder()
                     .musicId(musicId)
                     .grammar(grammar)
+                    .language(member.getLangType())
                     .speaking(speaking)
                     .listening(listening)
                     .vocabulary(vocabulary)
