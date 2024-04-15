@@ -41,7 +41,11 @@ function SelectCategory() {
       `/track/lyrics?trackId=${track.id}&format=json`
     );
     setLyric(res1.data);
-    const res2 = await axiosApi.post(`/api/support/quiz/category`, res1.data);
+    const res2 = await axiosApi.post(
+      `/api/support/quiz/category/${track.id}`,
+      res1.data
+    );
+    console.log(res2.data, "z");
 
     return Object.entries(res2.data).map(([name, value]) => ({
       name,
