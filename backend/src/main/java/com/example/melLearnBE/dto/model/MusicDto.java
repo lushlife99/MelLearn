@@ -21,8 +21,8 @@ public class MusicDto {
     private Long id;
     private String musicId;
     private Language language;
-    private Long liked;
-    private Long disLike;
+    private int liked;
+    private int disLike;
     private boolean speaking;
     private boolean grammar;
     private boolean listening;
