@@ -12,9 +12,9 @@ import java.util.concurrent.Executor;
 @Configuration
 public class AsyncConfig {
 
-    private static int CORE_POOL_SIZE = 1;
-    private static int MAX_POOL_SIZE = 5;
-    private static int QUEUE_CAPACITY = 4;
+    private static int CORE_POOL_SIZE = 10;
+    private static int MAX_POOL_SIZE = 20;
+    private static int QUEUE_CAPACITY = 10;
     private static String THREAD_NAME_PREFIX = "async-quiz";
 
     @Bean

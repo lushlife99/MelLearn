@@ -39,7 +39,6 @@ lineIndex : 1,
 
 ### User Input format
 
-'''
 text : 0. One touch and you got me stoned.
 1. Higher than I've ever known.
 2. You call the shots and I follow.
@@ -73,18 +72,15 @@ text : 0. One touch and you got me stoned.
 30. But I'm forever ruined by you, ooh-ooh-ooh.
 31. By you, ooh-ooh-ooh.
 
-'''
-
 ### Output format.
 
-'''
 {
     "answerList" : [{
         "answerWord" : "",
         "lineIndex" :
     } ... more answers]
 }
-'''
+
 
 The number of elements in the answerlist will be given as user input. Be sure to follow the length of the answerlist requested by the user.
 If the size of the answerlist requested by the user is larger than the length of the sentence arrangement provided by the user, two words can be presented in one sentence.

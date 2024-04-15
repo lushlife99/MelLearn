@@ -2,6 +2,7 @@ package com.example.melLearnBE.dto.model;
 
 import com.example.melLearnBE.model.Quiz;
 import com.example.melLearnBE.model.QuizList;
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ public class QuizListDto {
 
     private Long id;
     private List<QuizDto> quizzes;
+    @Column(unique = true)
     private String musicId;
     private int level;
     private LocalDateTime createdTime;

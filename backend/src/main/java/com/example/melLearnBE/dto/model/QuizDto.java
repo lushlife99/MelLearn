@@ -21,7 +21,7 @@ public class QuizDto {
     public QuizDto(Quiz quiz) {
         this.id = quiz.getId();
         this.question = quiz.getQuestion();
-        this.optionList = quiz.getOptionList();
+        this.optionList = List.copyOf(quiz.getOptionList());
         this.answer = quiz.getAnswer();
         this.comment = quiz.getComment();
         this.correctRate = ((double) quiz.getCorrectCount() / (double) quiz.getSubmitCount()) * 100.0;
