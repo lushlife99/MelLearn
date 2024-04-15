@@ -1,9 +1,9 @@
 package com.example.melLearnBE.service;
 
+import com.example.melLearnBE.dto.model.MusicDto;
 import com.example.melLearnBE.dto.request.LrcLyric;
 import com.example.melLearnBE.dto.request.SpeakingSubmitRequest;
 import com.example.melLearnBE.dto.model.SpeakingSubmitDto;
-import com.example.melLearnBE.dto.response.SupportQuizCategories;
 import com.example.melLearnBE.dto.response.openAI.WhisperSegment;
 import com.example.melLearnBE.dto.response.openAI.WhisperTranscriptionResponse;
 import com.example.melLearnBE.error.CustomException;
@@ -55,8 +55,8 @@ public class SpeakingService {
 
         List<LrcLyric> lyricList = submitRequest.getLyricList();
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-        SupportQuizCategories supportQuizCategory = supportService.getSupportQuizCategory(lyricList, request);
-        if (!supportQuizCategory.isSpeaking())
+        MusicDto musicDto = supportService.getSupportQuizCategory(musicId, lyricList, request);
+        if (!musicDto.isSpeaking())
             throw new CustomException(ErrorCode.UN_SUPPORTED_QUIZ_LANG);
 
         // 1. 전처리 1 - audio 파일을 lrc파일에 맞게 분할하고 사이에 temp audio 삽입

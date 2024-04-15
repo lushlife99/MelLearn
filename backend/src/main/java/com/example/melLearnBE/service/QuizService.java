@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.awt.print.Pageable;
 import java.io.File;
@@ -41,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -169,13 +171,13 @@ public class QuizService {
     }
 
     @Transactional
-    public ListeningQuizDto getListeningQuiz(QuizRequest quizRequest, HttpServletRequest request) {
+    public CompletableFuture<ListeningQuizDto> getListeningQuiz(QuizRequest quizRequest, HttpServletRequest request) {
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
         Optional<ListeningQuiz> optionalListeningQuiz = listeningQuizRepository.findByMusicIdAndLevel(quizRequest.getMusicId(), member.getLevel());
         if(optionalListeningQuiz.isEmpty()) {
-            return createListeningQuiz(quizRequest, member);
+            return CompletableFuture.completedFuture(createListeningQuiz(quizRequest, member));
         } else {
-            return new ListeningQuizDto(optionalListeningQuiz.get());
+            return CompletableFuture.completedFuture(new ListeningQuizDto(optionalListeningQuiz.get()));
         }
     }
 
@@ -312,7 +314,7 @@ public class QuizService {
 
         ChatRequest listeningRequest = ChatRequest.builder()
                 .system(getPrompt(quizType, member))
-                .userInput(quizRequest.getLyric() + "\n" + promptDetailUtil.get(member, quizRequest))
+                .userInput(addLineNumbers(quizRequest.getLyric()) + "\n" + promptDetailUtil.get(member, quizRequest))
                 .build();
 
         System.out.println("listeningRequest = " + listeningRequest);
@@ -323,7 +325,6 @@ public class QuizService {
         while (!success && retries < maxRetries) {
             try {
                 ChatGPTResponse chatGPTResponse = openAIService.requestGPT(listeningRequest);
-                System.out.println(chatGPTResponse);
                 String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
                 JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
                 JsonArray probListJsonArray = jsonObject.getAsJsonArray("answerList");
@@ -434,37 +435,64 @@ public class QuizService {
         }
     }
 
+    public static String addLineNumbers(String input) {
+        String[] lines = input.split("\n");
+        StringBuilder result = new StringBuilder();
+
+        for (int i = 0; i < lines.length; i++) {
+            result.append(i).append(". ").append(lines[i]).append("\n");
+        }
+
+        return result.toString();
+    }
+
     private void blankToListeningText(QuizRequest quizRequest, LearningLevel level, List<ListeningAnswer> answerContext, ListeningQuiz listeningQuiz) {
         String lyric = quizRequest.getLyric();
         List<String> answerList = new ArrayList<>();
         int totalBlankSize;
-        if(level.equals(LearningLevel.Beginner)) {
+        if (level.equals(LearningLevel.Beginner)) {
             totalBlankSize = 10;
-        } else if(level.equals(LearningLevel.Intermediate)) {
+        } else if (level.equals(LearningLevel.Intermediate)) {
             totalBlankSize = 20;
-        } else totalBlankSize = 30;
+        } else {
+            totalBlankSize = 30;
+        }
 
+        Collections.shuffle(answerContext);
         String[] lyricArray = lyric.split("\n");
         StringBuilder modifiedLyrics = new StringBuilder();
 
-        Collections.shuffle(answerContext);
 
         for (int i = 0; i < lyricArray.length; i++) {
             try {
                 String line = lyricArray[i];
                 String[] tokens = line.split(" ");
-
+                boolean test = false;
                 for (ListeningAnswer listeningAnswer : answerContext) {
                     if (listeningAnswer.getLineIndex() == i) {
-                        tokens[listeningAnswer.getWordPos()] = "__";
-                        answerList.add(listeningAnswer.getAnswerWord());
+                        for (int j = 0; j < tokens.length; j++) {
+                            if (tokens[j].contains(listeningAnswer.getAnswerWord())) {
+                                tokens[j] = "__";
+                                answerList.add(listeningAnswer.getAnswerWord());
+                                test = true;
+                                break;
+                            }
+                        }
+                        if(test == false) {
+                            System.out.println("일치하는 단어가 없음");
+                            System.out.println("line = " + line);
+                            System.out.println("listeningAnswer.getAnswerWord() = " + listeningAnswer.getAnswerWord());
+                        }
                     }
                 }
 
                 modifiedLyrics.append(String.join(" ", tokens));
                 modifiedLyrics.append("\n");
 
-                if(answerList.size() >= totalBlankSize) {
+                if (answerList.size() >= totalBlankSize) {
+                    for(int j = i+1; j < lyricArray.length; j++) {
+                        modifiedLyrics.append(lyricArray[j] + "\n");
+                    }
                     break;
                 }
             } catch (ArrayIndexOutOfBoundsException e) {
@@ -474,6 +502,6 @@ public class QuizService {
 
         listeningQuiz.setBlankedText(modifiedLyrics.toString());
         listeningQuiz.setAnswerList(answerList);
-
     }
+
 }

@@ -3,6 +3,7 @@ package com.example.melLearnBE.openFeign.naverCloudClient;
 import com.example.melLearnBE.dto.response.naverCloud.DetectLang;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -14,5 +15,5 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface NaverCloudClient {
 
     @PostMapping("/langs/v1/dect")
-    DetectLang detectLanguage(@RequestParam("query") String query);
+    DetectLang detectLanguage(@RequestParam String query);
 }

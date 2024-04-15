@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.ExecutionException;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/quiz")
@@ -29,8 +31,8 @@ public class QuizController {
 
 
     @PostMapping("/listening")
-    public ListeningQuizDto getListeningQuiz(@RequestBody QuizRequest quizRequest, HttpServletRequest request) {
-        return quizService.getListeningQuiz(quizRequest, request);
+    public ListeningQuizDto getListeningQuiz(@RequestBody QuizRequest quizRequest, HttpServletRequest request) throws ExecutionException, InterruptedException {
+        return quizService.getListeningQuiz(quizRequest, request).get();
     }
 
 }
