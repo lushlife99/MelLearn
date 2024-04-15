@@ -51,8 +51,9 @@ const handleResponseInterceptor = async (
     localStorage.setItem("accessToken", accessToken);
   } else if (error.response?.status === 404) {
     console.error("404err");
-  } else {
-    console.error("errrsss");
+  } else if (error.response?.status === 409) {
+    const errorData = error.response.data as { message: string };
+    alert(errorData.message);
   }
   return Promise.reject(error.toJSON());
 };

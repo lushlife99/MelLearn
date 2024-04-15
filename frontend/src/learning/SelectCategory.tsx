@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import BgCircle from "../components/BgCircle";
 import { useLocation, useNavigate } from "react-router-dom";
 import { IoIosArrowRoundBack } from "react-icons/io";
@@ -6,6 +6,7 @@ import axiosApi, { axiosSpotifyScraper } from "../api";
 import { Menu } from "antd";
 import { useQuery } from "react-query";
 import Spinner from "react-bootstrap/Spinner";
+import axios from "axios";
 
 interface Category {
   name: string;
@@ -20,6 +21,15 @@ function SelectCategory() {
   const [category, setCategory] = useState("");
   const [serverLyric, setServerLyric] = useState("");
   const [lyric, setLyric] = useState();
+  const [cancelTokenSource, setCancelTokenSource] = useState<any>(); // 문제 요청 도중 나갈시 취소 용 cancel Token
+
+  useEffect(() => {
+    const source = axios.CancelToken.source();
+    setCancelTokenSource(source);
+    return () => {
+      source.cancel(); // 컴포넌트 언마운트시 요청 취소
+    };
+  }, []);
 
   const {
     data: categories,
@@ -45,59 +55,83 @@ function SelectCategory() {
       `/api/support/quiz/category/${track.id}`,
       res1.data
     );
-    console.log(res2.data, "z");
 
-    return Object.entries(res2.data).map(([name, value]) => ({
-      name,
-      value: value as boolean,
-    }));
+    return Object.entries(res2.data)
+      .filter(([key, value]) =>
+        ["grammar", "speaking", "listening", "reading", "vocabulary"].includes(
+          key
+        )
+      )
+      .map(([name, value]) => ({
+        name,
+        value: value as boolean,
+      }));
   });
 
   const handleMenuClick = (e: any) => {
     setCategory(e.key);
   };
   const goSolveProblem = async () => {
-    console.log(category);
-    if (
-      category === "reading" ||
-      category === "vocabulary" ||
-      category === "grammar"
-    ) {
-      const res = await axiosApi.post(`/api/quiz/${category}`, {
-        musicId: track.id,
-        quizType: category.toUpperCase(),
-        lyric: serverLyric,
-      });
-      if (res.status === 200) {
-        navigate("/question", {
+    try {
+      if (
+        category === "reading" ||
+        category === "vocabulary" ||
+        category === "grammar"
+      ) {
+        const res = await axiosApi.post(
+          `/api/quiz/${category}`,
+          {
+            musicId: track.id,
+            quizType: category.toUpperCase(),
+            lyric: serverLyric,
+          },
+          {
+            cancelToken: cancelTokenSource.token,
+          }
+        );
+        if (res.status === 200) {
+          navigate("/question", {
+            state: {
+              category,
+              track,
+              quiz: res.data,
+            },
+          });
+        }
+      } else if (category === "speaking") {
+        navigate("/speaking", {
           state: {
-            category,
             track,
-            quiz: res.data,
           },
         });
-      }
-    } else if (category === "speaking") {
-      navigate("/speaking", {
-        state: {
-          track,
-        },
-      });
-    } else {
-      const res = await axiosApi.post(`/api/quiz/${category}`, {
-        musicId: track.id,
-        quizType: category.toUpperCase(),
-        lyric: serverLyric,
-      });
-      if (res.status === 200) {
-        navigate("/listening", {
-          state: {
-            category,
-            track,
-            quiz: res.data,
+      } else {
+        const res = await axiosApi.post(
+          `/api/quiz/${category}`,
+          {
+            musicId: track.id,
+            quizType: category.toUpperCase(),
+            lyric: serverLyric,
           },
-        });
+          {
+            cancelToken: cancelTokenSource.token,
+          }
+        );
+        if (res.status === 200) {
+          navigate("/listening", {
+            state: {
+              category,
+              track,
+              quiz: res.data,
+            },
+          });
+        }
       }
+    } catch (e) {
+      if (axios.isCancel(e)) {
+        console.log("요청 취소");
+      }
+    } finally {
+      cancelTokenSource.cancel("사용자가 페이지 떠남");
     }
   };
 

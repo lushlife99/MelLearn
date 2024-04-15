@@ -110,6 +110,14 @@ const Speaking = () => {
             }
           ); // 파일명은 선택사항
           console.log(res.data);
+          if (res.status === 200) {
+            navigate("/speakingScore", {
+              state: {
+                comments: res.data,
+                trackId: track.id,
+              },
+            });
+          }
         };
       }
     } catch (error) {

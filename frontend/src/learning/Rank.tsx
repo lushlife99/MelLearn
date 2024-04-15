@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Paper,
   TableBody,
@@ -9,6 +9,8 @@ import {
   TableRow,
 } from "@mui/material";
 import { styled, Table } from "@mui/joy";
+import { useLocation } from "react-router-dom";
+import axiosApi from "../api";
 
 function createData(rank: number, userName: string, accuracy: number) {
   return { rank, userName, accuracy };
@@ -42,7 +44,18 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   //     border: 0,
   // },
 }));
-export const Rank_yh = (): JSX.Element => {
+export const Rank = (): JSX.Element => {
+  const location = useLocation();
+  const { trackId } = location.state;
+
+  const getRank = async () => {
+    const res = await axiosApi.get(`/api/problem/speaking/rank?${trackId}`);
+    console.log(res.data);
+  };
+
+  useEffect(() => {
+    getRank();
+  }, []);
   return (
     <div className="bg-[#121111] flex flex-row justify-center w-full">
       <div className="bg-[#121111] w-[360px] h-[800px] relative">

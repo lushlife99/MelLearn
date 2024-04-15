@@ -184,7 +184,7 @@ function PlayMusic() {
             const clickX = e.clientX - rect.left;
             const progressPercentage = (clickX / rect.width) * 100;
             const progressMs = (progressPercentage / 100) * track.duration_ms;
-            console.log(progressMs, currentTime);
+
             //stopProgressBar();
             setCurrentTime(progressMs);
             dragResume(progressMs);
@@ -226,8 +226,7 @@ function PlayMusic() {
               className="flex flex-col justify-center items-center text-[#d3d3d3] hover:opacity-60"
             >
               <IoIosArrowUp />
-
-              <span>가사</span>
+              <span>가사</span>{" "}
             </div>
           </div>
           <button className="bg-[#D3D3D3] rounded-2xl h-9 w-28 flex items-center justify-center hover:opacity-60">

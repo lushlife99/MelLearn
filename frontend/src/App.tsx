@@ -18,9 +18,10 @@ import Speaking from "./learning/Speaking";
 import { QuestionBoardV2 } from "./learning/QuestionBoardV2";
 import { Score } from "./learning/Score";
 import Commentary from "./learning/Commentary";
-import { Rank_yh } from "./learning/Rank_yh";
+import { Rank } from "./learning/Rank";
 import Listening from "./learning/Listening";
 import SelectCategory from "./learning/SelectCategory";
+import SpeakingScore from "./learning/SpeakingScore";
 
 function App() {
   return (
@@ -47,8 +48,9 @@ function App() {
           <Route path="/question" element={<QuestionBoardV2 />}></Route>
           <Route path="/score" element={<Score />}></Route>
           <Route path="/comment" element={<Commentary />}></Route>
-          <Route path="/rank" element={<Rank_yh />}></Route>
+          <Route path="/rank" element={<Rank />}></Route>
           <Route path="/listening" element={<Listening />}></Route>
+          <Route path="/speakingScore" element={<SpeakingScore />}></Route>
         </Routes>
       </BrowserRouter>
     </Provider>
