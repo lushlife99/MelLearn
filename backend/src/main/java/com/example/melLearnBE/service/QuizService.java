@@ -11,7 +11,6 @@ import com.example.melLearnBE.dto.request.QuizSubmitRequest;
 import com.example.melLearnBE.dto.request.openAI.ChatQuestion;
 import com.example.melLearnBE.dto.request.openAI.ChatRequest;
 import com.example.melLearnBE.dto.response.openAI.ChatGPTResponse;
-import com.example.melLearnBE.dto.response.openAI.GrammarQuiz;
 import com.example.melLearnBE.dto.response.openAI.ListeningAnswer;
 import com.example.melLearnBE.enums.LearningLevel;
 import com.example.melLearnBE.enums.QuizType;
@@ -30,9 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
-import java.awt.print.Pageable;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
@@ -259,31 +256,22 @@ public class QuizService {
         while (!success && retries < maxRetries) {
             try {
                 ChatGPTResponse chatGPTResponse = openAIService.requestFinetuningModel(grammarRequest);
+                System.out.println(chatGPTResponse);
                 String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
                 JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
-                JsonArray probListJsonArray = jsonObject.getAsJsonArray("problist");
+                JsonArray probListJsonArray = jsonObject.getAsJsonArray("probList");
+                Type listType = new TypeToken<List<Quiz>>(){}.getType();
                 Gson gson = new GsonBuilder()
                         .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
                         .setLenient()
                         .create();
-
-                Type listType = new TypeToken<List<GrammarQuiz>>(){}.getType();
-                List<GrammarQuiz> grammarQuizs = gson.fromJson(probListJsonArray, listType);
-                List<Quiz> quizzes = new ArrayList<>();
-                for (GrammarQuiz grammarQuiz : grammarQuizs) {
-                    quizzes.add(Quiz.builder()
-                            .answer(grammarQuiz.getAnswer())
-                            .comment(grammarQuiz.getComment())
-                            .question(grammarQuiz.getQuestion())
-                            .optionList(grammarQuiz.getSelectionList())
-                            .build());
-                }
+                List<Quiz> quizzes = gson.fromJson(probListJsonArray, listType);
 
                 QuizList quizList = QuizList.builder()
                         .quizzes(quizzes)
+                        .createdTime(LocalDateTime.now())
                         .quizType(quizType)
                         .level(member.getLevel())
-                        .createdTime(LocalDateTime.now())
                         .musicId(quizRequest.getMusicId())
                         .build();
 
