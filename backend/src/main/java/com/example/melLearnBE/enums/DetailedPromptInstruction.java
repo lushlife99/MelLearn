@@ -15,7 +15,6 @@ public enum DetailedPromptInstruction {
     LISTENING_LEVEL1("Please provide Quiz with a total of 15 answer"),
     LISTENING_LEVEL2("Please provide Quiz with a total of 30 answer"),
     LISTENING_LEVEL3("Please provide Quiz with a total of 45 answer"),
-
     ;
 
     private final String detail;

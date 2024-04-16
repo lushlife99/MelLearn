@@ -34,6 +34,7 @@ public class QuizService {
     private final ListeningQuizRepository listeningQuizRepository;
     private final QuizSubmitRepository quizSubmitRepository;
     private final QuizListRepository quizListRepository;
+    private final QuizSubmitService quizSubmitService;
     private final JwtTokenProvider jwtTokenProvider;
     private final ListeningSubmitRepository listeningSubmitRepository;
     private final SubmitJpaRepository submitJpaRepository;
@@ -76,55 +77,14 @@ public class QuizService {
     @Async
     public CompletableFuture<QuizSubmitDto> submit(QuizSubmitRequest submitRequest, HttpServletRequest request) {
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-        QuizList quizList = quizListRepository.findByMusicIdAndQuizTypeAndLevel(submitRequest.getMusicId(), submitRequest.getQuizType(), member.getLevel())
-                .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-
-        double score = calCorrectRate(submitRequest, quizList);
-
-        QuizSubmit quizSubmit = QuizSubmit.builder()
-                .quizList(quizList)
-                .submitAnswerList(submitRequest.getAnswers())
-                .member(member)
-                .score(score)
-                .build();
-
-        return CompletableFuture.completedFuture(new QuizSubmitDto(quizSubmitRepository.save(quizSubmit)));
+        return quizSubmitService.submitQuiz(submitRequest, member);
     }
 
     @Async
     public CompletableFuture<ListeningSubmitDto> listeningSubmit(ListeningSubmitRequest submitRequest, HttpServletRequest request) {
 
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-        ListeningQuiz listeningQuiz = listeningQuizRepository.findByMusicIdAndLevel(submitRequest.getMusicId(), member.getLevel())
-                .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-
-        List<String> answerList = listeningQuiz.getAnswerList();
-        List<String> submitWordList = submitRequest.getSubmitWordList();
-        int correctCount = 0;
-
-        if(answerList.size() != submitWordList.size()) {
-            throw new CustomException(ErrorCode.REQUEST_ARRAY_SIZE_NOT_MATCHED);
-        }
-
-        for(int i = 0; i < answerList.size(); i++) {
-            String answerWord = answerList.get(i);
-            String submitWord = submitWordList.get(i);
-
-            if (answerWord.equals(submitWord.trim())) {
-                submitWordList.set(i, answerWord);
-                correctCount++;
-            }
-        }
-
-        ListeningSubmit listeningSubmit = ListeningSubmit.builder()
-                .listeningQuiz(listeningQuiz)
-                .submitAnswerList(submitWordList)
-                .member(member)
-                .score((correctCount * 100) / answerList.size())
-                .build();
-
-        return CompletableFuture.completedFuture(new ListeningSubmitDto(listeningSubmitRepository.save(listeningSubmit)));
-
+        return quizSubmitService.submitListeningQuiz(submitRequest, member);
     }
 
     private double calCorrectRate(QuizSubmitRequest submitRequest, QuizList quizList) {
@@ -142,17 +102,5 @@ public class QuizService {
 
          return totalCorrectCount * 100 / quizList.getQuizzes().size();
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
