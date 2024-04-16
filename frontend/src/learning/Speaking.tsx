@@ -96,9 +96,10 @@ const Speaking = () => {
             type: "application/json",
           });
           formData.append("lyricList", lyricsBlob, "lyricList.json");
-          const musicId = new Blob([JSON.stringify(track.id)], {
-            type: "application/json",
+          const musicId = new Blob([track.id], {
+            type: "text/plain",
           });
+          console.log(JSON.stringify(track.id));
           formData.append("musicId", musicId, "musicId.json");
           const res = await axiosApi.post(
             "/api/problem/speaking/transcription",

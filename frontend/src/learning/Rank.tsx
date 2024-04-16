@@ -44,12 +44,16 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   //     border: 0,
   // },
 }));
+
 export const Rank = (): JSX.Element => {
   const location = useLocation();
   const { trackId } = location.state;
+  console.log(trackId);
 
   const getRank = async () => {
-    const res = await axiosApi.get(`/api/problem/speaking/rank?${trackId}`);
+    const res = await axiosApi.get(
+      `/api/problem/speaking/ranking?musicId=${trackId.replace(/['"]+/g, "")}`
+    );
     console.log(res.data);
   };
 

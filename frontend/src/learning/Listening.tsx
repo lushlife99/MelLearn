@@ -42,7 +42,6 @@ const Listening = () => {
 
   useEffect(() => {
     if (currentTime >= duration) {
-      console.log("z");
       clearInterval(intervalId);
       setCurrentTime(0);
       setIsPlaying(false);
@@ -64,6 +63,7 @@ const Listening = () => {
     newAnswers[index] = event.target.value;
     setUserAnswers(newAnswers);
   };
+  const [idx, setIdx] = useState(0);
   const resume = async () => {
     startTime();
     const res = await axiosSpotify.get("/me/player/currently-playing");
@@ -101,7 +101,7 @@ const Listening = () => {
     });
     console.log(res.data);
   };
-
+  console.log(userAnswers);
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen ">
       <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col px-8 items-center">
@@ -128,12 +128,13 @@ const Listening = () => {
                     }] hover:text-[gray] text-2xl font-semibold`}
                   >
                     {part}
+
                     {indexs !== lyric.split("__").length - 1 && (
                       <input
                         type="text"
-                        onChange={(event) => handleAnswerChange(index, event)}
-                        value={userAnswers[index] || ""}
-                        className="w-20 h-5 text-xl text-center text-white bg-black border-none rounded-md "
+                        onChange={(event) => handleAnswerChange(idx, event)}
+                        value={userAnswers[idx] || ""}
+                        className="w-20 h-5 text-xl text-center text-white placeholder-gray-400 bg-black border-none rounded-md"
                       />
                     )}
                   </span>
