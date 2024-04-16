@@ -16,6 +16,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -55,6 +56,8 @@ public class QuizSubmitService {
         ListeningSubmit listeningSubmit = ListeningSubmit.builder()
                 .listeningQuiz(listeningQuiz)
                 .submitAnswerList(submitWordList)
+                .level(member.getLevel())
+                .createdTime(LocalDateTime.now())
                 .member(member)
                 .score((correctCount * 100) / answerList.size())
                 .build();

@@ -27,5 +27,5 @@ public class Ranking {
     @MapKeyColumn(name = "memberId")
     @Column(name = "score")
     @Builder.Default
-    private Map<Long, Double> score_list = new HashMap<>();
+    private Map<String, Double> score_list = new HashMap<>();
 }

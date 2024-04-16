@@ -111,7 +111,6 @@ public class SpeakingService {
     }
 
     public SpeakingSubmitDto grade(String musicId, List<LrcLyric> answerLyrics, Member member, WhisperTranscriptionResponse transcriptionResponse) {
-
         List<WhisperSegment> submitLyrics = transcriptionResponse.getSegments();
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit");

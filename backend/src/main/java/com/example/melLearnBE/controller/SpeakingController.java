@@ -32,7 +32,6 @@ public class SpeakingController {
                                     @RequestPart("lyricList") List<LrcLyric> lyricList,
                                     @RequestPart("musicId") String musicId,
                                     HttpServletRequest request) throws ExecutionException, InterruptedException {
-
         SpeakingSubmitRequest submitRequest = SpeakingSubmitRequest.builder()
                 .file(file)
                 .lyricList(lyricList)
