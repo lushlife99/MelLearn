@@ -7,5 +7,4 @@ public class ListeningAnswer {
 
     private String answerWord;
     private int lineIndex;
-    private int wordPos;
 }

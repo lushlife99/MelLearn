@@ -14,11 +14,11 @@ public class RankingDto {
 
     private Long id;
     private String musicId;
-    private Map<Long, Double> score_list;
+    private Map<String, Double> score_list;
 
     public RankingDto(Ranking ranking) {
         this.id = ranking.getId();
         this.musicId = ranking.getMusicId();
-        this.score_list = ranking.getScore_list();
+        this.score_list = Map.copyOf(ranking.getScore_list());
     }
 }

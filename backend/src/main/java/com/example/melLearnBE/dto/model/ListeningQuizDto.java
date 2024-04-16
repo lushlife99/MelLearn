@@ -15,6 +15,6 @@ public class ListeningQuizDto {
     public ListeningQuizDto(ListeningQuiz listeningQuiz) {
         this.id = listeningQuiz.getId();
         this.blankedText = listeningQuiz.getBlankedText();
-        this.answerList = listeningQuiz.getAnswerList();
+        this.answerList = List.copyOf(listeningQuiz.getAnswerList());
     }
 }

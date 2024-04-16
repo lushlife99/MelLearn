@@ -2,6 +2,7 @@ package com.example.melLearnBE.error;
 
 import com.example.melLearnBE.dto.response.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,6 +20,10 @@ public class GlobalExHandler extends ResponseEntityExceptionHandler {
         return ErrorResponse.toResponseEntity(e.getErrorCode());
     }
 
+    @ExceptionHandler(value = {DataIntegrityViolationException.class})
+    protected ResponseEntity<String> handleHttpCustomException(DataIntegrityViolationException e) {
+        return new ResponseEntity<>("quiz ", HttpStatus.CONFLICT);
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(Exception e) {

@@ -17,6 +17,9 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Builder
+@Table(name = "quiz_list", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"music_id", "level", "quiz_type"})
+})
 public class QuizList {
     @Id @GeneratedValue
     private Long id;
