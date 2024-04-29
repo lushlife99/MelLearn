@@ -32,25 +32,25 @@ public class QuizController {
 
     @PostMapping({"/reading", "/vocabulary", "/grammar"})
     @Operation(summary = "퀴즈 조회", description = "퀴즈 조회")
-    public QuizListDto getQuizList(@RequestBody QuizRequest quizRequest, HttpServletRequest request) {
+    public QuizListDto getQuizList(@RequestBody QuizRequest quizRequest, HttpServletRequest request) throws InterruptedException {
         try {
             return quizService.getQuizList(quizRequest, request).get();
         } catch (DataIntegrityViolationException e) {
             throw new CustomException(ErrorCode.ALREADY_EXIST_QUIZ);
-        } catch (Exception e) {
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        } catch (ExecutionException e) {
+            throw new CustomException(ErrorCode.CREATING_OTHER_REQUEST);
         }
     }
 
     @PostMapping("/listening")
     @Operation(summary = "퀴즈 조회", description = "퀴즈 조회")
-    public ListeningQuizDto getListeningQuiz(@RequestBody QuizRequest quizRequest, HttpServletRequest request) {
+    public ListeningQuizDto getListeningQuiz(@RequestBody QuizRequest quizRequest, HttpServletRequest request) throws InterruptedException {
         try {
             return quizService.getListeningQuiz(quizRequest, request).get();
         } catch (DataIntegrityViolationException e) {
             throw new CustomException(ErrorCode.ALREADY_EXIST_QUIZ);
-        } catch (Exception e) {
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        } catch (ExecutionException e) {
+            throw new CustomException(ErrorCode.CREATING_OTHER_REQUEST);
         }
     }
 

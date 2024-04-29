@@ -43,6 +43,7 @@ public class JwtTokenProvider {
     private final MemberRepository memberRepository;
 
 
+
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey,
                             @Value("${jwt.access-expiration-time}") int accessExpirationTime,
                             @Value("${jwt.refresh-expiration-time}") int refreshExpirationTime,
