@@ -22,8 +22,8 @@ jobs:
 
       - name: Build with Gradle
         run: |
-          chmod 777 ./gradlew
-          ./gradlew clean build --tests
+          chmod 777 ~./gradlew
+          ~./gradlew clean build --tests
 
       - name: Login to DockerHub
         uses: docker/login-action@v1
