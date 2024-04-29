@@ -27,6 +27,7 @@ public enum ErrorCode {
     /* 409 CONFLICT : Resource 의 현재 상태와 충돌. 보통 중복된 데이터 존재 */
     ALREADY_EXIST_USERID(HttpStatus.CONFLICT, "이미 존재하는 userId 입니다"),
     ALREADY_EXIST_QUIZ(HttpStatus.CONFLICT, "이미 존재하는 quiz입니다"),
+    CREATING_OTHER_REQUEST(HttpStatus.CONFLICT, "다른 사용자가 퀴즈를 생성하고 있습니다."),
 
     /* 500 INTERNAL_SERVER_ERROR : 서버오류 */
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류"),

@@ -47,29 +47,14 @@ public class QuizCreationService {
     private final QuizRepository quizRepository;
     private final ListeningQuizRepository listeningQuizRepository;
     private final static String QUIZ_JSON_PREFIX = "probList";
+    private final static String ANSWERLIST = "answerList";
+    private final static String PROMPT_PREFIX = "prompt";
+    private final static String TXT_EXTENSION = ".txt";
+
+
 
     @Transactional
-    public CompletableFuture<QuizListDto> fetchOrCreateQuizList(QuizRequest quizRequest, Member member) {
-        Optional<QuizList> optionalQuizList = quizListRepository.findByMusicIdAndQuizTypeAndLevel(quizRequest.getMusicId(), quizRequest.getQuizType(), member.getLevel());
-        if(optionalQuizList.isEmpty()) {
-            return CompletableFuture.completedFuture(createQuizList(quizRequest, member));
-        } else {
-            return CompletableFuture.completedFuture(new QuizListDto(optionalQuizList.get()));
-        }
-    }
-
-    @Transactional
-    public CompletableFuture<ListeningQuizDto> fetchOrCreateListeningQuizList(QuizRequest quizRequest, Member member) {
-        Optional<ListeningQuiz> optionalListeningQuiz = listeningQuizRepository.findByMusicIdAndLevel(quizRequest.getMusicId(), member.getLevel());
-        if(optionalListeningQuiz.isEmpty()) {
-            return CompletableFuture.completedFuture(createListeningQuiz(quizRequest, member));
-        } else {
-            return CompletableFuture.completedFuture(new ListeningQuizDto(optionalListeningQuiz.get()));
-        }
-    }
-
-    @Transactional
-    public ListeningQuizDto createListeningQuiz(QuizRequest quizRequest, Member member) {
+    public CompletableFuture<ListeningQuizDto> createListeningQuiz(QuizRequest quizRequest, Member member) {
         QuizType quizType = quizRequest.getQuizType();
 
         ChatRequest listeningRequest = ChatRequest.builder()
@@ -85,7 +70,7 @@ public class QuizCreationService {
                 ChatGPTResponse chatGPTResponse = openAIService.requestGPT(listeningRequest);
                 String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
                 JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
-                JsonArray probListJsonArray = jsonObject.getAsJsonArray("answerList");
+                JsonArray probListJsonArray = jsonObject.getAsJsonArray(ANSWERLIST);
                 Gson gson = new GsonBuilder()
                         .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
                         .setLenient()
@@ -103,7 +88,7 @@ public class QuizCreationService {
                 listeningQuizRepository.save(listeningQuiz);
 
                 success = true;
-                return new ListeningQuizDto(listeningQuiz);
+                return CompletableFuture.completedFuture(new ListeningQuizDto(listeningQuiz));
             } catch (Exception e) {
                 retries++;
                 e.printStackTrace();
@@ -180,11 +165,13 @@ public class QuizCreationService {
         listeningQuiz.setBlankedText(modifiedLyrics.toString());
         listeningQuiz.setAnswerList(answerList);
     }
-    public QuizListDto createQuizList(QuizRequest quizRequest, Member member) {
+
+    @Transactional
+    public CompletableFuture<QuizListDto> createQuizList(QuizRequest quizRequest, Member member) {
         QuizType quizType = quizRequest.getQuizType();
-        if(quizType.equals(QuizType.GRAMMAR) || quizType.equals(QuizType.READING) || quizType.equals(QuizType.VOCABULARY)) {
-            return requestQuiz(quizRequest, member);
-        }  else throw new CustomException(ErrorCode.UN_SUPPORTED_QUIZ_TYPE);
+        if(quizType.equals(QuizType.READING) || quizType.equals(QuizType.VOCABULARY) || quizType.equals(QuizType.GRAMMAR)) {
+            return CompletableFuture.completedFuture(requestQuiz(quizRequest, member));
+        } throw new CustomException(ErrorCode.UN_SUPPORTED_QUIZ_TYPE);
     }
 
     private QuizListDto requestQuiz(QuizRequest quizRequest, Member member) {
@@ -207,7 +194,13 @@ public class QuizCreationService {
 
         while (!success && retries < maxRetries) {
             try {
-                ChatGPTResponse chatGPTResponse = openAIService.requestFinetuningModel(chatRequest);
+                ChatGPTResponse chatGPTResponse;
+                if(quizRequest.getQuizType().equals(QuizType.GRAMMAR)) {
+                    chatGPTResponse = openAIService.requestFinetuningModel(chatRequest);
+                } else {
+                    chatGPTResponse = openAIService.requestFinetuningModel(chatRequest);
+                }
+
                 String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
                 JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
                 JsonArray probListJsonArray = jsonObject.getAsJsonArray(QUIZ_JSON_PREFIX);
@@ -246,191 +239,13 @@ public class QuizCreationService {
 
         throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
     }
-//    private QuizListDto createGrammarQuiz(QuizRequest quizRequest, Member member) {
-//        QuizType quizType = quizRequest.getQuizType();
-//        ChatQuestion question = ChatQuestion.builder()
-//                .text(quizRequest.getLyric())
-//                .lang(member.getLangType().getIso639Value())
-//                .level(member.getLevel().getValue())
-//                .totalProblem(5)
-//                .build();
-//
-//        ChatRequest grammarRequest = ChatRequest.builder()
-//                .system(getPrompt(quizType, member))
-//                .userInput(question.toString() + "\n" + promptDetailUtil.get(member, quizRequest))
-//                .build();
-//        int retries = 0;
-//        final int maxRetries = 3;
-//        boolean success = false;
-//
-//        while (!success && retries < maxRetries) {
-//            try {
-//                ChatGPTResponse chatGPTResponse = openAIService.requestFinetuningModel(grammarRequest);
-//                String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
-//                JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
-//                JsonArray probListJsonArray = jsonObject.getAsJsonArray(QUIZ_JSON_PREFIX);
-//                Type listType = new TypeToken<List<Quiz>>(){}.getType();
-//                Gson gson = new GsonBuilder()
-//                        .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
-//                        .setLenient()
-//                        .create();
-//                List<Quiz> quizzes = gson.fromJson(probListJsonArray, listType);
-//
-//                QuizList quizList = QuizList.builder()
-//                        .quizzes(quizzes)
-//                        .createdTime(LocalDateTime.now())
-//                        .quizType(quizType)
-//                        .level(member.getLevel())
-//                        .musicId(quizRequest.getMusicId())
-//                        .build();
-//
-//                for (Quiz quiz : quizzes) {
-//                    quiz.setQuizList(quizList);
-//                }
-//                List<Quiz> savedQuizzes = quizRepository.saveAll(quizzes.stream().toList());
-//                QuizList savedQuizList = quizListRepository.save(quizList);
-//                savedQuizList.setQuizzes(savedQuizzes);
-//
-//                success = true;
-//                return new QuizListDto(savedQuizList);
-//            } catch (Exception e) {
-//                retries++;
-//                e.printStackTrace();
-//                if (retries >= maxRetries) {
-//                    throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
-//                }
-//            }
-//        }
-//
-//        throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
-//
-//    }
-//
-//    public QuizListDto createVocaQuiz(QuizRequest quizRequest, Member member) {
-//        QuizType quizType = quizRequest.getQuizType();
-//        ChatQuestion question = ChatQuestion.builder()
-//                .text(quizRequest.getLyric())
-//                .totalProblem(5)
-//                .lang(member.getLangType().getIso639Value())
-//                .level(member.getLevel().getValue())
-//                .build();
-//
-//        ChatRequest vocaRequest = ChatRequest.builder()
-//                .system(getPrompt(quizType, member))
-//                .userInput(question.toString())
-//                .build();
-//        int retries = 0;
-//        final int maxRetries = 3;
-//        boolean success = false;
-//
-//        while (!success && retries < maxRetries) {
-//            try {
-//                ChatGPTResponse chatGPTResponse = openAIService.requestGPT(vocaRequest);
-//                String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
-//                JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
-//                JsonArray probListJsonArray = jsonObject.getAsJsonArray(QUIZ_JSON_PREFIX);
-//                Type listType = new TypeToken<List<Quiz>>(){}.getType();
-//                Gson gson = new GsonBuilder()
-//                        .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
-//                        .setLenient()
-//                        .create();
-//                List<Quiz> quizzes = gson.fromJson(probListJsonArray, listType);
-//
-//                QuizList quizList = QuizList.builder()
-//                        .quizzes(quizzes)
-//                        .createdTime(LocalDateTime.now())
-//                        .quizType(quizType)
-//                        .level(member.getLevel())
-//                        .musicId(quizRequest.getMusicId())
-//                        .build();
-//
-//                for (Quiz quiz : quizzes) {
-//                    quiz.setQuizList(quizList);
-//                }
-//                List<Quiz> savedQuizzes = quizRepository.saveAll(quizzes.stream().toList());
-//                QuizList savedQuizList = quizListRepository.save(quizList);
-//                savedQuizList.setQuizzes(savedQuizzes);
-//
-//                success = true;
-//                return new QuizListDto(savedQuizList);
-//            } catch (Exception e) {
-//                retries++;
-//                e.printStackTrace();
-//                if (retries >= maxRetries) {
-//                    throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
-//                }
-//            }
-//        }
-//
-//        throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
-//    }
-//
-//    private QuizListDto createReadingQuiz(QuizRequest quizRequest, Member member) {
-//        QuizType quizType = quizRequest.getQuizType();
-//        ChatQuestion question = ChatQuestion.builder()
-//                .text(quizRequest.getLyric())
-//                .totalProblem(5)
-//                .lang(member.getLangType().getIso639Value())
-//                .level(member.getLevel().getValue())
-//                .build();
-//        ChatRequest readingRequest = ChatRequest.builder()
-//                .system(getPrompt(quizType, member))
-//                .userInput(question.toString() + "\n" + promptDetailUtil.get(member, quizRequest))
-//                .build();
-//
-//        int retries = 0;
-//        final int maxRetries = 3;
-//        boolean success = false;
-//
-//        while (!success && retries < maxRetries) {
-//            try {
-//                ChatGPTResponse chatGPTResponse = openAIService.requestGPT(readingRequest);
-//                String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
-//                JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
-//                JsonArray probListJsonArray = jsonObject.getAsJsonArray(QUIZ_JSON_PREFIX);
-//                Type listType = new TypeToken<List<Quiz>>(){}.getType();
-//                Gson gson = new GsonBuilder()
-//                        .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
-//                        .setLenient()
-//                        .create();
-//                List<Quiz> quizzes = gson.fromJson(probListJsonArray, listType);
-//
-//                QuizList quizList = QuizList.builder()
-//                        .quizzes(quizzes)
-//                        .createdTime(LocalDateTime.now())
-//                        .quizType(quizType)
-//                        .level(member.getLevel())
-//                        .musicId(quizRequest.getMusicId())
-//                        .build();
-//
-//                for (Quiz quiz : quizzes) {
-//                    quiz.setQuizList(quizList);
-//                }
-//                List<Quiz> savedQuizzes = quizRepository.saveAll(quizzes.stream().toList());
-//                QuizList savedQuizList = quizListRepository.save(quizList);
-//                savedQuizList.setQuizzes(savedQuizzes);
-//
-//                success = true;
-//                return new QuizListDto(savedQuizList);
-//            } catch (Exception e) {
-//                retries++;
-//                e.printStackTrace();
-//                if (retries >= maxRetries) {
-//                    throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
-//                }
-//            }
-//        }
-//
-//        throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
-//    }
-
     private String getPrompt(QuizType quizType, Member member) {
 
         String filePath;
         if(quizType.equals(QuizType.VOCABULARY)) {
-            filePath = "." + File.separator + "prompt" + File.separator + quizType + File.separator + member.getLevel().toString() + ".txt";
+            filePath = "." + File.separator + PROMPT_PREFIX + File.separator + quizType + File.separator + member.getLevel().toString() + TXT_EXTENSION;
         } else {
-            filePath = "." + File.separator + "prompt" + File.separator + quizType + ".txt";
+            filePath = "." + File.separator + PROMPT_PREFIX + File.separator + quizType + TXT_EXTENSION;
         }
 
         try {
