@@ -20,14 +20,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Init gradle wrapper
-        run: gradle wrapper
-
       - name: Change wrapper permissions
-        run: chmod +x ./gradlew
+        run: chmod +x ./backend/gradlew
 
       - name: Build with Gradle wrapper
-        run: ./gradlew build
+        run: ./backend/gradlew build
     
       - name: Login to DockerHub
         uses: docker/login-action@v1
