@@ -20,9 +20,13 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Set up Gradle Wrapper
+        run: |
+          ./gradlew wrapper
+      
       - name: Build with Gradle
         run: |
-          chmod +x gradlew
+          chmod +x ./gradlew
           ./gradlew clean build --tests
 
       - name: Login to DockerHub
