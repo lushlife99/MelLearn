@@ -43,7 +43,7 @@ public class QuizService {
     private final QuizCreationService quizCreationService;
     private final QuizListRepository quizListRepository;
     private final ListeningQuizRepository listeningQuizRepository;
-    private final static String delimiter = ":";
+    private static String delimiter = ":";
 
 
     /**
