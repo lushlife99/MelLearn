@@ -22,6 +22,7 @@ import { Rank } from "./learning/Rank";
 import Listening from "./learning/Listening";
 import SelectCategory from "./learning/SelectCategory";
 import SpeakingScore from "./learning/SpeakingScore";
+import ListeningScore from "./learning/ListeningScore";
 
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
           <Route path="/comment" element={<Commentary />}></Route>
           <Route path="/rank" element={<Rank />}></Route>
           <Route path="/listening" element={<Listening />}></Route>
+          <Route path="/lsScore" element={<ListeningScore />}></Route>
           <Route path="/speakingScore" element={<SpeakingScore />}></Route>
         </Routes>
       </BrowserRouter>

@@ -6,6 +6,7 @@ import { FaPlayCircle } from "react-icons/fa";
 import { FaPause, FaPlay } from "react-icons/fa6";
 import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../api";
 import { IoIosArrowBack, IoIosArrowRoundBack } from "react-icons/io";
+
 interface TimeLyric {
   startMs: number;
   durMs: number;
@@ -16,7 +17,7 @@ const Listening = () => {
   const navigate = useNavigate();
   const { category, track, quiz } = location.state;
   const [isPlaying, setIsPlaying] = useState(false);
-  const [lyrics, setLyrics] = useState([]);
+  const [lyrics, setLyrics] = useState<string>();
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
   const [intervalId, setIntervalId] =
@@ -35,8 +36,8 @@ const Listening = () => {
   };
   useEffect(() => {
     getFetchTimeLyric();
-    const newArr = quiz.blankedText.split("\n");
-    setLyrics(newArr);
+
+    setLyrics(quiz.blankedText);
     setDuration(track.duration_ms);
   }, []);
 
@@ -63,7 +64,8 @@ const Listening = () => {
     newAnswers[index] = event.target.value;
     setUserAnswers(newAnswers);
   };
-  const [idx, setIdx] = useState(0);
+  //const [idx, setIdx] = useState(0);
+
   const resume = async () => {
     startTime();
     const res = await axiosSpotify.get("/me/player/currently-playing");
@@ -99,9 +101,17 @@ const Listening = () => {
       musicId: track.id,
       submitWordList: userAnswers,
     });
+    if (res.status === 200) {
+      navigate("/lsScore", {
+        state: {
+          comments: res.data,
+        },
+      });
+    }
     console.log(res.data);
   };
   console.log(userAnswers);
+  const handleSelect = (e: any) => {};
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen ">
       <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col px-8 items-center">
@@ -114,32 +124,29 @@ const Listening = () => {
         </div>
         <div className="rounded-3xl bg-white z-10 font-bold text-black text-2xl leading-[normal]  whitespace-normal  overflow-y-auto scrollbarwhite px-4 py-2">
           {timeLyric &&
-            lyrics?.map((lyric: string, index: number) => (
-              <div key={index}>
-                {lyric.split("__").map((part: string, indexs: number) => (
-                  <span
-                    key={indexs}
-                    className={`text-[${
-                      currentTime >= timeLyric[index]?.startMs &&
-                      currentTime <=
-                        timeLyric[index]?.startMs + timeLyric[index]?.durMs
-                        ? "gray"
-                        : "black"
-                    }] hover:text-[gray] text-2xl font-semibold`}
-                  >
-                    {part}
-
-                    {indexs !== lyric.split("__").length - 1 && (
-                      <input
-                        type="text"
-                        onChange={(event) => handleAnswerChange(idx, event)}
-                        value={userAnswers[idx] || ""}
-                        className="w-20 h-5 text-xl text-center text-white placeholder-gray-400 bg-black border-none rounded-md"
-                      />
-                    )}
-                  </span>
-                ))}
-              </div>
+            lyrics?.split("__")?.map((lyric: string, index: number) => (
+              <span
+                key={index}
+                className="text-xl"
+                // className={`text-[${
+                //   currentTime >= timeLyric[index]?.startMs &&
+                //   currentTime <=
+                //     timeLyric[index]?.startMs + timeLyric[index]?.durMs
+                //     ? "gray"
+                //     : "black"
+                // }] hover:text-[gray] text-2xl font-semibold`}
+              >
+                {lyric}
+                {index !== lyrics.split("__").length - 1 && (
+                  <input
+                    onSelect={handleSelect}
+                    type="text"
+                    onChange={(event) => handleAnswerChange(index, event)}
+                    value={userAnswers[index] || ""}
+                    className="h-5 text-lg text-center text-blue-500 bg-white rounded-md w-28 border-gray"
+                  />
+                )}
+              </span>
             ))}
         </div>
         <div className="z-10 flex items-center w-full mt-4 mb-4 bg-white rounded-2xl h-36">
