@@ -22,7 +22,7 @@ function SelectCategory() {
   const [serverLyric, setServerLyric] = useState("");
   const [lyric, setLyric] = useState();
   const [cancelTokenSource, setCancelTokenSource] = useState<any>(); // 문제 요청 도중 나갈시 취소 용 cancel Token
-
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     const source = axios.CancelToken.source();
     setCancelTokenSource(source);
@@ -72,6 +72,7 @@ function SelectCategory() {
     setCategory(e.key);
   };
   const goSolveProblem = async () => {
+    setLoading(true);
     try {
       if (
         category === "reading" ||
@@ -90,6 +91,7 @@ function SelectCategory() {
           }
         );
         if (res.status === 200) {
+          setLoading(false);
           navigate("/question", {
             state: {
               category,
@@ -99,12 +101,16 @@ function SelectCategory() {
           });
         }
       } else if (category === "speaking") {
+        //speaking
+        setLoading(false);
         navigate("/speaking", {
           state: {
             track,
           },
         });
-      } else {
+      } else if (category === "listening") {
+        // Listening
+        setLoading(false);
         const res = await axiosApi.post(
           `/api/quiz/${category}`,
           {
@@ -117,6 +123,7 @@ function SelectCategory() {
           }
         );
         if (res.status === 200) {
+          setLoading(false);
           navigate("/listening", {
             state: {
               category,
@@ -157,6 +164,13 @@ function SelectCategory() {
               alt="Category Cover"
               className="w-full mt-12 h-88"
             />
+            {loading && (
+              <div className="absolute left-0 z-10 flex items-center justify-center w-full h-12 font-bold text-center text-white animate-pulse top-50 rounded-xl ">
+                <div className="animate-bounce bg-[#007AFF] h-12 flex items-center rounded-xl w-[80%] justify-center">
+                  인공지능이 문제를 만들고 있어요
+                </div>
+              </div>
+            )}
 
             <div className="fixed bottom-0 w-[430px] bg-white h-88 rounded-t-2xl flex justify-center flex-col items-center">
               <div className="flex justify-start w-full pt-4 pl-4">
