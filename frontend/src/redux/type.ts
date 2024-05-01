@@ -51,6 +51,23 @@ interface Track {
   uri: string;
   is_local: boolean;
 }
+/* 사용자 추천 음악*/
+interface RTrack {
+  album: {
+    images: {
+      url: string;
+    }[];
+  };
+  artists: {
+    id: string;
+    name: string;
+  }[];
+  name: string;
+  id: string;
+}
+export interface RecommendData {
+  recommends: RTrack[];
+}
 
 export interface ChartData {
   tracks: Track[];

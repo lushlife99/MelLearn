@@ -23,6 +23,7 @@ import Listening from "./learning/Listening";
 import SelectCategory from "./learning/SelectCategory";
 import SpeakingScore from "./learning/SpeakingScore";
 import ListeningScore from "./learning/ListeningScore";
+import { RecommendMusicList } from "./musichome/RecommendMusicList";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
           <Route path="/spotify" element={<SpotifyLogo />}></Route>
           <Route path="/callback" element={<Callback />}></Route>
           <Route path="/home" element={<MusicHome />}></Route>
+          <Route path="/home/main6" element={<RecommendMusicList />}></Route>
           <Route path="/home/main2" element={<PopularMusicList />}></Route>
           <Route path="/home/main3" element={<PoplularArtistList />}></Route>
           <Route path="/home/main5" element={<SearchMusic />}></Route>

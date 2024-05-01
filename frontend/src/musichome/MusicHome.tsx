@@ -23,6 +23,8 @@ import { fetchChartData } from "../redux/chart/chartAction";
 import { setChartData } from "../redux/chart/chartSlice";
 import { fetchMetaData } from "../redux/trackMeta/trackMetaAction";
 import { setTrackMetaData } from "../redux/trackMeta/trackMetaSlice";
+import { fetchRecommendData } from "../redux/recommend/recommendAction";
+import { setRecommendData } from "../redux/recommend/recommendSlice";
 
 interface Artist {
   id: string;
@@ -63,7 +65,17 @@ function MusicHome() {
       staleTime: 1800000,
     }
   );
-  console.log(chartData);
+  const { data: recommendData, isLoading: recommendLoading } = useQuery(
+    "recommends",
+    fetchRecommendData,
+    {
+      onSuccess: (data) => {
+        dispatch(setRecommendData(data));
+      },
+      staleTime: 1800000,
+    }
+  );
+  console.log(recommendData);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setPage(newValue);
@@ -138,7 +150,7 @@ function MusicHome() {
               사용자 추천 음악
             </span>
             <Link
-              to={""}
+              to={"/home/main6"}
               className="text-[#4B8E96] hover:opacity-60 text-decoration-none"
             >
               모두 보기
@@ -151,12 +163,41 @@ function MusicHome() {
             loop={true}
             className="mySwiper"
           >
-            <SwiperSlide>
-              <img src="" className="w-[200px]" />
-            </SwiperSlide>
-            <SwiperSlide>Slide 2</SwiperSlide>
-            <SwiperSlide>Slide 3</SwiperSlide>
-            <SwiperSlide>Slide 4</SwiperSlide>
+            {recommendData?.recommends.slice(0, 10).map((track, index) => (
+              <SwiperSlide
+                key={index}
+                className="swiper-slide-mid hover:bg-slate-400"
+                onClick={() => {
+                  goPlayMusic(track);
+                }}
+              >
+                <img
+                  src={track.album.images[0].url}
+                  className="p-2"
+                  alt="Album Cover"
+                />
+                <span className="px-3 overflow-hidden text-lg font-extrabold whitespace-nowrap overflow-ellipsis">
+                  {track.name}
+                </span>
+                <div className="flex px-3 overflow-hidden overflow-ellipsis">
+                  {track.artists.length < 4 ? (
+                    track.artists.map((artist, index) => (
+                      <span
+                        key={index}
+                        className=" text-[#93989D] font-semibold text-sm whitespace-nowrap "
+                      >
+                        {artist.name}
+                        {index !== track.artists.length - 1 && ", "}
+                      </span>
+                    ))
+                  ) : (
+                    <span className=" text-[#93989D] font-semibold text-sm">
+                      Various Artists
+                    </span>
+                  )}
+                </div>
+              </SwiperSlide>
+            ))}
           </Swiper>
         </div>
 
