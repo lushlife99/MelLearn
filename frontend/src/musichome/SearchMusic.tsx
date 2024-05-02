@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaMagnifyingGlass } from "react-icons/fa6";
-import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../api";
+import { axiosSpotify } from "../api";
 import { Link, useNavigate } from "react-router-dom";
 import "../css/scroll.css";
 import { useQuery } from "react-query";
@@ -8,7 +8,7 @@ import { FaPlay } from "react-icons/fa";
 import { LuPencilLine } from "react-icons/lu";
 import Spinner from "react-bootstrap/Spinner";
 import { IoIosArrowDown } from "react-icons/io";
-import { Menu } from "antd";
+
 interface SearchTrack {
   items: {
     album: {
@@ -37,8 +37,6 @@ export const SearchMusic = () => {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
   const [isCategory, setIsCategory] = useState<boolean>(false);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedTrack, setSelectedTrack] = useState();
 
   const getArtistAlbum = async (search: string) => {
     const response = await axiosSpotify.get(`/search?q=${search}&type=track`);
@@ -72,67 +70,18 @@ export const SearchMusic = () => {
       },
     });
   };
-  const goStudy = async (track: any) => {
-    setSelectedTrack(track);
-    setIsCategory(true);
-    /* 서버에 가사 전송 하기 위함 */
-    const res = await axiosSpotifyScraper.get(
-      `/track/lyrics?trackId=${track.id}&format=json`
-    );
-    const res2 = await axiosApi.post(`/api/support/quiz/category`, res.data);
-    const categoriesArray: Category[] = Object.entries(res2.data).map(
-      ([name, value]) => ({
-        name,
-        value: value as boolean,
-      })
-    );
-    setCategories(categoriesArray);
-  };
-  const handleMenuClick = (e: any) => {
-    switch (e.key) {
-      case "speaking":
-        navigate("/speaking", {
-          state: {
-            track: selectedTrack,
-          },
-        });
-        break;
-      case "listening":
-        break;
-      case "reading":
-        break;
-      case "vocabulary":
-        break;
-      case "grammar":
-        break;
-    }
+  const goStudy = (track: any) => {
+    navigate("/category", {
+      state: {
+        track,
+      },
+    });
   };
 
   return (
     <div className="flex justify-center w-full h-screen">
-      {isCategory && (
-        <div className="absolute bottom-0 w-[450px] z-10 bg-black rounded-t-2xl">
-          <IoIosArrowDown
-            onClick={() => setIsCategory(false)}
-            className="w-6 h-6 mt-2 ml-4 fill-[#B3B3B3] hover:fill-white"
-          />
-          <Menu
-            theme="dark"
-            mode="vertical"
-            className="text-lg font-bold bg-black"
-            onSelect={handleMenuClick}
-            items={categories.map((category, index) => ({
-              key: category.name,
-              label: `${index + 1}. ${category.name}`,
-              disabled: !category.value,
-            }))}
-          />
-        </div>
-      )}
       <div
-        className={`flex flex-col items-center w-full bg-[black] max-w-[450px] px-8 py-12 ${
-          isCategory ? "opacity-45" : "opacity-100"
-        }`}
+        className={`flex flex-col items-center w-full bg-[black] max-w-[450px] px-8 py-12 `}
       >
         {/* 검색 창 */}
         <form

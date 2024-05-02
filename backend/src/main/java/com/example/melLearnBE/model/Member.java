@@ -39,11 +39,11 @@ public class Member implements UserDetails {
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<WordList> wordLists;
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-    private List<AnswerSpeaking> answerSpeakingList;
+    private List<SpeakingSubmit> speakingSubmitList;
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-    private List<AnswerProblem> answerProblemList;
+    private List<QuizSubmit> quizSubmitList;
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-    private List<AnswerListening> answerListeningList;
+    private List<ListeningSubmit> listeningSubmitList;
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
     private List<String> roles = new ArrayList<>();

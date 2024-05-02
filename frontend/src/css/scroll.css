@@ -15,3 +15,20 @@
     border-radius: 4px;
   }
 }
+.scrollbarwhite {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #888888 white; /* Firefox */
+
+  &::-webkit-scrollbarwhite {
+    width: 8px; /* Chrome/Safari/Edge */
+  }
+
+  &::-webkit-scrollbarwhite-track {
+    background-color: white; /* Chrome/Safari/Edge */
+  }
+
+  &::-webkit-scrollbarwhite-thumb {
+    background-color: white; /* Chrome/Safari/Edge */
+    border-radius: 4px;
+  }
+}

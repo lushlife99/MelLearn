@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { axiosSpotify, axiosSpotifyScraper } from "../api";
+import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../api";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   FaPlay,
@@ -113,7 +113,8 @@ function PlayMusic() {
   //다음재생
   const playNext = async () => {
     const res = await axiosSpotify.post("/me/player/next");
-    console.log("다음", res.data);
+    const res2 = await axiosSpotify.get("/me/player/queue");
+    console.log("다음", res2.data);
   };
   const goBack = () => {
     navigate(-1); //뒤로가기
@@ -123,6 +124,14 @@ function PlayMusic() {
   const goLyric = () => {
     setIsLyric(true);
   };
+  const goStudy = async (track: any) => {
+    navigate("/category", {
+      state: {
+        track,
+      },
+    });
+  };
+  const lyricClick = true;
 
   const progressPercentage = (currentTime / duration) * 100;
 
@@ -133,8 +142,16 @@ function PlayMusic() {
           onClick={goBack}
           className="fill-[white] w-10 h-10 mt-8 hover:opacity-60"
         />
+
         {isLyric && (
-          <Lyric trackId={track.id} isLyric={isLyric} setIsLyric={setIsLyric} />
+          <Lyric
+            trackId={track.id}
+            isLyric={isLyric}
+            setIsLyric={setIsLyric}
+            setCurrentTime={setCurrentTime}
+            currentTime={currentTime}
+            lyricClick={lyricClick}
+          />
         )}
         {/* 앪범 커버 */}
         <div className="flex items-center justify-center mt-4 ">
@@ -167,14 +184,14 @@ function PlayMusic() {
             const clickX = e.clientX - rect.left;
             const progressPercentage = (clickX / rect.width) * 100;
             const progressMs = (progressPercentage / 100) * track.duration_ms;
-            console.log(progressMs, currentTime);
+
             //stopProgressBar();
             setCurrentTime(progressMs);
             dragResume(progressMs);
           }}
         >
           <div
-            className={`h-full bg-green-500 rounded-full transition-all duration-500 ease-in-out`}
+            className={`h-full bg-[#7CEEFF] rounded-full transition-all duration-500 ease-in-out`}
             style={{ width: `${progressPercentage}%` }}
           ></div>
         </div>
@@ -196,9 +213,12 @@ function PlayMusic() {
         </div>
         {/* 버튼 div */}
         <div className="flex justify-between mt-12">
-          <button className="bg-[#D3D3D3] rounded-2xl h-9 w-28 flex items-center justify-center hover:opacity-60">
+          <button
+            onClick={() => goStudy(track)}
+            className="bg-[#D3D3D3] rounded-2xl h-9 w-28 flex items-center justify-center hover:opacity-60"
+          >
             <LuPencilLine />
-            문제풀기
+            공부하기
           </button>
           <div className="flex flex-col items-center">
             <div
@@ -206,8 +226,7 @@ function PlayMusic() {
               className="flex flex-col justify-center items-center text-[#d3d3d3] hover:opacity-60"
             >
               <IoIosArrowUp />
-
-              <span>가사</span>
+              <span>가사</span>{" "}
             </div>
           </div>
           <button className="bg-[#D3D3D3] rounded-2xl h-9 w-28 flex items-center justify-center hover:opacity-60">

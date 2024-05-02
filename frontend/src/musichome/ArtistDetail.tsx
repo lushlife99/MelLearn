@@ -63,11 +63,11 @@ export const ArtistDetial = (): JSX.Element => {
       <div className="flex flex-col items-center w-full bg-black max-w-[450px]  px-3 py-4">
         {/* Artist 커버 이미지, 이름*/}
         <div className="flex flex-col items-center justify-center w-full ">
-          <div className="flex items-start justify-around w-full">
-            <div className="w-[21%] flex justify-start ">
+          <div className="flex flex-col items-center w-full">
+            <div className="flex justify-start w-full px-5 mb-4 ">
               <IoIosArrowRoundBack
                 onClick={goBack}
-                className="w-12 h-12 fill-white hover:fill-gray-500"
+                className="w-10 h-10 fill-white hover:fill-gray-500"
               />
             </div>
 

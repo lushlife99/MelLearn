@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { axiosSpotifyScraper } from "../api";
+import { axiosSpotify, axiosSpotifyScraper } from "../api";
 import { useLocation } from "react-router-dom";
 import { useQuery } from "react-query";
 import { LyricData } from "../redux/type";
@@ -7,15 +7,26 @@ import Spinner from "react-bootstrap/Spinner";
 import { Transition } from "@headlessui/react";
 import "../css/scroll.css";
 import { IoIosArrowDown } from "react-icons/io";
+import { current } from "@reduxjs/toolkit";
 
 interface LyricProps {
   trackId: string;
   isLyric: boolean;
   setIsLyric: React.Dispatch<React.SetStateAction<boolean>>;
+  setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
+  currentTime: number;
+  lyricClick: boolean;
 }
 
 function Lyric(props: LyricProps) {
-  const { trackId, isLyric, setIsLyric } = props;
+  const {
+    trackId,
+    isLyric,
+    setIsLyric,
+    currentTime,
+    lyricClick,
+    setCurrentTime,
+  } = props;
   const getFetchLyric = async () => {
     const res = await axiosSpotifyScraper.get(
       `/track/lyrics?trackId=${trackId}&format=json`
@@ -28,7 +39,16 @@ function Lyric(props: LyricProps) {
   >(["lyric", trackId], getFetchLyric, {
     staleTime: 10800000,
   });
-  console.log("s", trackId);
+
+  const lyricTimeline = async (progressMs: number) => {
+    if (lyricClick) {
+      setCurrentTime(progressMs);
+      const res = await axiosSpotify.put("/me/player/play", {
+        uris: ["spotify:track:" + trackId],
+        position_ms: progressMs,
+      });
+    }
+  };
 
   if (lyricLoading) {
     return (
@@ -39,7 +59,6 @@ function Lyric(props: LyricProps) {
       </div>
     );
   }
-  console.log(lyricData);
 
   return (
     <div
@@ -53,7 +72,15 @@ function Lyric(props: LyricProps) {
       <div className="scrollbar flex flex-col items-start w-full max-w-[450px]   py-2 overflow-y-auto h-screen">
         {lyricData?.map((lyric, index) => (
           <div key={index}>
-            <p className="text-[#B3B3B3] hover:text-[white] text-2xl font-semibold">
+            <p
+              onClick={() => lyricTimeline(lyric.startMs)}
+              className={`text-${
+                currentTime >= lyric.startMs &&
+                currentTime <= lyric.startMs + lyric.durMs
+                  ? "white"
+                  : "#B3B3B3"
+              } hover:text-[white] text-2xl font-semibold`}
+            >
               {lyric.text}
             </p>
           </div>

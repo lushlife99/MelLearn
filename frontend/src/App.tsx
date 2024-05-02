@@ -18,8 +18,12 @@ import Speaking from "./learning/Speaking";
 import { QuestionBoardV2 } from "./learning/QuestionBoardV2";
 import { Score } from "./learning/Score";
 import Commentary from "./learning/Commentary";
-import { Rank_yh } from "./learning/Rank_yh";
+import { Rank } from "./learning/Rank";
 import Listening from "./learning/Listening";
+import SelectCategory from "./learning/SelectCategory";
+import SpeakingScore from "./learning/SpeakingScore";
+import ListeningScore from "./learning/ListeningScore";
+import { RecommendMusicList } from "./musichome/RecommendMusicList";
 
 function App() {
   return (
@@ -32,6 +36,7 @@ function App() {
           <Route path="/spotify" element={<SpotifyLogo />}></Route>
           <Route path="/callback" element={<Callback />}></Route>
           <Route path="/home" element={<MusicHome />}></Route>
+          <Route path="/home/main6" element={<RecommendMusicList />}></Route>
           <Route path="/home/main2" element={<PopularMusicList />}></Route>
           <Route path="/home/main3" element={<PoplularArtistList />}></Route>
           <Route path="/home/main5" element={<SearchMusic />}></Route>
@@ -40,13 +45,16 @@ function App() {
 
           <Route path="/main4" element={<ArtistDetial />}></Route>
           <Route path="/playMusic" element={<PlayMusic />}></Route>
+          <Route path="/category" element={<SelectCategory />}></Route>
           <Route path="/speaking" element={<Speaking />}></Route>
 
           <Route path="/question" element={<QuestionBoardV2 />}></Route>
           <Route path="/score" element={<Score />}></Route>
           <Route path="/comment" element={<Commentary />}></Route>
-          <Route path="/rank" element={<Rank_yh />}></Route>
-          <Route path="/ls" element={<Listening />}></Route>
+          <Route path="/rank" element={<Rank />}></Route>
+          <Route path="/listening" element={<Listening />}></Route>
+          <Route path="/lsScore" element={<ListeningScore />}></Route>
+          <Route path="/speakingScore" element={<SpeakingScore />}></Route>
         </Routes>
       </BrowserRouter>
     </Provider>

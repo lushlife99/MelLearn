@@ -1,122 +1,135 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../api";
 import axios from "axios";
+import LearningStart from "./LearningStart";
+import {
+  IoIosArrowBack,
+  IoIosArrowRoundBack,
+  IoIosArrowUp,
+} from "react-icons/io";
+import { useQuery } from "react-query";
+import Lyric from "../musichome/Lyric";
+interface Track {
+  album: {
+    images: {
+      url: string;
+    }[];
+  };
+  artists: {
+    id: string;
+    name: string;
+  }[];
+  is_playable: boolean;
+  name: string;
+  type: string;
+  uri: string;
+  duration_ms: number;
+  id: string;
+}
 
 const Speaking = () => {
-  const [recordedUrl, setRecordedUrl] = useState("");
+  const [intervalId, setIntervalId] =
+    useState<ReturnType<typeof setInterval>>();
+  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(0);
   const mediaStream = useRef<MediaStream | null>(null);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
   const location = useLocation();
   const { track } = location.state;
-  console.log(track);
-
-  const [test, setTest] = useState();
+  const [start, setStart] = useState<boolean>(false);
+  const [isLyric, setIsLyric] = useState<boolean>(false);
 
   const getLyric = async () => {
     const res = await axiosSpotifyScraper.get(
       `/track/lyrics?trackId=${track.id}&format=json`
     );
-
-    setTest(res.data); // 가사 보낼용 -> 이걸로 사용
+    return res.data;
   };
-  useEffect(() => {
-    getLyric();
-  }, []);
-  const [id, setId] = useState();
-
-  const convert = async () => {
-    const res = await axios.get(`https://api.convertio.co/convert/${id}/dl`);
-    console.log(res.data);
-  };
-  const convertStatus = async () => {
-    const res = await axios.get(
-      `https://api.convertio.co/convert/${id}/status`
-    );
-    console.log("상태", res.data.data.step);
-  };
-  const convertWebMToWAV = async (audioUrl: string) => {
-    console.log(audioUrl);
-    try {
-      const requestBody = {
-        apikey: "774b220833b0a6c13636283904a1ab93",
-        input: "raw",
-        file: audioUrl,
-        filename: "audio.webm",
-        outputformat: "wav",
-      };
-
-      const response = await axios.post(
-        "https://api.convertio.co/convert",
-        requestBody
-      );
-      //console.log("a", response.data.data.id);
-      setId(response.data.data.id);
-
-      // const downloadUrl = response.data.data.output.url;
-      // const wavFile = await axios.get(downloadUrl, { responseType: "blob" });
-      // console.log("c", wavFile.data);
-      // return wavFile.data;
-    } catch (error) {
-      console.error("Error converting to WAV:", error);
-      throw error;
+  const { data: lyricData, isLoading: lyricLoading } = useQuery(
+    ["lyric", track.id],
+    () => getLyric(),
+    {
+      staleTime: 10800000,
     }
-  };
+  );
+
+  useEffect(() => {
+    setDuration(track.duration_ms);
+    return () => {
+      pause(); // 컴포넌트 언마운트시 음악 정지
+    };
+  }, []);
+
+  useEffect(() => {
+    if (currentTime >= duration) {
+      //노래 종료
+      setCurrentTime(0);
+      stopRecording();
+      clearInterval(intervalId);
+    }
+  }, [currentTime, duration]);
 
   const accessMicrophone = async () => {
     try {
       // mic 접근 권한 허용
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaStream.current = stream;
-      mediaRecorder.current = new MediaRecorder(stream);
-      mediaRecorder.current.ondataavailable = (e) => {
-        const wavAudioData = new Blob([e.data]);
-        chunks.current = [];
-        chunks.current.push(wavAudioData);
-      };
-      mediaRecorder.current.onstop = async () => {
-        const recordedBlob = new Blob(chunks.current, { type: "audio/webm" });
-        //const wav = await convertWebMToWAV(recordedBlob);
-        const url = URL.createObjectURL(recordedBlob);
-        await convertWebMToWAV(url);
-        // setRecordedUrl(url);
-        // // 녹음 파일 임시 다운로드
-        // const a = document.createElement("a");
-        // document.body.appendChild(a);
-        // a.href = url;
-        // a.download = "recorded_audio.wav";
-        // a.click();
-        // window.URL.revokeObjectURL(url);
-      };
-      mediaRecorder.current.start();
+      // true 되면 실행
+      if (stream.active) {
+        playMusic(); // 마이크 연결 될시 음악 실행
+        mediaStream.current = stream;
+        mediaRecorder.current = new MediaRecorder(stream);
+        mediaRecorder.current.ondataavailable = (e) => {
+          const wavAudioData = new Blob([e.data]);
+          chunks.current = [];
+          chunks.current.push(wavAudioData);
+        };
+        mediaRecorder.current.start();
+        mediaRecorder.current.onstop = async () => {
+          // 노래 끝나고 서버에 speaking data 보냄
+          const recordedBlob = new Blob(chunks.current, { type: "audio/wav" });
+          //const url = URL.createObjectURL(recordedBlob);
+          const formData = new FormData();
+          formData.append(`file`, recordedBlob);
+          const lyricsBlob = new Blob([JSON.stringify(lyricData)], {
+            type: "application/json",
+          });
+          formData.append("lyricList", lyricsBlob, "lyricList.json");
+          const musicId = new Blob([track.id], {
+            type: "text/plain",
+          });
+          console.log(JSON.stringify(track.id));
+          formData.append("musicId", musicId, "musicId.json");
+          const res = await axiosApi.post(
+            "/api/problem/speaking/transcription",
+            formData,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          ); // 파일명은 선택사항
+          console.log(res.data);
+          if (res.status === 200) {
+            navigate("/speakingScore", {
+              state: {
+                comments: res.data,
+                trackId: track.id,
+              },
+            });
+          }
+        };
+      }
     } catch (error) {
-      console.error("마이크 접근 에러", error);
+      alert("마이크를 연결해주세요");
     }
   };
 
   const stopRecording = async () => {
-    /*  테스트용 */
-    const formData = new FormData();
-    const recordedBlob = new Blob(chunks.current, { type: "audio/wav" });
-
-    formData.append(`file`, recordedBlob);
-    const lyricsBlob = new Blob([JSON.stringify(test)], {
-      type: "application/json",
-    });
-    formData.append("lyricList", lyricsBlob, "lyricList.json"); // 파일명은 선택사항
-
     if (mediaRecorder.current && mediaRecorder.current.state === "recording") {
       mediaRecorder.current.stop();
-      // const res = await axiosApi.post(
-      //   "/api/problem/speaking/transcription",
-      //   formData,
-      //   {
-      //     headers: {
-      //       "Content-Type": "multipart/form-data",
-      //     },
-      //   }
-      // );
+      pause();
     }
     if (mediaStream.current) {
       mediaStream.current.getTracks().forEach((track) => {
@@ -124,68 +137,105 @@ const Speaking = () => {
       });
     }
   };
-  const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (event.target.files && event.target.files.length > 0) {
-      const file = event.target.files[0];
-      const formData = new FormData();
-      formData.append("file", file);
-      const lyricsBlob = new Blob([JSON.stringify(test)], {
-        type: "application/json",
-      });
-      formData.append("lyricList", lyricsBlob, "lyricList.json");
-      const musicId = new Blob([JSON.stringify(track.id)], {
-        type: "application/json",
-      });
-      formData.append("musicId", musicId, "musicId.json");
-      const res = await axiosApi.post(
-        "/api/problem/speaking/transcription",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      console.log(res.data);
-    }
+  const startProgressBar = () => {
+    const interval = setInterval(() => {
+      setCurrentTime((prevTime) => prevTime + 1000);
+    }, 1000);
+    setIntervalId(interval);
   };
-
   const playMusic = async () => {
     const res = await axiosSpotify.put("/me/player/play", {
       uris: ["spotify:track:" + track.id],
+      position_ms: 0,
     });
-
     if (res.status === 202) {
-      accessMicrophone();
+      startProgressBar();
       // 노래 한곡 재생 데이터 보내주기
       //노래 끝나면 녹음 중지하면서 서버에 요청
     }
   };
-  //test용 정지
+
   const pause = async () => {
     const res = await axiosSpotify.put("/me/player/pause");
-    if (res.status === 202) {
-      stopRecording();
-    }
   };
 
-  return (
-    <div>
-      <audio controls src={recordedUrl} />
-      <input type="file" onChange={handleFileUpload} />
-      <button className="bg-[blue]" onClick={accessMicrophone}>
-        녹음 시작
-      </button>
-      <button className="bg-[blue]" onClick={stopRecording}>
-        녹음 중지
-      </button>
-      <button onClick={convertStatus}>상태</button>
-      <button onClick={convert}>변환</button>
+  const navigate = useNavigate();
+  const goBack = () => {
+    navigate(-1);
+  };
+  const progressPercentage = (currentTime / duration) * 100;
+  const lyricClick = false;
 
-      <button onClick={playMusic}>노래 재생</button>
-      <button onClick={pause}>정지</button>
+  return (
+    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
+      <div
+        className={` ${
+          start ? "bg-black" : "bg-[#9bd1e5] relative"
+        } overflow-hidden w-full max-w-[450px] h-screen  flex flex-col px-5 items-center
+        `}
+      >
+        {!start ? (
+          <LearningStart start={start} setStart={setStart} track={track} />
+        ) : (
+          <div>
+            <IoIosArrowRoundBack
+              onClick={goBack}
+              className="z-10 w-10 h-10 my-4 fill-white hover:opacity-40"
+            />
+            {isLyric && (
+              <Lyric
+                trackId={track.id}
+                isLyric={isLyric}
+                setIsLyric={setIsLyric}
+                currentTime={currentTime}
+                lyricClick={lyricClick}
+                setCurrentTime={setCurrentTime}
+              />
+            )}
+            <img
+              src={track.album.images[0].url}
+              alt="Album Cover"
+              className="mb-4 rounded-2xl"
+            />
+            <span className="text-3xl font-bold text-white">{track.name}</span>
+            <div className="w-full h-2 mt-4 bg-gray-200 rounded-full cursor-pointer">
+              <div
+                className={`h-full bg-[#7CEEFF] rounded-full transition-all duration-500 ease-in-out`}
+                style={{ width: `${progressPercentage}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between mt-1">
+              <span className="text-[#B3B3B3]">
+                {Math.floor(currentTime / 1000 / 60)}:
+                {Math.floor((currentTime / 1000) % 60) < 10
+                  ? `0${Math.floor((currentTime / 1000) % 60)}`
+                  : Math.floor((currentTime / 1000) % 60)}
+              </span>
+              <span className=" text-[#B3B3B3]">
+                {Math.floor(duration / 1000 / 60)}:
+                {Math.floor((duration / 1000) % 60) < 10
+                  ? `0${Math.floor((duration / 1000) % 60)}`
+                  : Math.floor((duration / 1000) % 60)}
+              </span>
+            </div>
+            <div className="flex flex-col items-center">
+              <div
+                onClick={() => setIsLyric(true)}
+                className="flex flex-col justify-center items-center text-[#d3d3d3] hover:opacity-60"
+              >
+                <IoIosArrowUp />
+                <span>가사</span>
+              </div>
+            </div>
+            <button
+              className="bg-[#007AFF] text-white font-bold w-[100%] h-10 rounded-xl mt-12"
+              onClick={accessMicrophone}
+            >
+              시작하기
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

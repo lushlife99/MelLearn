@@ -1,9 +1,6 @@
 package com.example.melLearnBE.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,14 +11,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @Builder
-public class AnswerListening {
+public class SpeakingSubmit {
 
-    @Id
-    @GeneratedValue
+    @Id @GeneratedValue
     private Long id;
-
+    private String musicId;
     @ManyToOne
     private Member member;
-
+    @Column(columnDefinition="LONGTEXT")
+    private String submit;
+    @Column(columnDefinition="LONGTEXT")
+    private String markedText;
+    private double score;
 
 }
