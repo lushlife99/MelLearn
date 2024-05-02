@@ -84,7 +84,7 @@ function MusicHome() {
         navigation("/home");
         break;
       case 1:
-        //navigation("/word");
+        navigation("/compQuiz");
         break;
       case 2:
         //navigation("/history");
@@ -116,7 +116,7 @@ function MusicHome() {
   if (chartLoading || artistLoading) {
     return (
       <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
-        <div className="relative bg-[#9bd1e5] overflow-hidden w-full max-w-[450px] h-screen  flex flex-col ">
+        <div className="relative bg-[black] overflow-hidden w-full max-w-[450px] h-screen  flex flex-col ">
           <div className="flex items-center justify-center h-[300%]">
             <Spinner className="border" variant="primary" />
           </div>
@@ -130,28 +130,26 @@ function MusicHome() {
   // 메인환경올때마다 이걸 요청? -> 리액트 쿼리 이용해서 불필요한 호출 방지 되면 환경설정에서도 적용
 
   return (
-    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
-      <div className="relative bg-[#9bd1e5] overflow-hidden w-full max-w-[450px] h-screen  flex flex-col ">
-        <BgCircle />
-
+    <div className="bg-[white] flex flex-row justify-center w-full h-screen">
+      <div className="relative bg-black overflow-hidden w-full max-w-[450px] h-screen  flex flex-col ">
         {/* 타이틀*/}
-        <div className="z-10 flex items-center justify-between h-16 px-3 mb-2 bg-white">
-          <span className="text-[22px] font-bold">MelLearn</span>
+        <div className="flex items-center justify-between h-16 px-3 mb-2 bg-black ">
+          <span className="px-2 text-3xl font-bold text-white">MelLearn</span>
           <FaMagnifyingGlass
             onClick={() => navigation("/home/main5")}
-            className="w-5 h-5 hover:text-gray-300"
+            className="w-5 h-5 hover:opacity-60 fill-white"
           />
         </div>
 
         {/* 사용자 추천 음악*/}
-        <div className="z-10 px-3 mt-4">
+        <div className="px-3 mt-4 ">
           <div className="flex items-center justify-between">
-            <span className="text-[22px] font-extrabold px-2">
+            <span className="px-2 text-xl font-extrabold text-white">
               사용자 추천 음악
             </span>
             <Link
               to={"/home/main6"}
-              className="text-[#4B8E96] hover:opacity-60 text-decoration-none"
+              className="font-bold text-gray-500 hover:opacity-60 text-decoration-none"
             >
               모두 보기
             </Link>
@@ -166,7 +164,7 @@ function MusicHome() {
             {recommendData?.recommends.slice(0, 10).map((track, index) => (
               <SwiperSlide
                 key={index}
-                className="swiper-slide-mid hover:bg-slate-400"
+                className="bg-black swiper-slide-mid hover:opacity-60"
                 onClick={() => {
                   goPlayMusic(track);
                 }}
@@ -176,11 +174,11 @@ function MusicHome() {
                   className="p-2"
                   alt="Album Cover"
                 />
-                <span className="px-3 overflow-hidden text-lg font-extrabold whitespace-nowrap overflow-ellipsis">
+                <span className="px-3 overflow-hidden text-lg font-extrabold text-white whitespace-nowrap overflow-ellipsis">
                   {track.name}
                 </span>
                 <div className="flex px-3 overflow-hidden overflow-ellipsis">
-                  {track.artists.length < 4 ? (
+                  {track.artists.length < 3 ? (
                     track.artists.map((artist, index) => (
                       <span
                         key={index}
@@ -204,11 +202,13 @@ function MusicHome() {
         {/* 인기 가수*/}
         <div className="z-10 px-3 mt-4">
           <div className="flex items-center justify-between ">
-            <span className="text-[22px] font-extrabold px-2">인기 가수</span>
+            <span className="px-2 text-xl font-extrabold text-white">
+              인기 가수
+            </span>
 
             <Link
               to={"/home/main3"}
-              className="text-[#4B8E96] hover:opacity-60 text-decoration-none"
+              className="font-bold text-gray-500 hover:opacity-60 text-decoration-none "
             >
               모두 보기
             </Link>
@@ -224,15 +224,15 @@ function MusicHome() {
             {artistData?.artists.slice(0, 10).map((artist, index) => (
               <SwiperSlide
                 key={index}
-                className="swiper-slide-mini hover:bg-slate-400 "
+                className="bg-black swiper-slide-mini hover:opacity-60 "
                 onClick={() => goDetailArtist(artist)}
               >
                 <img
                   src={artist.visuals.avatar[0].url}
                   alt="Artist Cover"
-                  className="p-2"
+                  className="p-2 "
                 />
-                <span className="pb-3 text-sm font-extrabold">
+                <span className="pb-3 text-sm font-extrabold text-white">
                   {artist.name}
                 </span>
               </SwiperSlide>
@@ -241,13 +241,15 @@ function MusicHome() {
         </div>
 
         {/* 인기 음악*/}
-        <div className="z-10 px-3 mt-4">
+        <div className="px-3 mt-4 ">
           <div className="flex items-center justify-between ">
-            <span className="text-[22px] font-extrabold px-2">인기 음악</span>
+            <span className="px-2 text-xl font-extrabold text-white">
+              인기 음악
+            </span>
 
             <Link
               to={"/home/main2"}
-              className="text-[#4B8E96] hover:opacity-60 text-decoration-none"
+              className="font-bold text-gray-500 hover:opacity-60 text-decoration-none"
             >
               모두 보기
             </Link>
@@ -263,7 +265,7 @@ function MusicHome() {
             {chartData?.tracks.slice(0, 10).map((track, index) => (
               <SwiperSlide
                 key={index}
-                className="swiper-slide-mid hover:bg-slate-400"
+                className="bg-black swiper-slide-mid hover:opacity-60"
                 onClick={() => {
                   goPlayMusic(track);
                 }}
@@ -273,11 +275,11 @@ function MusicHome() {
                   className="p-2"
                   alt="Album Cover"
                 />
-                <span className="px-3 overflow-hidden text-lg font-extrabold whitespace-nowrap overflow-ellipsis">
+                <span className="px-3 overflow-hidden text-lg font-extrabold text-white whitespace-nowrap overflow-ellipsis">
                   {track.name}
                 </span>
                 <div className="flex px-3 overflow-hidden overflow-ellipsis">
-                  {track.artists.length < 4 ? (
+                  {track.artists.length < 3 ? (
                     track.artists.map((artist, index) => (
                       <span
                         key={index}
@@ -300,28 +302,28 @@ function MusicHome() {
 
         {/* <div className="bottom-0 left-0 right-0 z-10 w-full "> */}
         <BottomNavigation
-          className="fixed bottom-0 w-[450px]"
+          className="fixed bottom-0 w-[450px] bg-black"
           showLabels
           value={page}
           onChange={handleChange}
         >
           <BottomNavigationAction
-            className="hover:bg-slate-400"
+            className="text-white hover:opacity-60 "
             label="홈"
             icon={<HomeIcon />}
           />
           <BottomNavigationAction
-            className="hover:bg-slate-400"
-            label="문제집"
+            className="text-white hover:opacity-60"
+            label="모의고사"
             icon={<MenuBookIcon />}
           />
           <BottomNavigationAction
-            className="hover:bg-slate-400"
+            className="text-white hover:opacity-60"
             label="히스토리"
             icon={<HistoryIcon />}
           />
           <BottomNavigationAction
-            className="hover:bg-slate-400"
+            className="text-white hover:opacity-60"
             label="설정"
             icon={<SettingsIcon />}
           />

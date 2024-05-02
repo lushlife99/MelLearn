@@ -16,6 +16,8 @@ interface LyricProps {
   setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
   currentTime: number;
   lyricClick: boolean;
+  lyricData: LyricData[];
+  lyricLoading: boolean;
 }
 
 function Lyric(props: LyricProps) {
@@ -26,19 +28,21 @@ function Lyric(props: LyricProps) {
     currentTime,
     lyricClick,
     setCurrentTime,
+    lyricData,
+    lyricLoading,
   } = props;
-  const getFetchLyric = async () => {
-    const res = await axiosSpotifyScraper.get(
-      `/track/lyrics?trackId=${trackId}&format=json`
-    );
-    return res.data;
-  };
-  const { data: lyricData, isLoading: lyricLoading } = useQuery<
-    LyricData[],
-    Error
-  >(["lyric", trackId], getFetchLyric, {
-    staleTime: 10800000,
-  });
+  // const getFetchLyric = async () => {
+  //   const res = await axiosSpotifyScraper.get(
+  //     `/track/lyrics?trackId=${trackId}&format=json`
+  //   );
+  //   return res.data;
+  // };
+  // const { data: lyricData, isLoading: lyricLoading } = useQuery<
+  //   LyricData[],
+  //   Error
+  // >(["lyric", trackId], getFetchLyric, {
+  //   staleTime: 10800000,
+  // });
 
   const lyricTimeline = async (progressMs: number) => {
     if (lyricClick) {

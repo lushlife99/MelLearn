@@ -190,6 +190,8 @@ const Speaking = () => {
                 currentTime={currentTime}
                 lyricClick={lyricClick}
                 setCurrentTime={setCurrentTime}
+                lyricData={lyricData}
+                lyricLoading={lyricLoading}
               />
             )}
             <img

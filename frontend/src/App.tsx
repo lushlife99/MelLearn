@@ -24,6 +24,8 @@ import SelectCategory from "./learning/SelectCategory";
 import SpeakingScore from "./learning/SpeakingScore";
 import ListeningScore from "./learning/ListeningScore";
 import { RecommendMusicList } from "./musichome/RecommendMusicList";
+import MockExam from "./learning/MockExam";
+import SearchExam from "./learning/SearchExam";
 
 function App() {
   return (
@@ -55,6 +57,8 @@ function App() {
           <Route path="/listening" element={<Listening />}></Route>
           <Route path="/lsScore" element={<ListeningScore />}></Route>
           <Route path="/speakingScore" element={<SpeakingScore />}></Route>
+          <Route path="/compQuiz" element={<SearchExam />}></Route>
+          <Route path="/mockExam" element={<MockExam />}></Route>
         </Routes>
       </BrowserRouter>
     </Provider>
