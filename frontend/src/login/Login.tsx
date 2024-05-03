@@ -30,7 +30,7 @@ function Login() {
   };
 
   return (
-    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
+    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-roboto">
       <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col px-8">
         <BgCircle />
 
@@ -51,7 +51,8 @@ function Login() {
           <input
             {...register("user_id", { required: true })}
             placeholder="아이디"
-            className="my-3 rounded-[30px] h-[45px] shadow-[0px_4px_4px_#00000040] px-4  focus:outline-none focus:border-sky-500 focus:ring-2"
+            type="text"
+            className="my-3 rounded-2xl h-12 shadow-[0px_4px_4px_#00000040] px-4 focus:outline-none focus:border-sky-500 focus:ring-2 border-none"
           />
           {errors.user_id && (
             <span className="text-center text-[red] font-bold">
@@ -62,14 +63,14 @@ function Login() {
             {...register("password", { required: true })}
             type="password"
             placeholder="비밀번호"
-            className="my-3 rounded-[30px] h-[45px] shadow-[0px_4px_4px_#00000040] px-4  focus:outline-none focus:border-sky-500 focus:ring-1"
+            className="my-3 rounded-2xl h-12 shadow-[0px_4px_4px_#00000040] px-4 focus:outline-none focus:border-sky-500 focus:ring-2 border-none"
           />
           {errors.password && (
             <span className="text-center text-[red] font-bold">
               비밀번호를 입력해주세요
             </span>
           )}
-          <button className="mt-6 rounded-[30px] bg-[#495867] h-[45px] text-[white] hover:bg-[gray] hover:text-[#495867]">
+          <button className="mt-6 rounded-2xl bg-[#495867] h-12 text-[white] hover:bg-[gray] hover:text-[#495867] font-bold flex items-center justify-center">
             로그인
           </button>
         </form>
