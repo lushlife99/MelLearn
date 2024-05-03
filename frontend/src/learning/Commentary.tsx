@@ -40,8 +40,6 @@ const Commentary = () => {
 
   // 현재 페이지에 따라 해당 범위의 항목을 선택하는 함수
 
-  console.log(comments);
-
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
       <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col px-8">
