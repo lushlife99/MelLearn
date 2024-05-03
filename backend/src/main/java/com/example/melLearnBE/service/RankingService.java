@@ -29,7 +29,7 @@ public class RankingService {
     public RankingDto updateRanking(String musicId, HttpServletRequest request) {
         Optional<Ranking> optionalRanking = rankingRepository.findByMusicId(musicId);
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-        SpeakingSubmit speakingSubmit = speakingSubmitRepository.findByMusicIdAndMember(musicId, member).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
+        SpeakingSubmit speakingSubmit = speakingSubmitRepository.findTopByMusicIdAndMemberOrderByScoreDesc(musicId, member).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
         Ranking ranking;
         if(optionalRanking.isPresent()) {
             ranking = optionalRanking.get();
@@ -40,14 +40,15 @@ public class RankingService {
                     .build();
         }
 
-        Map<Long, Double> scoreList = ranking.getScore_list();
-        scoreList.put(member.getId(), speakingSubmit.getScore());
+        Map<String, Double> scoreList = ranking.getScore_list();
+        scoreList.put(member.getMemberId(), speakingSubmit.getScore());
 
         return new RankingDto(rankingRepository.save(ranking));
     }
 
     @Transactional(readOnly = true)
     public RankingDto getRanking(String musicId) {
+
         Optional<Ranking> optionalRanking = rankingRepository.findByMusicId(musicId);
         if(optionalRanking.isEmpty()) {
             return new RankingDto();
