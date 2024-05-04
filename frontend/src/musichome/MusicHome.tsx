@@ -113,7 +113,7 @@ function MusicHome() {
       },
     });
   };
-  if (chartLoading || artistLoading) {
+  if (chartLoading || artistLoading || recommendLoading) {
     return (
       <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
         <div className="relative bg-[black] overflow-hidden w-full max-w-[450px] h-screen  flex flex-col ">

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import axiosApi, { axiosSpotifyScraper } from "../api";
+import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../api";
 import { FormControlLabel, Radio, RadioGroup } from "@mui/material";
 import "../css/scroll.css";
+import { FaPause, FaPlay } from "react-icons/fa6";
+import MockSubmitDisplay from "./MockSubmitDisplay";
 
 interface ReadComp {
   id: number;
@@ -29,6 +31,7 @@ function MockExam() {
   const location = useLocation();
   const { track } = location.state;
   const [currentPage, setCurrentPage] = useState(1);
+  const [lrcLyricList, setlrcLyricList] = useState();
   const [exam, setExam] = useState<
     {
       answer: number;
@@ -38,6 +41,24 @@ function MockExam() {
       optionList: string[];
     }[]
   >([]);
+  const [listening, setListening] = useState<Listening>();
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState<number>(0);
+
+  const [intervalId, setIntervalId] =
+    useState<ReturnType<typeof setInterval>>();
+
+  const quizLen = 5;
+  const [readingSubmit, setReadingSubmit] = useState<number[]>(
+    new Array(quizLen).fill(0)
+  );
+  const [vocabularySubmit, setVocabularySubmit] = useState<number[]>(
+    new Array(quizLen).fill(0)
+  );
+  const [grammarSubmit, setGrammarSubmit] = useState<number[]>(
+    new Array(quizLen).fill(0)
+  );
+  const [listeningSubmit, setListeningSubmit] = useState<string[]>([]);
 
   const combineQuizzArray = (quiz: Exam) => {
     const combinArray = [];
@@ -50,19 +71,123 @@ function MockExam() {
 
   const fetchExam = async () => {
     const res = await axiosSpotifyScraper.get(
+      `/track/lyrics?trackId=${track.id}&format=json`
+    );
+    setlrcLyricList(res.data);
+    const res2 = await axiosSpotifyScraper.get(
       `/track/lyrics?trackId=${track.id}`
     );
-    const res2 = await axiosApi.post("/api/comprehensive-quiz", {
+    const res3 = await axiosApi.post("/api/comprehensive-quiz", {
       musicId: track.id,
       quizType: "GRAMMAR",
-      lyric: res.data,
+      lyric: res2.data,
+    });
+    console.log(res3.data);
+    setListening(res3.data.listeningQuizDto);
+    const combineQuizArr = combineQuizzArray(res3.data);
+    setExam(combineQuizArr);
+  };
+  const getIndex = (index: number) => {
+    switch (currentPage) {
+      case 1:
+        return index + 1;
+      case 2:
+        return index + 6;
+      case 3:
+        return index + 11;
+    }
+  };
+
+  const startTime = () => {
+    const interval = setInterval(() => {
+      setCurrentTime((prev) => prev + 1000);
+    }, 1000);
+    setIntervalId(interval);
+  };
+  const stopTime = () => {
+    clearInterval(intervalId);
+  };
+
+  const resume = async () => {
+    startTime();
+    const res = await axiosSpotify.get("/me/player/currently-playing");
+    let progress_ms = 0;
+    if (res.data.item === undefined) {
+      progress_ms = 0;
+    } else {
+      if (track.id === res.data.item.id) {
+        progress_ms = res.data.progress_ms;
+      } else {
+        progress_ms = 0;
+      }
+    }
+    const res2 = await axiosSpotify.put("/me/player/play", {
+      uris: ["spotify:track:" + track.id],
+      position_ms: progress_ms,
     });
 
-    const combineQuizArr = combineQuizzArray(res2.data);
-    setExam(combineQuizArr);
+    if (res2.status === 202) {
+      setIsPlaying(true);
+    }
+  };
+  const pause = async () => {
+    stopTime();
+    const res = await axiosSpotify.put("/me/player/pause");
+    if (res.status === 202) {
+      setIsPlaying(false);
+    }
+  };
+  const getSubmitArray = () => {
+    switch (currentPage) {
+      case 1:
+        return grammarSubmit;
+      case 2:
+        return readingSubmit;
+      case 3:
+        return vocabularySubmit;
+      default:
+        return [];
+    }
+  };
+  const onChagneAnswer = (answer: number, index: number) => {
+    if (answer !== undefined) {
+      if (currentPage === 1) {
+        const newArr = [...grammarSubmit];
+        newArr[index] = answer;
+        setGrammarSubmit(newArr);
+      } else if (currentPage === 2) {
+        const newArr = [...readingSubmit];
+        newArr[index] = answer;
+        setReadingSubmit(newArr);
+      } else if (currentPage === 3) {
+        const newArr = [...vocabularySubmit];
+        newArr[index] = answer;
+        setVocabularySubmit(newArr);
+      }
+    }
+  };
+  const listenAnswerChange = (index: any, event: any) => {
+    const newAnswers = [...listeningSubmit];
+    newAnswers[index] = event.target.value;
+    setListeningSubmit(newAnswers);
+  };
+
+  const submitQuiz = async () => {
+    const res = await axiosApi.post("/api/comprehensive-quiz/submit", {
+      musicId: track.id,
+      readingSubmit,
+      vocabularySubmit,
+      grammarSubmit,
+      listeningSubmit,
+      lrcLyricList,
+    });
+    console.log(res.data);
   };
   useEffect(() => {
     fetchExam();
+    if (listening) {
+      setListeningSubmit(Array(listening.answerList.length).fill(""));
+    }
   }, []);
 
   return (
@@ -80,7 +205,7 @@ function MockExam() {
         </div>
 
         {/* 문제 */}
-        <div>
+        <div className="h-[80%]">
           <span className="font-bold ">
             {currentPage === 1 &&
               "[01-05] Read the following passages. Then choose the option that best completes the passage."}
@@ -88,23 +213,25 @@ function MockExam() {
               "[06-10] Read the following passages. Then choose the option that best completes the passage."}
             {currentPage === 3 &&
               "[11-15] Read the following passages. Then choose the option that best completes the passage."}
+            {currentPage === 4 &&
+              "[16-25]  Listen the following passages. Then choose the option that best completes the passage."}
           </span>
-          <div className="overflow-y-auto  h-[80%] scrollbarwhite  whitespace-normal ">
+          <div className="h-full overflow-y-auto whitespace-normal scrollbarwhite ">
             {exam
               .slice((currentPage - 1) * 5, currentPage * 5)
               ?.map((problem, index) => (
                 <div key={index} className="flex flex-col mt-2">
-                  <span className="font-bold">{index + 1}.</span>
+                  <span className="font-bold">{getIndex(index)}.</span>
                   <div className="p-2 mb-2 font-semibold border border-black">
                     {problem.question}
                   </div>
                   <RadioGroup
                     className="radio-buttons-group-focus"
                     row
-                    // onChange={(e: any) =>
-                    //   onChagneAnswer(parseInt(e.target.value))
-                    // }
-                    // value={answers[index]}
+                    onChange={(e: any) =>
+                      onChagneAnswer(parseInt(e.target.value), index)
+                    }
+                    value={getSubmitArray()[index]}
                   >
                     {problem.optionList.map((option, index) => (
                       <FormControlLabel
@@ -125,24 +252,105 @@ function MockExam() {
                   </RadioGroup>
                 </div>
               ))}
+            {/* 듣기 문제*/}
+            {currentPage === 4 && (
+              <div className="py-2 text-2xl font-bold text-black bg-white rounded-3xl h-[80%]">
+                <div className="flex flex-col items-start">
+                  <div className="flex items-center w-full h-16 p-2 my-2 bg-white border border-black rounded-2xl">
+                    <img
+                      src={track.album.images[2].url}
+                      alt="Album Cover"
+                      className="w-12 h-12 rounded-xl"
+                    />
+                    <div className="flex flex-col justify-start ml-4">
+                      <span className="text-sm font-bold">{track.name}</span>
+                      <span className="text-sm">{track.artists[0].name}</span>
+                    </div>
+
+                    <div className="ml-44 hover:opacity-50">
+                      {isPlaying ? (
+                        <FaPause onClick={pause} className="w-6 h-6" />
+                      ) : (
+                        <FaPlay onClick={resume} className="w-6 h-6" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="h-full p-3 overflow-y-auto leading-[normal] border border-black scrollbarwhite">
+                  {listening?.blankedText
+                    ?.split("__")
+                    ?.map((lyric: string, index: number) => (
+                      <span key={index} className="text-xl">
+                        {lyric}
+                        {index !==
+                          listening.blankedText.split("__").length - 1 && (
+                          <span>
+                            <span className="text-xs">{index + 16}.</span>
+
+                            <input
+                              type="text"
+                              onChange={(event) =>
+                                listenAnswerChange(index, event)
+                              }
+                              value={listeningSubmit[index] || ""}
+                              className="w-24 h-5 text-lg text-center text-blue-500 bg-white rounded-md border-gray"
+                            />
+                          </span>
+                        )}
+                      </span>
+                    ))}
+                </div>
+              </div>
+            )}
+            {currentPage === 5 && (
+              <div className="h-[80%] w-full">
+                <div className="grid grid-cols-2 grid-rows-2 gap-4">
+                  <MockSubmitDisplay
+                    title="Grammar"
+                    submissions={grammarSubmit}
+                  />
+                  <MockSubmitDisplay
+                    title="Reading"
+                    submissions={readingSubmit}
+                  />
+                  <MockSubmitDisplay
+                    title="Vocabulary"
+                    submissions={vocabularySubmit}
+                  />
+                  <MockSubmitDisplay
+                    title="Listening"
+                    submissions={listeningSubmit}
+                  />
+                </div>
+                <div className="flex justify-center w-full mt-12 hover:opacity-60">
+                  <button
+                    onClick={submitQuiz}
+                    className="font-bold text-white bg-[#007AFF] w-[50%] h-8 rounded-xl"
+                  >
+                    제출하기
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="flex justify-center w-full h-[10%] mt-8">
-            {Array.from({ length: exam.length / 5 + 1 }, (_, i) => i + 1).map(
-              (page) => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`p-2 w-10 h-10 mx-1  rounded-md cursor-pointer bg-[${
-                    currentPage === page ? "#007AFF" : "white"
-                  }] text-[${
-                    currentPage === page ? "white" : "black"
-                  }] text-center hover:opacity-60`}
-                >
-                  {page}
-                </button>
-              )
-            )}
+          <div className="flex justify-center w-full h-[10%] mt-1">
+            {Array.from(
+              { length: (exam.length + 5) / 5 + 1 },
+              (_, i) => i + 1
+            ).map((page) => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`p-2 w-10 h-10 mx-1  rounded-md cursor-pointer bg-[${
+                  currentPage === page ? "#007AFF" : "white"
+                }] text-[${
+                  currentPage === page ? "white" : "black"
+                }] text-center hover:opacity-60`}
+              >
+                {page}
+              </button>
+            ))}
           </div>
         </div>
       </div>
