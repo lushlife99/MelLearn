@@ -9,7 +9,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.concurrent.ExecutionException;
 
@@ -27,9 +29,12 @@ public class ComprehensiveQuizController {
         return comprehensiveQuizService.get(quizRequest, request);
     }
 
-    @PostMapping("/submit")
+    @PostMapping(value = "/submit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "모의고사 답안지 제출", description = "모의고사 답안지 제출")
-    public ComprehensiveQuizSubmitDto submit(@RequestBody ComprehensiveQuizSubmitRequest submitRequest, HttpServletRequest request) throws ExecutionException, InterruptedException {
-        return comprehensiveQuizService.submit(submitRequest, request);
+    public ComprehensiveQuizSubmitDto submit(@RequestPart ComprehensiveQuizSubmitRequest submitRequest,
+                                             @RequestPart MultipartFile speakingSubmitFile,
+                                             @RequestPart  HttpServletRequest request) throws ExecutionException, InterruptedException {
+        System.out.println("ComprehensiveQuizController.submit");
+        return comprehensiveQuizService.submit(submitRequest, speakingSubmitFile, request);
     }
 }

@@ -13,6 +13,5 @@ public class ComprehensiveQuizSubmitRequest {
     private List<Integer> vocabularySubmit;
     private List<Integer> grammarSubmit;
     private List<String> listeningSubmit;
-    private MultipartFile speakingSubmit;
     private List<LrcLyric> lrcLyricList;
 }

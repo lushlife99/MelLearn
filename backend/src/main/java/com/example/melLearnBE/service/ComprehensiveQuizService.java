@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,13 +31,13 @@ public class ComprehensiveQuizService {
     private final JwtTokenProvider jwtTokenProvider;
 
 
-    public ComprehensiveQuizSubmitDto submit(ComprehensiveQuizSubmitRequest quizSubmitRequest, HttpServletRequest request) throws ExecutionException, InterruptedException {
+    public ComprehensiveQuizSubmitDto submit(ComprehensiveQuizSubmitRequest quizSubmitRequest, MultipartFile speakingSubmitFile, HttpServletRequest request) throws ExecutionException, InterruptedException {
 
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
 
         CompletableFuture<SpeakingSubmitDto> speakingSubmit = speakingService.submit(
                 SpeakingSubmitRequest.builder()
-                        .file(quizSubmitRequest.getSpeakingSubmit())
+                        .file(speakingSubmitFile)
                         .lyricList(quizSubmitRequest.getLrcLyricList())
                         .build(), quizSubmitRequest.getMusicId(), request);
 

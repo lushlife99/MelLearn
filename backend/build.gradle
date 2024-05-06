@@ -36,7 +36,7 @@ dependencies {
 	//Querydsl 추가
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'com.mysql:mysql-connector-j'
+	runtimeOnly 'com.mysql:mysql-connector-j:8.0.32'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.1'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.1'
 	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
