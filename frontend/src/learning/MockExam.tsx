@@ -249,7 +249,7 @@ function MockExam() {
                           <div className="">
                             <div className="flex items-center">
                               <span className="text-[black] text-md  ">
-                                {index + 1}. {option}
+                                {index + 1}. {option.replace(/^\d+\.\s*/, "")}
                               </span>
                             </div>
                           </div>

@@ -55,10 +55,11 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 
 export const Rank = (): JSX.Element => {
   const location = useLocation();
-  const { trackId, track } = location.state;
+  const { track } = location.state;
   const navigate = useNavigate();
-  const [rank, setRank] = useState<[string, unknown][]>([]);
+  const [rank, setRank] = useState<[string, number][]>([]);
   const [myScore, setMyScore] = useState<number | undefined>();
+  const [myRank, setMyRank] = useState<number>();
   const [member, setMember] = useState<IMember>();
   const [memberId, setMemberId] = useState<string>();
 
@@ -67,19 +68,19 @@ export const Rank = (): JSX.Element => {
       `/api/problem/speaking/ranking?musicId=${track.id.replace(/['"]+/g, "")}`
     );
 
-    const entries = Object.entries(res.data.score_list);
+    const entries: [string, number][] = Object.entries(res.data.score_list);
     const currentMemberScore = entries.find(([key]) => key === memberId)?.[1];
     if (typeof currentMemberScore === "number") {
       setMyScore(currentMemberScore);
     }
 
-    const sortedEntries: [string, unknown][] = entries.sort((a, b) => {
-      if (a[0] < b[0]) return -1;
-      if (a[0] > b[0]) return 1;
-      return 0;
-    });
-
+    const sortedEntries: [string, number][] = entries.sort(
+      (a, b) => b[1] - a[1]
+    );
+    const index = sortedEntries.findIndex(([id, score]) => id === memberId);
     setRank(sortedEntries);
+    setMyRank(index);
+    console.log(index);
     console.log(sortedEntries);
   };
   const getMember = async () => {
@@ -88,6 +89,7 @@ export const Rank = (): JSX.Element => {
     setMember(res.data);
     setMemberId(res.data.memberId);
   };
+  console.log(myScore);
 
   useEffect(() => {
     getRank();
@@ -115,43 +117,61 @@ export const Rank = (): JSX.Element => {
         <div className="flex justify-start mt-4">
           <span className="text-3xl font-bold text-white">{track.name}</span>
         </div>
-        <div className="my-4">
-          <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 300 }} aria-label="simple table">
-              <TableHead>
-                <TableRow>
-                  <StyledTableCell>랭크 </StyledTableCell>
-                  <StyledTableCell align="center">유저</StyledTableCell>
-                  <StyledTableCell align="center">정확도</StyledTableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {rows.map((row) => (
-                  <TableRow
-                    key={row.rank}
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <StyledTableCell component="th" scope="row">
-                      {row.rank}
-                    </StyledTableCell>
-                    <StyledTableCell align="left">
-                      {row.userName}
-                    </StyledTableCell>
-                    <StyledTableCell align="left">
-                      {row.accuracy}
-                    </StyledTableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+
+        <div className="w-full my-4">
+          <table className="bg-[#007AFF] w-full rounded-xl text-white font-bold h-28">
+            <thead>
+              <tr>
+                <th className="p-2 w-[33%]">순위</th>
+                <th className="p-2 w-[33%]">유저</th>
+                <th className="p-2 w-[33%]">점수</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rank.slice(0, 3).map((user, index) => (
+                <tr>
+                  <td className="p-2">
+                    <div className="flex items-center text-lg">
+                      <span>{index + 1}</span>
+                      <div className="w-8 h-8">
+                        {index + 1 === 1 && "🥇"}
+                        {index + 1 === 2 && "🥈"}
+                        {index + 1 === 3 && "🥉"}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-2 ">{user[0]}</td>
+                  <td className="p-2 ">{user[1]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
-        <div className="">
+        <div className="mt-4 ">
           <div className="mb-2">
-            <span className="text-xl font-bold text-[#8A9A9D]">내 순위</span>
+            <span className="text-sm font-bold text-[#8A9A9D]">내 순위</span>
           </div>
-          <TableContainer component={Paper}>
+
+          <table className="bg-[#007AFF] w-full rounded-xl text-white font-bold h-12 ">
+            <thead>
+              <tr>
+                <td className="p-2  w-[33%] ">
+                  <div className="flex items-center text-lg">
+                    <span>{myRank !== undefined && myRank + 1}</span>
+                    <div className="w-8 h-8">
+                      {myRank !== undefined && myRank + 1 === 1 && "🥇"}
+                      {myRank !== undefined && myRank + 1 === 2 && "🥈"}
+                      {myRank !== undefined && myRank + 1 === 3 && "🥉"}
+                    </div>
+                  </div>
+                </td>
+                <td className="ml-4  w-[33%]">{member?.memberId}</td>
+                <td className="px-2 w-[33%]">{myScore}</td>
+              </tr>
+            </thead>
+          </table>
+          {/* <TableContainer component={Paper}>
             <Table sx={{ minWidth: 300 }} aria-label="simple table">
               <TableHead>
                 <TableRow>
@@ -163,7 +183,7 @@ export const Rank = (): JSX.Element => {
                 </TableRow>
               </TableHead>
             </Table>
-          </TableContainer>
+          </TableContainer> */}
         </div>
       </div>
     </div>
