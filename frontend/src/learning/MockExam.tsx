@@ -5,6 +5,7 @@ import { FormControlLabel, Radio, RadioGroup } from "@mui/material";
 import "../css/scroll.css";
 import { FaPause, FaPlay } from "react-icons/fa6";
 import MockSubmitDisplay from "./MockSubmitDisplay";
+import MockSpeaking from "./MockSpeaking";
 
 interface ReadComp {
   id: number;
@@ -58,7 +59,10 @@ function MockExam() {
   const [grammarSubmit, setGrammarSubmit] = useState<number[]>(
     new Array(quizLen).fill(0)
   );
-  const [listeningSubmit, setListeningSubmit] = useState<string[]>([]);
+  const [listeningSubmit, setListeningSubmit] = useState<string[]>(
+    new Array(10).fill("")
+  );
+  const formData = new FormData();
 
   const combineQuizzArray = (quiz: Exam) => {
     const combinArray = [];
@@ -180,6 +184,7 @@ function MockExam() {
       grammarSubmit,
       listeningSubmit,
       lrcLyricList,
+      speakingSubmit: JSON.stringify(formData),
     });
     console.log(res.data);
   };
@@ -189,6 +194,7 @@ function MockExam() {
       setListeningSubmit(Array(listening.answerList.length).fill(""));
     }
   }, []);
+  console.log("check", formData);
 
   return (
     <div className="bg-[white] flex flex-row justify-center w-full h-screen font-[roboto]">
@@ -215,6 +221,7 @@ function MockExam() {
               "[11-15] Read the following passages. Then choose the option that best completes the passage."}
             {currentPage === 4 &&
               "[16-25]  Listen the following passages. Then choose the option that best completes the passage."}
+            {currentPage === 5 && "[26] spaeking test"}
           </span>
           <div className="h-full overflow-y-auto whitespace-normal scrollbarwhite ">
             {exam
@@ -281,7 +288,7 @@ function MockExam() {
                     ?.split("__")
                     ?.map((lyric: string, index: number) => (
                       <span key={index} className="text-xl">
-                        {lyric}
+                        {lyric.replace(/\[\d+:\d+\.\d+\]/g, "")}
                         {index !==
                           listening.blankedText.split("__").length - 1 && (
                           <span>
@@ -302,7 +309,11 @@ function MockExam() {
                 </div>
               </div>
             )}
+
             {currentPage === 5 && (
+              <MockSpeaking track={track} formData={formData} />
+            )}
+            {currentPage === 6 && (
               <div className="h-[80%] w-full">
                 <div className="grid grid-cols-2 grid-rows-2 gap-4">
                   <MockSubmitDisplay
@@ -336,7 +347,7 @@ function MockExam() {
 
           <div className="flex justify-center w-full h-[10%] mt-1">
             {Array.from(
-              { length: (exam.length + 5) / 5 + 1 },
+              { length: (exam.length + 10) / 5 + 1 },
               (_, i) => i + 1
             ).map((page) => (
               <button

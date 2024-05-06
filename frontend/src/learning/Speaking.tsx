@@ -115,7 +115,8 @@ const Speaking = () => {
             navigate("/speakingScore", {
               state: {
                 comments: res.data,
-                trackId: track.id,
+
+                track: track,
               },
             });
           }

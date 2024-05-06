@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Paper,
   TableBody,
@@ -9,8 +9,26 @@ import {
   TableRow,
 } from "@mui/material";
 import { styled, Table } from "@mui/joy";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axiosApi from "../api";
+import { IoIosArrowRoundBack } from "react-icons/io";
+
+interface IMember {
+  id: number;
+  langType: string;
+  level: string;
+  levelPoint: number;
+  memberId: string;
+  name: string;
+}
+interface ScoreList {
+  [key: string]: number;
+}
+interface IRank {
+  id: number;
+  musicId: string;
+  score_list: ScoreList;
+}
 
 function createData(rank: number, userName: string, accuracy: number) {
   return { rank, userName, accuracy };
@@ -35,48 +53,69 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   },
 }));
 
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  // '&:nth-of-type(odd)': {
-  //     // backgroundColor: theme.palette.action.hover,
-  // },
-  // // hide last border
-  // '&:last-child td, &:last-child th': {
-  //     border: 0,
-  // },
-}));
-
 export const Rank = (): JSX.Element => {
   const location = useLocation();
-  const { trackId } = location.state;
-  console.log(trackId);
+  const { trackId, track } = location.state;
+  const navigate = useNavigate();
+  const [rank, setRank] = useState<[string, unknown][]>([]);
+  const [myScore, setMyScore] = useState<number | undefined>();
+  const [member, setMember] = useState<IMember>();
+  const [memberId, setMemberId] = useState<string>();
 
   const getRank = async () => {
     const res = await axiosApi.get(
-      `/api/problem/speaking/ranking?musicId=${trackId.replace(/['"]+/g, "")}`
+      `/api/problem/speaking/ranking?musicId=${track.id.replace(/['"]+/g, "")}`
     );
-    console.log(res.data);
+
+    const entries = Object.entries(res.data.score_list);
+    const currentMemberScore = entries.find(([key]) => key === memberId)?.[1];
+    if (typeof currentMemberScore === "number") {
+      setMyScore(currentMemberScore);
+    }
+
+    const sortedEntries: [string, unknown][] = entries.sort((a, b) => {
+      if (a[0] < b[0]) return -1;
+      if (a[0] > b[0]) return 1;
+      return 0;
+    });
+
+    setRank(sortedEntries);
+    console.log(sortedEntries);
+  };
+  const getMember = async () => {
+    const res = await axiosApi.get("/api/member/info");
+
+    setMember(res.data);
+    setMemberId(res.data.memberId);
   };
 
   useEffect(() => {
     getRank();
+    getMember();
   }, []);
   return (
-    <div className="bg-[#121111] flex flex-row justify-center w-full">
-      <div className="bg-[#121111] w-[360px] h-[800px] relative">
-        <div className="absolute w-[84px] top-[29px] left-[137px]  font-bold text-white text-[44px] tracking-[0] leading-[normal] whitespace-nowrap">
-          랭킹
-        </div>
-        <div>
-          <img
-            className="absolute w-[300px] h-[300px] top-[100px] left-[29px] object-cover rounded"
-            src="./mardyBUm.jpg"
-            alt="?"
+    <div className="bg-[black] flex flex-row justify-center w-full h-screen font-roboto">
+      <div className="bg-[black] overflow-hidden w-[450px] h-screen relative flex flex-col px-8 border border-white">
+        <div className="mt-4">
+          <IoIosArrowRoundBack
+            onClick={() => navigate(-1)}
+            className="w-8 h-8 fill-white hover:opacity-60"
           />
         </div>
-        <div className="absolute w-[262px] top-[417px] left-[30px] [font-family:'Acme-Regular',Helvetica] font-normal text-white text-[24px] tracking-[1.44px] leading-[normal] whitespace-nowrap">
-          Mardy Bum
+        <div className="flex items-center justify-center w-full my-4">
+          <span className="text-4xl font-bold text-white ">랭킹</span>
         </div>
-        <div className="absolute w-[306px] h-[194px] top-[475px] left-[29px]">
+        <div className="flex items-center justify-center">
+          <img
+            className="w-100 h-100"
+            src={track.album.images[0].url}
+            alt="Album Cover"
+          />
+        </div>
+        <div className="flex justify-start mt-4">
+          <span className="text-3xl font-bold text-white">{track.name}</span>
+        </div>
+        <div className="my-4">
           <TableContainer component={Paper}>
             <Table sx={{ minWidth: 300 }} aria-label="simple table">
               <TableHead>
@@ -107,21 +146,24 @@ export const Rank = (): JSX.Element => {
             </Table>
           </TableContainer>
         </div>
-        <div className="h-[51px] top-[716px] left-[29px] absolute w-[306px]">
+
+        <div className="">
+          <div className="mb-2">
+            <span className="text-xl font-bold text-[#8A9A9D]">내 순위</span>
+          </div>
           <TableContainer component={Paper}>
             <Table sx={{ minWidth: 300 }} aria-label="simple table">
               <TableHead>
                 <TableRow>
                   <StyledTableCell>랭크 </StyledTableCell>
-                  <StyledTableCell align="center">유저</StyledTableCell>
-                  <StyledTableCell align="center">정확도</StyledTableCell>
+                  <StyledTableCell align="center">
+                    {member?.memberId}
+                  </StyledTableCell>
+                  <StyledTableCell align="center">{myScore}</StyledTableCell>
                 </TableRow>
               </TableHead>
             </Table>
           </TableContainer>
-        </div>
-        <div className="absolute w-[64px] top-[687px] left-[36px] font-normal text-[#8a9a9d] text-[14px] tracking-[0.77px] leading-[normal]">
-          내 순위
         </div>
       </div>
     </div>

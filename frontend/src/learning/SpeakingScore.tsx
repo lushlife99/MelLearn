@@ -1,17 +1,17 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import BgCircle from "../components/BgCircle";
-import axiosApi from "../api";
 
 function SpeakingScore() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { comments, trackId } = location.state;
-  console.log(comments);
+  const { comments, track } = location.state;
+
+  const parts = comments.markedText.split("_");
   const viewRank = async () => {
     navigate("/rank", {
       state: {
-        trackId,
+        track,
       },
     });
   };
@@ -23,8 +23,25 @@ function SpeakingScore() {
       <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col ">
         <BgCircle />
         <div className="z-10 flex flex-col items-center justify-center w-full h-full px-12">
-          <div className="w-full px-4 py-2 mb-8 overflow-y-auto text-black bg-white rounded-lg h-96">
-            <p>{comments.markedText}</p>
+          <div className="w-full px-4 py-2 mb-8 overflow-y-auto text-black bg-white rounded-3xl h-96 shadow-[0px_4px_4px_#00000040]">
+            <p>
+              {parts.map((part: any, index: number) => {
+                if (index % 2 === 0) {
+                  // 인덱스가 홀수인 경우(즉, __ 다음에 오는 문자열)
+                  return (
+                    <span
+                      className="font-bold text-[#FF0000] text-lg"
+                      key={index}
+                    >
+                      {part}
+                    </span>
+                  );
+                } else {
+                  // 인덱스가 짝수인 경우(즉, __)
+                  return part;
+                }
+              })}
+            </p>
           </div>
           <div className="bg-[#55A2FD] w-80 h-80 rounded-full flex justify-center items-center">
             <div className="flex items-center justify-center w-72 h-72 bg-[#9bd1e5] rounded-full">

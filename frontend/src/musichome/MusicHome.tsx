@@ -75,7 +75,6 @@ function MusicHome() {
       staleTime: 1800000,
     }
   );
-  console.log(recommendData);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setPage(newValue);

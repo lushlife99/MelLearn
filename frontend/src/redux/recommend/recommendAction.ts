@@ -15,6 +15,5 @@ export const fetchRecommendData = async (): Promise<RecommendData> => {
 
   const playableTracks = tracks.filter((track) => track.preview_url !== null);
 
-  console.log(res.data);
   return { recommends: playableTracks };
 };
