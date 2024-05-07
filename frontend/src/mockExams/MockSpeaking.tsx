@@ -5,7 +5,8 @@ import Lyric from "../musichome/Lyric";
 import { LyricData } from "../redux/type";
 import { IoMdMicrophone } from "react-icons/io";
 import { useDispatch } from "react-redux";
-import { setSpeakingData } from "../redux/mockSpeaking/mockSpeakingSlice";
+import { setRecordBlobUrl } from "../redux/mockSpeaking/recordSlice";
+
 interface ITrack {
   album: {
     images: {
@@ -25,10 +26,11 @@ interface ITrack {
 }
 interface Track {
   track: ITrack;
-  formData: FormData;
+
+  label: number | undefined;
 }
 
-function MockSpeaking({ track, formData }: Track) {
+function MockSpeaking({ track, label }: Track) {
   const mediaStream = useRef<MediaStream | null>(null);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
@@ -91,31 +93,11 @@ function MockSpeaking({ track, formData }: Track) {
         };
         mediaRecorder.current.start();
         mediaRecorder.current.onstop = async () => {
+          console.log("중지");
           // 노래 끝나고 서버에 speaking data 보냄
           const recordedBlob = new Blob(chunks.current, { type: "audio/wav" });
-          //const url = URL.createObjectURL(recordedBlob);
-          //const formData = new FormData();
-          formData.append(`speakingSubmit`, recordedBlob);
-          const lyricsBlob = new Blob([JSON.stringify(lyricData)], {
-            type: "application/json",
-          });
-          formData.append("lyricList", lyricsBlob, "lyricList.json");
-          const musicId = new Blob([track.id], {
-            type: "text/plain",
-          });
-
-          formData.append("musicId", musicId, "musicId.json");
-          console.log(formData);
-
-          //   const res = await axiosApi.post(
-          //     "/api/problem/speaking/transcription",
-          //     formData,
-          //     {
-          //       headers: {
-          //         "Content-Type": "multipart/form-data",
-          //       },
-          //     }
-          //   ); // 파일명은 선택사항
+          const blobUrl = URL.createObjectURL(recordedBlob);
+          dispatch(setRecordBlobUrl(blobUrl));
         };
       }
     } catch (error) {
@@ -150,9 +132,10 @@ function MockSpeaking({ track, formData }: Track) {
   }, []);
 
   return (
-    <div className="h-[80%]">
+    <div className="h-[80%] ">
       <div className="flex flex-col items-start h-[15%]">
         <div className="flex items-center w-full h-16 p-2 my-2 bg-white border border-black rounded-2xl">
+          <IoMdMicrophone className="w-8 h-8" onClick={accessMicrophone} />
           <img
             src={track.album.images[2].url}
             alt="Album Cover"
@@ -162,12 +145,9 @@ function MockSpeaking({ track, formData }: Track) {
             <span className="text-sm font-bold">{track.name}</span>
             <span className="text-sm">{track.artists[0].name}</span>
           </div>
-          <div className="ml-44 hover:opacity-60">
-            <IoMdMicrophone className="w-8 h-8" onClick={accessMicrophone} />
-          </div>
         </div>
       </div>
-      <span className="font-bold">26.</span>
+      <span className="font-bold">{label && 16 + label}</span>
       <div className="h-full p-3 overflow-y-auto leading-[normal] border border-black scrollbarwhite">
         {lyricData?.map((lyric, index) => (
           <div key={index}>

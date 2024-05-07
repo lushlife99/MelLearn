@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../api";
 import { FormControlLabel, Radio, RadioGroup } from "@mui/material";
 import "../css/scroll.css";
 import { FaPause, FaPlay } from "react-icons/fa6";
 import MockSubmitDisplay from "./MockSubmitDisplay";
 import MockSpeaking from "./MockSpeaking";
+import BgCircle from "../components/BgCircle";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
 
 interface ReadComp {
   id: number;
@@ -30,8 +33,10 @@ interface Exam {
 
 function MockExam() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { track } = location.state;
   const [currentPage, setCurrentPage] = useState(1);
+
   const [lrcLyricList, setlrcLyricList] = useState();
   const [exam, setExam] = useState<
     {
@@ -45,6 +50,7 @@ function MockExam() {
   const [listening, setListening] = useState<Listening>();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [intervalId, setIntervalId] =
     useState<ReturnType<typeof setInterval>>();
@@ -60,9 +66,11 @@ function MockExam() {
     new Array(quizLen).fill(0)
   );
   const [listeningSubmit, setListeningSubmit] = useState<string[]>(
-    new Array(10).fill("")
+    new Array(listening?.answerList.length).fill("")
   );
-  const formData = new FormData();
+  const recordedBlobUrl = useSelector(
+    (state: RootState) => state.record.recordedBlobUrl
+  );
 
   const combineQuizzArray = (quiz: Exam) => {
     const combinArray = [];
@@ -86,6 +94,7 @@ function MockExam() {
       quizType: "GRAMMAR",
       lyric: res2.data,
     });
+    setIsLoading(false);
     console.log(res3.data);
     setListening(res3.data.listeningQuizDto);
     const combineQuizArr = combineQuizzArray(res3.data);
@@ -177,16 +186,41 @@ function MockExam() {
   };
 
   const submitQuiz = async () => {
-    const res = await axiosApi.post("/api/comprehensive-quiz/submit", {
-      musicId: track.id,
+    const formData = new FormData();
+    const submitRequest = {
       readingSubmit,
+      musicId: track.id,
+      lrcLyricList,
       vocabularySubmit,
       grammarSubmit,
       listeningSubmit,
-      lrcLyricList,
-      speakingSubmit: JSON.stringify(formData),
+    };
+    if (recordedBlobUrl) {
+      const res = await fetch(recordedBlobUrl);
+      const blob = await res.blob();
+      formData.append("speakingSubmitFile", blob);
+    }
+    //formData.append(`speakingSubmitFile`, recordedBlob);
+    const submitBlob = new Blob([JSON.stringify(submitRequest)], {
+      type: "application/json",
     });
-    console.log(res.data);
+    formData.append("submitRequest", submitBlob, "submit.json");
+    const res = await axiosApi.post(
+      "/api/comprehensive-quiz/submit",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    if (res.status === 200) {
+      navigate("/mockComment", {
+        state: {
+          comment: res.data,
+        },
+      });
+    }
   };
   useEffect(() => {
     fetchExam();
@@ -194,24 +228,38 @@ function MockExam() {
       setListeningSubmit(Array(listening.answerList.length).fill(""));
     }
   }, []);
-  console.log("check", formData);
+
+  if (isLoading) {
+    return (
+      <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
+        <div className="bg-[#9bd1e5] whi overflow-hidden w-[450px] h-full relative flex flex-col px-8 border border-black">
+          <div className="absolute left-0 z-10 flex items-center justify-center w-full h-12 font-bold text-center text-white animate-pulse top-50 rounded-xl ">
+            <div className="animate-bounce bg-[#007AFF] h-12 flex items-center rounded-xl w-[80%] justify-center">
+              모의고사 생성중...
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-[white] flex flex-row justify-center w-full h-screen font-[roboto]">
-      <div className="bg-[white] whi overflow-hidden w-[450px] h-full relative flex flex-col px-8 border border-black">
+    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
+      <div className="bg-[#9bd1e5] whi overflow-hidden w-[450px] h-full relative flex flex-col px-8 border border-black">
         {/* 모의고사 제목*/}
-        <div className="h-[10%] ">
-          <div className="my-2 border-t-2 border-gray-300"></div>
+        <BgCircle />
+        <div className="h-[10%] z-10 ">
+          <div className="my-2 border-t-2 border-black"></div>
           <div className="flex justify-center w-full">
             <span className="text-3xl font-extrabold">
               {track.name} 모의고사
             </span>
           </div>
-          <div className="my-2 border-t-2 border-gray-300"></div>
+          <div className="my-2 border-t-2 border-black"></div>
         </div>
 
         {/* 문제 */}
-        <div className="h-[80%]">
+        <div className="h-[80%] z-10">
           <span className="font-bold ">
             {currentPage === 1 &&
               "[01-05] Read the following passages. Then choose the option that best completes the passage."}
@@ -220,8 +268,13 @@ function MockExam() {
             {currentPage === 3 &&
               "[11-15] Read the following passages. Then choose the option that best completes the passage."}
             {currentPage === 4 &&
-              "[16-25]  Listen the following passages. Then choose the option that best completes the passage."}
-            {currentPage === 5 && "[26] spaeking test"}
+              listening &&
+              `[16-${
+                16 + listening?.answerList.length - 1
+              }]  Listen the following passages. Then choose the option that best completes the passage.`}
+            {currentPage === 5 &&
+              listening &&
+              `[${16 + listening.answerList.length}] spaeking test`}
           </span>
           <div className="h-full overflow-y-auto whitespace-normal scrollbarwhite ">
             {exam
@@ -311,7 +364,15 @@ function MockExam() {
             )}
 
             {currentPage === 5 && (
-              <MockSpeaking track={track} formData={formData} />
+              <div>
+                {/* <button onClick={() => stopRecording()}>fd</button> */}
+                <div className="ml-44 hover:opacity-60">
+                  <MockSpeaking
+                    track={track}
+                    label={listening?.answerList.length}
+                  />
+                </div>
+              </div>
             )}
             {currentPage === 6 && (
               <div className="h-[80%] w-full">
