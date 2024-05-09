@@ -12,9 +12,10 @@ interface IListeningComment {
 }
 function ListeningComments({ comments }: IListeningComment) {
   return (
-    <div className="h-full px-4 py-2 bg-white rounded-xl">
+    <div className="h-full ">
       <div className="text-2xl font-bold text-black">
         {comments.listeningQuiz.blankedText
+          .replaceAll(/\[\d{2}:\d{2}\.\d{2}\]/g, "")
           .split("__")
           .map((part: string, index: number) => {
             if (index < comments.listeningQuiz.answerList.length) {
@@ -35,8 +36,8 @@ function ListeningComments({ comments }: IListeningComment) {
               );
             } else {
               return (
-                <span className="text-green" key={index}>
-                  {part}
+                <span className="" key={index}>
+                  {part.replace(/\[\d+:\d+\.\d+\]/, "")}
                 </span>
               );
             }

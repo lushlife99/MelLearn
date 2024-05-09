@@ -316,7 +316,7 @@ function MockExam() {
             {currentPage === 4 && (
               <div className="py-2 text-2xl font-bold text-black bg-white rounded-3xl h-[80%]">
                 <div className="flex flex-col items-start">
-                  <div className="flex items-center w-full h-16 p-2 my-2 bg-white border border-black rounded-2xl">
+                  <div className="flex items-center w-full h-16 p-2 my-2 bg-white rounded-2xl shadow-[0px_4px_4px_#00000040]">
                     <img
                       src={track.album.images[2].url}
                       alt="Album Cover"
@@ -336,7 +336,7 @@ function MockExam() {
                     </div>
                   </div>
                 </div>
-                <div className="h-full p-3 overflow-y-auto leading-[normal] border border-black scrollbarwhite">
+                <div className="h-full p-3 overflow-y-auto leading-[normal] bg-white  scrollbarwhite shadow-[0px_4px_4px_#00000040] rounded-b-2xl">
                   {listening?.blankedText
                     ?.split("__")
                     ?.map((lyric: string, index: number) => (
@@ -364,9 +364,8 @@ function MockExam() {
             )}
 
             {currentPage === 5 && (
-              <div>
-                {/* <button onClick={() => stopRecording()}>fd</button> */}
-                <div className="ml-44 hover:opacity-60">
+              <div className="h-full">
+                <div className="h-full">
                   <MockSpeaking
                     track={track}
                     label={listening?.answerList.length}

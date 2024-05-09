@@ -44,7 +44,6 @@ function PlayMusic() {
   >(["lyric", track.id], getFetchLyric, {
     staleTime: 10800000,
   });
-  console.log(lyricData);
 
   const play = async () => {
     const res = await axiosSpotify.put("/me/player/play", {
@@ -121,17 +120,17 @@ function PlayMusic() {
   };
 
   //이전 재생
-  const playPrevious = async () => {
-    const res = await axiosSpotify.post("/me/player/previous");
-    console.log("이전", res.status);
-  };
+  // const playPrevious = async () => {
+  //   const res = await axiosSpotify.post("/me/player/previous");
+  //   console.log("이전", res.status);
+  // };
 
-  //다음재생
-  const playNext = async () => {
-    const res = await axiosSpotify.post("/me/player/next");
-    const res2 = await axiosSpotify.get("/me/player/queue");
-    console.log("다음", res2.data);
-  };
+  // //다음재생
+  // const playNext = async () => {
+  //   const res = await axiosSpotify.post("/me/player/next");
+  //   const res2 = await axiosSpotify.get("/me/player/queue");
+  //   console.log("다음", res2.data);
+  // };
   const goBack = () => {
     navigate(-1); //뒤로가기
   };

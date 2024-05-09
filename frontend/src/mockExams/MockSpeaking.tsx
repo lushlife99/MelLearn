@@ -132,23 +132,28 @@ function MockSpeaking({ track, label }: Track) {
   }, []);
 
   return (
-    <div className="h-[80%] ">
+    <div className="w-full h-full">
       <div className="flex flex-col items-start h-[15%]">
-        <div className="flex items-center w-full h-16 p-2 my-2 bg-white border border-black rounded-2xl">
-          <IoMdMicrophone className="w-8 h-8" onClick={accessMicrophone} />
-          <img
-            src={track.album.images[2].url}
-            alt="Album Cover"
-            className="w-12 h-12 rounded-xl"
-          />
-          <div className="flex flex-col justify-start ml-4">
-            <span className="text-sm font-bold">{track.name}</span>
-            <span className="text-sm">{track.artists[0].name}</span>
+        <div className="flex items-center w-full h-16 p-2 my-2 bg-white rounded-2xl shadow-[0px_4px_4px_#00000040] justify-between">
+          <div className="flex items-center justify-center ">
+            <img
+              src={track.album.images[2].url}
+              alt="Album Cover"
+              className="w-12 h-12 rounded-xl"
+            />
+            <div className="flex flex-col justify-start ml-4">
+              <span className="text-sm font-bold">{track.name}</span>
+              <span className="text-sm">{track.artists[0].name}</span>
+            </div>
           </div>
+          <IoMdMicrophone
+            className="w-8 h-8 hover:opacity-60"
+            onClick={accessMicrophone}
+          />
         </div>
       </div>
-      <span className="font-bold">{label && 16 + label}</span>
-      <div className="h-full p-3 overflow-y-auto leading-[normal] border border-black scrollbarwhite">
+      <span className="font-bold h-[5%]">{label && 16 + label}.</span>
+      <div className="h-[80%] p-3 overflow-y-auto leading-[normal] bg-white scrollbarwhite rounded-xl shadow-[0px_4px_4px_#00000040]">
         {lyricData?.map((lyric, index) => (
           <div key={index}>
             <p

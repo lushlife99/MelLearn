@@ -5,6 +5,7 @@ import Comments from "../components/Comments";
 import ListeningComments from "../components/ListeningComments";
 import "../css/scroll.css";
 import SpeakingComments from "../components/SpeakingComments";
+import HomeIcon from "@mui/icons-material/Home";
 
 function MockComment() {
   const navigate = useNavigate();
@@ -53,7 +54,10 @@ function MockComment() {
             <div className="font-bold text-2xl h-[10%] flex w-full  justify-around items-center">
               <span>스피킹</span>
               <span className="text-[#007AFF]">
-                {comment.comprehensiveQuizAnswer.speakingSubmit.score}점
+                {comment.comprehensiveQuizAnswer.speakingSubmit.score.toFixed(
+                  2
+                )}
+                점
               </span>
             </div>
           )}
@@ -80,14 +84,14 @@ function MockComment() {
             </div>
           )}
           {currentPage === 4 && (
-            <div className="h-[80%] overflow-y-auto scrollbarwhite">
+            <div className="h-[80%] overflow-y-auto scrollbarwhite px-4 py-2 bg-white rounded-xl">
               <ListeningComments
                 comments={comment.comprehensiveQuizAnswer.listeningSubmit}
               />
             </div>
           )}
           {currentPage === 5 && (
-            <div className="h-[80%] overflow-y-auto scrollbarwhite">
+            <div className="h-[80%] overflow-y-auto flex felx-col scrollbarwhite bg-white rounded-xl px-4 py-2">
               <SpeakingComments
                 comments={comment.comprehensiveQuizAnswer.speakingSubmit}
               />
@@ -107,6 +111,12 @@ function MockComment() {
                 {page}
               </button>
             ))}
+            <button
+              onClick={() => navigate("/home")}
+              className="w-10 h-10 p-2 mx-1 bg-white rounded-md cursor-pointer hover:opacity-60"
+            >
+              <HomeIcon />
+            </button>
           </div>
         </div>
       </div>

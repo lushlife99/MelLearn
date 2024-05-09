@@ -54,7 +54,8 @@ const handleResponseInterceptor = async (
     localStorage.setItem("accessToken", accessToken);
     return new Promise(() => {});
   } else if (error.response?.status === 404) {
-    console.error("404err");
+    const errorData = error.response.data as { message: string };
+    alert(errorData.message);
   } else if (error.response?.status === 409) {
     const errorData = error.response.data as { message: string };
     alert(errorData.message);
@@ -87,7 +88,9 @@ const handleSpotifyResponseInterceptor = async (
 
     return new Promise(() => {});
   } else if (error.response?.status === 404) {
-    console.error("장치 연결");
+    //const deviceId = localStorage.getItem("deviceId");
+    alert("연결된 장치가 존재하지 않습니다. 다시 로그인 해주세요");
+    window.location.href = "/";
     return new Promise(() => {});
   }
   return Promise.reject(error.toJSON());
