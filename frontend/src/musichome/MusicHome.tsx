@@ -80,15 +80,19 @@ function MusicHome() {
     setPage(newValue);
     switch (newValue) {
       case 0:
+        //home
         navigation("/home");
         break;
       case 1:
+        //모의고사
         navigation("/compQuiz");
         break;
       case 2:
-        //navigation("/history");
+        //히스토리
+        navigation("/history");
         break;
       case 3:
+        //설정
         navigation("/setting");
         break;
       default:

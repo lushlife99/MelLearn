@@ -27,6 +27,7 @@ import { RecommendMusicList } from "./musichome/RecommendMusicList";
 import MockExam from "./mockExams/MockExam";
 import SearchExam from "./mockExams/SearchExam";
 import MockComment from "./mockExams/MockComment";
+import History from "./problemHistory/History";
 
 function App() {
   return (
@@ -61,6 +62,7 @@ function App() {
           <Route path="/compQuiz" element={<SearchExam />}></Route>
           <Route path="/mockExam" element={<MockExam />}></Route>
           <Route path="/mockComment" element={<MockComment />}></Route>
+          <Route path="/history" element={<History />}></Route>
         </Routes>
       </BrowserRouter>
     </Provider>
