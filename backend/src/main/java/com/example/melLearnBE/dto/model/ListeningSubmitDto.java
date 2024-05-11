@@ -36,7 +36,7 @@ public class ListeningSubmitDto {
         this.id = id;
         this.listeningQuiz = listeningQuiz;
         this.level = level;
-        this.submitAnswerList = submitAnswerList;
+        this.submitAnswerList = List.copyOf(submitAnswerList);
         this.score = score;
         this.createdTime = createdTime;
     }

@@ -82,7 +82,7 @@ public class QuizCreationService {
                 ListeningQuiz listeningQuiz = ListeningQuiz.builder()
                         .level(member.getLevel())
                         .musicId(quizRequest.getMusicId())
-                        .submitList(new ArrayList<>()).build();
+                        .build();
 
 
                 blankToListeningText(quizRequest, member.getLevel(), answerContext, listeningQuiz);

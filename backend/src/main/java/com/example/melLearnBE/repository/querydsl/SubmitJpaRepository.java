@@ -3,8 +3,12 @@ package com.example.melLearnBE.repository.querydsl;
 import com.example.melLearnBE.dto.model.*;
 import com.example.melLearnBE.enums.QuizType;
 import com.example.melLearnBE.model.*;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.ListPath;
+import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
@@ -25,6 +29,14 @@ public class SubmitJpaRepository {
         this.queryFactory = new JPAQueryFactory(em);
     }
 
+    /**
+     * @ElementCollection 타입을 Join하는 쿼리는 Querydsl에서 지원하지 않음.
+     * 그래서 한방 쿼리를 날리려면 Entity계층을 수정해야 함.
+     * @ElementCollection 타입을 Entity로 등록하고 연관관계를 설정해주어야, fetchJoin을 사용할 수 있음.
+     *
+     * 일단 지금은 트랜잭션을 사용해 Lazy-Fetch로 값을 불러오고, 나중에 수정하기.
+     */
+    @Transactional
     public Page<QuizSubmitDto> findSubmitWithPaging(long memberId, QuizType quizType, int pageNumber, int pageSize) {
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
@@ -57,14 +69,13 @@ public class SubmitJpaRepository {
 
     }
 
+    @Transactional
     public Page<ListeningSubmitDto> findListeningSubmitWithPaging(long memberId, int pageNumber, int pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
-
         List<ListeningSubmit> results = queryFactory
-                .select(listeningSubmit)
-                .from(listeningSubmit)
-                .join(listeningSubmit.listeningQuiz, listeningQuiz)
+                .selectFrom(listeningSubmit)
+                .join(listeningSubmit.listeningQuiz, listeningQuiz).fetchJoin()
                 .where(listeningSubmit.member.id.eq(memberId))
                 .orderBy(listeningSubmit.createdTime.desc())
                 .offset(pageable.getOffset())
@@ -74,9 +85,10 @@ public class SubmitJpaRepository {
         long total = queryFactory
                 .select(listeningSubmit)
                 .from(listeningSubmit)
-                .join(listeningSubmit.listeningQuiz, listeningQuiz)
+                .join(listeningSubmit.listeningQuiz)
                 .where(listeningSubmit.member.id.eq(memberId))
                 .fetchCount();
+
 
         List<ListeningSubmitDto> result = results.stream()
                 .map(submit -> new ListeningSubmitDto(
@@ -87,10 +99,10 @@ public class SubmitJpaRepository {
                         submit.getScore(),
                         submit.getCreatedTime()))
                 .collect(Collectors.toList());
-
         return new PageImpl<>(result, pageable, total);
     }
 
+    @Transactional
     public Page<SpeakingSubmitDto> findSpeakingSubmitWithPaging(long memberId, int pageNumber, int pageSize) {
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
