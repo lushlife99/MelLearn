@@ -8,6 +8,7 @@ import com.example.melLearnBE.dto.request.openAI.ChatQuestion;
 import com.example.melLearnBE.dto.request.openAI.ChatRequest;
 import com.example.melLearnBE.dto.response.openAI.ChatGPTResponse;
 import com.example.melLearnBE.dto.response.openAI.ListeningAnswer;
+import com.example.melLearnBE.enums.Language;
 import com.example.melLearnBE.enums.LearningLevel;
 import com.example.melLearnBE.enums.QuizType;
 import com.example.melLearnBE.error.CustomException;
@@ -241,12 +242,26 @@ public class QuizCreationService {
     }
     private String getPrompt(QuizType quizType, Member member) {
 
-        String filePath;
-        if(quizType.equals(QuizType.VOCABULARY)) {
-            filePath = "." + File.separator + PROMPT_PREFIX + File.separator + quizType + File.separator + member.getLevel().toString() + TXT_EXTENSION;
-        } else {
-            filePath = "." + File.separator + PROMPT_PREFIX + File.separator + quizType + TXT_EXTENSION;
+        String filePath = "." + File.separator + PROMPT_PREFIX + File.separator + quizType;
+
+        if(member.getLangType().equals(Language.ENGLISH)) {
+            if(quizType.equals(QuizType.VOCABULARY)) {
+                filePath += File.separator + member.getLangType().getIso639Value() + File.separator + member.getLevel().toString() + TXT_EXTENSION;
+            } else if (quizType.equals(QuizType.READING)) {
+                filePath += File.separator + member.getLangType().getIso639Value() + File.separator + quizType + TXT_EXTENSION;
+            } else {
+                filePath += File.separator + quizType + TXT_EXTENSION;
+            }
+        } else if (member.getLangType().equals(Language.JAPANESE)) {
+            if(quizType.equals(QuizType.VOCABULARY)) {
+                filePath += File.separator + member.getLangType().getIso639Value() + File.separator + member.getLevel().toString() + TXT_EXTENSION;
+            } else if (quizType.equals(QuizType.READING)) {
+                filePath += File.separator + member.getLangType().getIso639Value() + File.separator + member.getLevel().toString() + TXT_EXTENSION;
+            } else {
+                filePath += File.separator + quizType + TXT_EXTENSION;
+            }
         }
+
 
         try {
             return new String(Files.readAllBytes(Paths.get(filePath)));
