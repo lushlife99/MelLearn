@@ -1,8 +1,17 @@
 import { ArtistData } from "../type";
 import { axiosSpotify, axiosSpotifyScraper } from "../../api";
 
-export const fetchArtistData = async (): Promise<ArtistData> => {
-  const res = await axiosSpotifyScraper.get("/chart/artists/top?region=us");
+export const fetchArtistData = async (
+  langType: string | undefined
+): Promise<ArtistData> => {
+  if (langType === "en") {
+    langType = "us";
+  } else if (langType === "ja") {
+    langType = "jp";
+  }
+  const res = await axiosSpotifyScraper.get(
+    `/chart/artists/top?region=${langType}`
+  );
   return res.data;
   // const artistIds = res.data.artists
   //   .slice(0, 50)

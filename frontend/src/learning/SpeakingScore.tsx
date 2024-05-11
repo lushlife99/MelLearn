@@ -7,7 +7,7 @@ function SpeakingScore() {
   const navigate = useNavigate();
   const { comments, track } = location.state;
 
-  const parts = comments.markedText.split(" ");
+  const parts = comments.markedText.split("\n");
   const viewRank = async () => {
     navigate("/rank", {
       state: {
@@ -25,7 +25,7 @@ function SpeakingScore() {
       <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col ">
         <BgCircle />
         <div className="z-10 flex flex-col items-center justify-center w-full h-full px-12">
-          <div className="w-full px-4 py-2 mb-8 overflow-y-auto text-black bg-white rounded-3xl h-96 shadow-[0px_4px_4px_#00000040]">
+          <div className="w-full px-4 py-2 mb-8 overflow-y-auto scrollbarwhite text-black bg-white rounded-3xl h-96 shadow-[0px_4px_4px_#00000040]">
             {comments.markedText
               .split(" ")
               .map((part: string, index: number) => {
@@ -51,7 +51,7 @@ function SpeakingScore() {
                   <div className="flex items-center justify-center w-48 h-24 bg-[#55A2FD] rounded-t-full rounded-b-none overflow-hidden top-3 absolute"></div>
                   <span className="mt-24 mb-2 text-3xl font-bold">점수</span>
                   <span className="text-[#55A2FD] text-5xl ">
-                    {comments.score}
+                    {comments.score.toFixed(2)}
                   </span>
                 </div>
               </div>

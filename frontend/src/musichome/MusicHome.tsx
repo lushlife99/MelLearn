@@ -25,7 +25,16 @@ import { fetchMetaData } from "../redux/trackMeta/trackMetaAction";
 import { setTrackMetaData } from "../redux/trackMeta/trackMetaSlice";
 import { fetchRecommendData } from "../redux/recommend/recommendAction";
 import { setRecommendData } from "../redux/recommend/recommendSlice";
+import axiosApi from "../api";
 
+interface Member {
+  id: number;
+  langType: string;
+  level: string;
+  levelPoint: number;
+  memberId: string;
+  name: string;
+}
 interface Artist {
   id: string;
   type: string;
@@ -43,31 +52,46 @@ function MusicHome() {
   const navigation = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
+  const [member, setMember] = useState<Member>(); //멤버 정보 데이터
+  const [langType, setLangType] = useState();
+
+  const getMember = async () => {
+    const res = await axiosApi.get("/api/member/info");
+    if (res.status === 200) {
+      setMember(res.data);
+      setLangType(res.data.langType);
+      console.log(res.data.langType);
+    }
+  };
+
+  useEffect(() => {
+    getMember();
+  }, []);
+  useEffect(() => {}, [langType]);
 
   const { data: chartData, isLoading: chartLoading } = useQuery(
-    "chart",
-    fetchChartData,
+    ["chart", langType],
+    () => fetchChartData(langType),
     {
+      enabled: !!langType,
       onSuccess: (data) => {
         dispatch(setChartData(data));
       },
-      staleTime: 1800000,
     }
   );
 
   const { data: artistData, isLoading: artistLoading } = useQuery(
-    "artists",
-    fetchArtistData,
+    ["artists", langType],
+    () => fetchArtistData(langType),
     {
       onSuccess: (data) => {
         dispatch(setArtistData(data));
       },
-      staleTime: 1800000,
     }
   );
   const { data: recommendData, isLoading: recommendLoading } = useQuery(
-    "recommends",
-    fetchRecommendData,
+    ["recommends", langType],
+    () => fetchRecommendData(langType),
     {
       onSuccess: (data) => {
         dispatch(setRecommendData(data));

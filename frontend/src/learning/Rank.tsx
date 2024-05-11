@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axiosApi from "../api";
 import { IoIosArrowRoundBack } from "react-icons/io";
-
+import "../css/scroll.css";
 interface IMember {
   id: number;
   langType: string;
@@ -60,12 +60,12 @@ export const Rank = (): JSX.Element => {
     getMember();
   }, []);
   return (
-    <div className="bg-[black] flex flex-row justify-center w-full h-screen font-roboto">
-      <div className="bg-[black] overflow-hidden w-[450px] h-screen relative flex flex-col px-8 border border-white">
+    <div className="bg-[white] flex flex-row justify-center w-full h-screen font-roboto">
+      <div className="bg-[black] overflow-hidden w-[450px] h-screen relative flex flex-col px-8 ">
         <div className="mt-4">
           <IoIosArrowRoundBack
             onClick={() => navigate(-1)}
-            className="w-8 h-8 fill-white hover:opacity-60"
+            className="w-10 h-10 fill-white hover:opacity-60"
           />
         </div>
         <div className="flex items-center justify-center w-full my-4">
@@ -105,7 +105,7 @@ export const Rank = (): JSX.Element => {
                     </div>
                   </td>
                   <td className="p-2 ">{user[0]}</td>
-                  <td className="p-2 ">{user[1]}</td>
+                  <td className="p-2 ">{user[1].toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>
@@ -133,7 +133,7 @@ export const Rank = (): JSX.Element => {
                 </td>
                 <td className="ml-4  w-[33%]">{member?.memberId}</td>
                 <td className="px-2 w-[33%]">
-                  {rank.find(([key]) => key === memberId)?.[1]}
+                  {rank.find(([key]) => key === memberId)?.[1].toFixed(2)}
                 </td>
               </tr>
             </thead>

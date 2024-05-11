@@ -1,11 +1,28 @@
 import { ChartData } from "../type";
-import { axiosSpotify, axiosSpotifyScraper } from "../../api";
-
-export const fetchChartData = async (): Promise<ChartData> => {
-  const res = await axiosSpotifyScraper.get("/chart/tracks/top?region=us");
+import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../../api";
+interface Member {
+  id: number;
+  langType: string;
+  level: string;
+  levelPoint: number;
+  memberId: string;
+  name: string;
+}
+export const fetchChartData = async (
+  langType: string | undefined
+): Promise<ChartData> => {
+  if (langType === "en") {
+    langType = "us";
+  } else if (langType === "ja") {
+    langType = "jp";
+  }
+  console.log("chartac", langType);
+  const res = await axiosSpotifyScraper.get(
+    `/chart/tracks/top?region=${langType}`
+  );
 
   // track.playabe이 사라짐
-  console.log(res.data);
+
   const trackIds = res.data.tracks.slice(0, 50).map((track: any) => track.id);
   const trackReq = trackIds.map((id: string) =>
     axiosSpotify.get(`/tracks/${id}`)

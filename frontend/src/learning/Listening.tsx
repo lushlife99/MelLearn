@@ -2,10 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import BgCircle from "../components/BgCircle";
 import "../css/scroll.css";
-import { FaPlayCircle } from "react-icons/fa";
 import { FaPause, FaPlay } from "react-icons/fa6";
 import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../api";
-import { IoIosArrowBack, IoIosArrowRoundBack } from "react-icons/io";
+import { IoIosArrowRoundBack } from "react-icons/io";
 
 interface TimeLyric {
   startMs: number;
