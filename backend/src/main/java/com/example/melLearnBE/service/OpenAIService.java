@@ -84,4 +84,26 @@ public class OpenAIService {
 
         return openAIClient.chat(chatGPTRequest);
     }
+
+    public ChatGPTResponse requestGPT4(ChatRequest chatRequest){
+
+        Message systemMessage = Message.builder()
+                .role(ROLE_SYSTEM)
+                .content(chatRequest.getSystem())
+                .build();
+
+        Message userMessage = Message.builder()
+                .role(ROLE_USER)
+                .content(chatRequest.getUserInput())
+                .build();
+
+
+        ChatGPTRequest chatGPTRequest = ChatGPTRequest.builder()
+                .model(openAIClientConfig.getGpt4Model())
+                .max_tokens(4095)
+                .messages(List.of(systemMessage, userMessage))
+                .build();
+
+        return openAIClient.chat(chatGPTRequest);
+    }
 }

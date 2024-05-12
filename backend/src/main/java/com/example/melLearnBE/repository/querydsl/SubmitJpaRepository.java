@@ -50,6 +50,7 @@ public class SubmitJpaRepository {
                 .limit(pageable.getPageSize())
                 .fetch();
 
+
         long total = queryFactory
                 .selectFrom(quizSubmit)
                 .where(quizSubmit.member.id.eq(memberId))

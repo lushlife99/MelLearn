@@ -198,9 +198,9 @@ public class QuizCreationService {
                 ChatGPTResponse chatGPTResponse;
                 if(quizRequest.getQuizType().equals(QuizType.GRAMMAR)) {
                     chatGPTResponse = openAIService.requestFinetuningModel(chatRequest);
-                } else {
-                    chatGPTResponse = openAIService.requestFinetuningModel(chatRequest);
-                }
+                } else if (member.getLangType().equals(Language.ENGLISH)){
+                    chatGPTResponse = openAIService.requestGPT(chatRequest);
+                } else chatGPTResponse = openAIService.requestGPT4(chatRequest);
 
                 String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
                 JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
@@ -210,6 +210,7 @@ public class QuizCreationService {
                         .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
                         .setLenient()
                         .create();
+
                 List<Quiz> quizzes = gson.fromJson(probListJsonArray, listType);
 
                 QuizList quizList = QuizList.builder()
@@ -223,6 +224,7 @@ public class QuizCreationService {
                 for (Quiz quiz : quizzes) {
                     quiz.setQuizList(quizList);
                 }
+
                 List<Quiz> savedQuizzes = quizRepository.saveAll(quizzes.stream().toList());
                 QuizList savedQuizList = quizListRepository.save(quizList);
                 savedQuizList.setQuizzes(savedQuizzes);
@@ -254,14 +256,13 @@ public class QuizCreationService {
             }
         } else if (member.getLangType().equals(Language.JAPANESE)) {
             if(quizType.equals(QuizType.VOCABULARY)) {
-                filePath += File.separator + member.getLangType().getIso639Value() + File.separator + member.getLevel().toString() + TXT_EXTENSION;
+                filePath += File.separator + member.getLevel().toString() + TXT_EXTENSION;
             } else if (quizType.equals(QuizType.READING)) {
-                filePath += File.separator + member.getLangType().getIso639Value() + File.separator + member.getLevel().toString() + TXT_EXTENSION;
+                filePath += File.separator + member.getLangType().getIso639Value() + File.separator + quizType + TXT_EXTENSION;
             } else {
                 filePath += File.separator + quizType + TXT_EXTENSION;
             }
         }
-
 
         try {
             return new String(Files.readAllBytes(Paths.get(filePath)));

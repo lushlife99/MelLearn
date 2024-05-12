@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -103,16 +104,26 @@ public class SupportService {
 
         return new MusicDto(musicRepository.save(music));
     }
-
     private String truncateLyricByCharLimit(String lyric) {
-        int charCount = lyric.length();
-
-        if (charCount > MAX_CHAR_SIZE) {
-            String trimmedLyric = lyric.substring(0, MAX_CHAR_SIZE);
-            return trimmedLyric;
+        byte[] bytes = lyric.getBytes(StandardCharsets.UTF_8);
+        if (bytes.length <= MAX_CHAR_SIZE) {
+            return lyric;
         }
-        return lyric;
+
+        int byteCount = 0;
+        int index = 0;
+        while (index < lyric.length()) {
+            int charByteSize = Character.charCount(lyric.codePointAt(index));
+            byteCount += charByteSize;
+            if (byteCount >= MAX_CHAR_SIZE) {
+                break;
+            }
+            index += Character.charCount(lyric.codePointAt(index));
+        }
+
+        return lyric.substring(0, index);
     }
+
     private String getPureLyric(List<LrcLyric> lrcLyrics) {
         StringBuilder stringBuilder = new StringBuilder();
 

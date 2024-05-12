@@ -30,4 +30,5 @@ public class SupportController {
     public MusicDto getSupportQuizCategory(@RequestBody List<LrcLyric> lyric, @PathVariable String musicId, HttpServletRequest request) {
         return supportService.getSupportQuizCategory(musicId, lyric, request);
     }
+
 }
