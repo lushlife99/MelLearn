@@ -1,5 +1,3 @@
-import React from "react";
-
 interface SpeakingComment {
   markedText: string;
   submit: string;

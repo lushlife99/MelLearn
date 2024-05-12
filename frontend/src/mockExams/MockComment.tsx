@@ -11,7 +11,7 @@ function MockComment() {
   const navigate = useNavigate();
   const location = useLocation();
   const { comment } = location.state;
-  console.log(comment);
+
   const [currentPage, setCurrentPage] = useState(1);
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">

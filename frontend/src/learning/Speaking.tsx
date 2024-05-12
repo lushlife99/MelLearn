@@ -1,32 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../api";
-import axios from "axios";
 import LearningStart from "./LearningStart";
-import {
-  IoIosArrowBack,
-  IoIosArrowRoundBack,
-  IoIosArrowUp,
-} from "react-icons/io";
+import { IoIosArrowRoundBack, IoIosArrowUp } from "react-icons/io";
 import { useQuery } from "react-query";
 import Lyric from "../musichome/Lyric";
-interface Track {
-  album: {
-    images: {
-      url: string;
-    }[];
-  };
-  artists: {
-    id: string;
-    name: string;
-  }[];
-  is_playable: boolean;
-  name: string;
-  type: string;
-  uri: string;
-  duration_ms: number;
-  id: string;
-}
 
 const Speaking = () => {
   const [intervalId, setIntervalId] =
@@ -100,7 +78,7 @@ const Speaking = () => {
           const musicId = new Blob([track.id], {
             type: "text/plain",
           });
-          console.log(JSON.stringify(track.id));
+
           formData.append("musicId", musicId, "musicId.json");
           const res = await axiosApi.post(
             "/api/problem/speaking/transcription",

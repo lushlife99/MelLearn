@@ -55,9 +55,8 @@ function HistorySpeaking({ quizType }: Speaking) {
     setPageGroup(Math.ceil(pageNumber / 5));
   };
   const goComment = async (item: any) => {
-    console.log(item.musicId);
     const res = await axiosSpotify.get(`/tracks/${item.musicId}`);
-    console.log(res.data);
+
     navigate("/speakingScore", {
       state: {
         comments: item,

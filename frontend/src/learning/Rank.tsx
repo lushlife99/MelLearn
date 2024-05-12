@@ -51,7 +51,7 @@ export const Rank = (): JSX.Element => {
 
   const getIndex = () => {
     const index = rank.findIndex(([id, score]) => id === member?.memberId);
-    console.log(index);
+
     return index;
   };
 

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import axiosApi from "../api";
+import React, { useState } from "react";
+
 import { IoIosArrowRoundBack } from "react-icons/io";
 import HistoryList from "./HistoryList";
 import { useNavigate } from "react-router-dom";

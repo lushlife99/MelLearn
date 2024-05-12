@@ -1,13 +1,9 @@
-import React, { useEffect } from "react";
-import { axiosSpotify, axiosSpotifyScraper } from "../api";
-import { useLocation } from "react-router-dom";
-import { useQuery } from "react-query";
+import React from "react";
+import { axiosSpotify } from "../api";
 import { LyricData } from "../redux/type";
 import Spinner from "react-bootstrap/Spinner";
-import { Transition } from "@headlessui/react";
 import "../css/scroll.css";
 import { IoIosArrowDown } from "react-icons/io";
-import { current } from "@reduxjs/toolkit";
 
 interface LyricProps {
   trackId: string;

@@ -1,4 +1,3 @@
-import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import BgCircle from "../components/BgCircle";
 
@@ -6,7 +5,7 @@ function SpeakingScore() {
   const location = useLocation();
   const navigate = useNavigate();
   const { comments, track } = location.state;
-
+  console.log(comments.markedText);
   const parts = comments.markedText.split("\n");
   const viewRank = async () => {
     navigate("/rank", {

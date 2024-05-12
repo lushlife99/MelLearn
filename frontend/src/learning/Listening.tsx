@@ -107,9 +107,8 @@ const Listening = () => {
         },
       });
     }
-    console.log(res.data);
   };
-  console.log(userAnswers);
+
   const handleSelect = (e: any) => {};
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen ">

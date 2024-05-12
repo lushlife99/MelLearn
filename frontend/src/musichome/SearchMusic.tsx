@@ -7,7 +7,6 @@ import { useQuery } from "react-query";
 import { FaPlay } from "react-icons/fa";
 import { LuPencilLine } from "react-icons/lu";
 import Spinner from "react-bootstrap/Spinner";
-import { IoIosArrowDown } from "react-icons/io";
 
 interface SearchTrack {
   items: {

@@ -16,7 +16,7 @@ export const fetchChartData = async (
   } else if (langType === "ja") {
     langType = "jp";
   }
-  console.log("chartac", langType);
+
   const res = await axiosSpotifyScraper.get(
     `/chart/tracks/top?region=${langType}`
   );

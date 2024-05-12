@@ -95,7 +95,7 @@ function MockExam() {
       lyric: res2.data,
     });
     setIsLoading(false);
-    console.log(res3.data);
+
     setListening(res3.data.listeningQuizDto);
     const combineQuizArr = combineQuizzArray(res3.data);
     setExam(combineQuizArr);

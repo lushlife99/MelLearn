@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import BgCircle from "../components/BgCircle";
 import { useLocation, useNavigate } from "react-router-dom";
 import { IoIosArrowRoundBack } from "react-icons/io";
@@ -135,7 +135,6 @@ function SelectCategory() {
       }
     } catch (e) {
       if (axios.isCancel(e)) {
-        console.log("요청 취소");
       }
     } finally {
       cancelTokenSource.cancel("사용자가 페이지 떠남");

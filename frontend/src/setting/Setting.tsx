@@ -27,7 +27,6 @@ export const Setting = (): JSX.Element => {
     const res = await axiosApi.get("/api/member/info");
     if (res.status === 200) {
       setMember(res.data);
-      console.log(res.data);
     }
   };
 
@@ -37,7 +36,6 @@ export const Setting = (): JSX.Element => {
     if (res.status === 200) {
       setLanguages(res.data);
     }
-    console.log(res.data);
   };
 
   //언어 선택 후 변경된 정보 전송
@@ -47,13 +45,11 @@ export const Setting = (): JSX.Element => {
     });
 
     if (res.status === 200) {
-      console.log(res.data);
       setMember(res.data);
       setLanguage(eventKey);
     }
   };
   const selectLevel = async (eventKey: any, event: Object) => {
-    console.log(eventKey);
     const res = await axiosApi.put("/api/member/info", {
       level: eventKey,
     });
@@ -96,7 +92,6 @@ export const Setting = (): JSX.Element => {
   const goHome = () => {
     navigation("/home");
   };
-  console.log(member);
 
   useEffect(() => {
     getMember(); // 멤버 정보 불러오기

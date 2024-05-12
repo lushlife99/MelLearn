@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../api";
+import { axiosSpotify, axiosSpotifyScraper } from "../api";
 import { useQuery } from "react-query";
-import Lyric from "../musichome/Lyric";
 import { LyricData } from "../redux/type";
 import { IoMdMicrophone } from "react-icons/io";
 import { useDispatch } from "react-redux";
@@ -93,7 +92,6 @@ function MockSpeaking({ track, label }: Track) {
         };
         mediaRecorder.current.start();
         mediaRecorder.current.onstop = async () => {
-          console.log("중지");
           // 노래 끝나고 서버에 speaking data 보냄
           const recordedBlob = new Blob(chunks.current, { type: "audio/wav" });
           const blobUrl = URL.createObjectURL(recordedBlob);

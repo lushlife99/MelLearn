@@ -1,6 +1,4 @@
 import React from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "../redux/store";
 
 interface Submission {
   title: string;
@@ -19,7 +17,7 @@ const MockSubmitDisplay: React.FC<Submission> = ({ title, submissions }) => {
         return index + 16;
     }
   };
-  console.log(submissions);
+
   return (
     <div>
       <span className="font-bold">{title}</span>

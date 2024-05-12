@@ -1,17 +1,10 @@
 import React, { useEffect, useState } from "react";
-import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../api";
+import { axiosSpotify, axiosSpotifyScraper } from "../api";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  FaPlay,
-  FaPause,
-  FaStepBackward,
-  FaStepForward,
-  FaPlayCircle,
-  FaPauseCircle,
-} from "react-icons/fa";
+import { FaPlayCircle, FaPauseCircle } from "react-icons/fa";
 import { IoIosArrowRoundBack, IoIosArrowUp } from "react-icons/io";
 import { LuPencilLine } from "react-icons/lu";
-import { FaMicrophoneLines } from "react-icons/fa6";
+
 import Lyric from "./Lyric";
 import { useQuery } from "react-query";
 import { LyricData } from "../redux/type";

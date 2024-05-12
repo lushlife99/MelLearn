@@ -4,11 +4,8 @@ import { axiosSpotify } from "../api";
 import { Link, useNavigate } from "react-router-dom";
 import "../css/scroll.css";
 import { useQuery } from "react-query";
-import { FaPlay } from "react-icons/fa";
-import { LuPencilLine } from "react-icons/lu";
 import Spinner from "react-bootstrap/Spinner";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import { IoIosArrowDown } from "react-icons/io";
 
 interface SearchTrack {
   items: {

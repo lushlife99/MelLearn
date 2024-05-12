@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import BgCircle from "../components/BgCircle";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import BottomNavigation from "@mui/material/BottomNavigation";
 import BottomNavigationAction from "@mui/material/BottomNavigationAction";
@@ -60,7 +59,6 @@ function MusicHome() {
     if (res.status === 200) {
       setMember(res.data);
       setLangType(res.data.langType);
-      console.log(res.data.langType);
     }
   };
 

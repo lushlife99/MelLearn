@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import axiosApi from "../api";
 import BgCircle from "../components/BgCircle";

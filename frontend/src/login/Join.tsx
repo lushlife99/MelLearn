@@ -1,10 +1,8 @@
-import React from "react";
 import BgCircle from "../components/BgCircle";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import axiosApi from "../api";
-import BackArrow from "../components/BackArrow";
 
 interface Input {
   username: string;

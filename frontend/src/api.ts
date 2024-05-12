@@ -81,7 +81,6 @@ const handleSpotifyResponseInterceptor = async (
   error: AxiosError
 ): Promise<AxiosResponse> => {
   if (error.response?.status === 401) {
-    console.log("err");
     window.location.href = "/"; //로그인 창으로 리다이렉션
     return new Promise(() => {});
   } else if (error.response?.status === 403) {

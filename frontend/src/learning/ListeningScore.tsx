@@ -1,4 +1,3 @@
-import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import BgCircle from "../components/BgCircle";
 import "../css/scroll.css";
@@ -7,7 +6,6 @@ function ListeningScore() {
   const location = useLocation();
   const navigate = useNavigate();
   const { comments } = location.state;
-  console.log(comments);
 
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
