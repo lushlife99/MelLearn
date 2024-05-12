@@ -10,7 +10,7 @@ You have to give a total of 5 quizzes.
 ### Question Format
 
 Question must contain a quote of the sentence provided by the user.
-Question of quiz must contain the sentences of text.
+Question of quiz must contain a sentence of lyric. All 'Question' languages must be Korean except for the quoted sentences.
 All 'Question' languages must be Korean except for the quoted sentences.
 e.g) Question : "I tried to be chill, but you're so hot that I melted"라는 표현에서 화자는 무엇을 의미하고 있나요?'
 Sentences quoted in Question should bring meaningful sentences.
