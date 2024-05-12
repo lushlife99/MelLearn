@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -40,42 +41,47 @@ public class OpenAIService {
 
     public ChatGPTResponse requestFinetuningModel(ChatRequest chatRequest) {
 
-        Message userMessage = Message.builder()
-                .role(ROLE_USER)
-                .content(chatRequest.getQuestion())
-                .build();
-
         Message systemMessage = Message.builder()
                 .role(ROLE_SYSTEM)
                 .content(chatRequest.getSystem())
                 .build();
 
-        List<Message> messages = List.of(systemMessage, userMessage);
+        List<Message> userMessages = new ArrayList<>();
+        Message userMessage = Message.builder()
+                .role(ROLE_USER)
+                .content(chatRequest.getUserInput())
+                .build();
+        userMessages.add(userMessage);
+
+
         ChatGPTRequest chatGPTRequest = ChatGPTRequest.builder()
                 .model(openAIClientConfig.getFineTuningModel())
                 .max_tokens(2048)
-                .messages(messages)
+                .messages(List.of(systemMessage, userMessage))
                 .build();
+
         return openAIClient.chat(chatGPTRequest);
     }
 
     public ChatGPTResponse requestGPT(ChatRequest chatRequest){
-        Message userMessage = Message.builder()
-                .role(ROLE_USER)
-                .content(chatRequest.getQuestion())
-                .build();
 
         Message systemMessage = Message.builder()
                 .role(ROLE_SYSTEM)
                 .content(chatRequest.getSystem())
                 .build();
 
-        List<Message> messages = List.of(systemMessage, userMessage);
+        Message userMessage = Message.builder()
+                .role(ROLE_USER)
+                .content(chatRequest.getUserInput())
+                .build();
+
+
         ChatGPTRequest chatGPTRequest = ChatGPTRequest.builder()
                 .model(openAIClientConfig.getModel())
                 .max_tokens(4095)
-                .messages(messages)
+                .messages(List.of(systemMessage, userMessage))
                 .build();
+
         return openAIClient.chat(chatGPTRequest);
     }
 }

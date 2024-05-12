@@ -1,18 +1,13 @@
 import React, { useEffect, useState } from "react";
-import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../api";
+import { axiosSpotify, axiosSpotifyScraper } from "../api";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  FaPlay,
-  FaPause,
-  FaStepBackward,
-  FaStepForward,
-  FaPlayCircle,
-  FaPauseCircle,
-} from "react-icons/fa";
+import { FaPlayCircle, FaPauseCircle } from "react-icons/fa";
 import { IoIosArrowRoundBack, IoIosArrowUp } from "react-icons/io";
 import { LuPencilLine } from "react-icons/lu";
-import { FaMicrophoneLines } from "react-icons/fa6";
+
 import Lyric from "./Lyric";
+import { useQuery } from "react-query";
+import { LyricData } from "../redux/type";
 
 export interface CurrentTimeData {
   progress_ms: number;
@@ -29,6 +24,19 @@ function PlayMusic() {
   const [isLyric, setIsLyric] = useState<boolean>(false);
 
   const { track } = location.state;
+
+  const getFetchLyric = async () => {
+    const res = await axiosSpotifyScraper.get(
+      `/track/lyrics?trackId=${track.id}&format=json`
+    );
+    return res.data;
+  };
+  const { data: lyricData, isLoading: lyricLoading } = useQuery<
+    LyricData[],
+    Error
+  >(["lyric", track.id], getFetchLyric, {
+    staleTime: 10800000,
+  });
 
   const play = async () => {
     const res = await axiosSpotify.put("/me/player/play", {
@@ -105,17 +113,17 @@ function PlayMusic() {
   };
 
   //이전 재생
-  const playPrevious = async () => {
-    const res = await axiosSpotify.post("/me/player/previous");
-    console.log("이전", res.status);
-  };
+  // const playPrevious = async () => {
+  //   const res = await axiosSpotify.post("/me/player/previous");
+  //   console.log("이전", res.status);
+  // };
 
-  //다음재생
-  const playNext = async () => {
-    const res = await axiosSpotify.post("/me/player/next");
-    const res2 = await axiosSpotify.get("/me/player/queue");
-    console.log("다음", res2.data);
-  };
+  // //다음재생
+  // const playNext = async () => {
+  //   const res = await axiosSpotify.post("/me/player/next");
+  //   const res2 = await axiosSpotify.get("/me/player/queue");
+  //   console.log("다음", res2.data);
+  // };
   const goBack = () => {
     navigate(-1); //뒤로가기
   };
@@ -135,6 +143,15 @@ function PlayMusic() {
 
   const progressPercentage = (currentTime / duration) * 100;
 
+  // const goComprehensiveQuiz = () => {
+  //   navigate("/compQuiz", {
+  //     state: {
+  //       musicId: track.id,
+  //       quizType: "GRAMMAR",
+  //     },
+  //   });
+  // };
+
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
       <div className="relative bg-[black] overflow-hidden w-full max-w-[450px] h-screen  flex flex-col px-5">
@@ -151,6 +168,8 @@ function PlayMusic() {
             setCurrentTime={setCurrentTime}
             currentTime={currentTime}
             lyricClick={lyricClick}
+            lyricData={lyricData || []}
+            lyricLoading={lyricLoading}
           />
         )}
         {/* 앪범 커버 */}
@@ -212,14 +231,7 @@ function PlayMusic() {
           </span>
         </div>
         {/* 버튼 div */}
-        <div className="flex justify-between mt-12">
-          <button
-            onClick={() => goStudy(track)}
-            className="bg-[#D3D3D3] rounded-2xl h-9 w-28 flex items-center justify-center hover:opacity-60"
-          >
-            <LuPencilLine />
-            공부하기
-          </button>
+        <div className="flex flex-col items-center mt-12">
           <div className="flex flex-col items-center">
             <div
               onClick={goLyric}
@@ -229,18 +241,21 @@ function PlayMusic() {
               <span>가사</span>{" "}
             </div>
           </div>
-          <button className="bg-[#D3D3D3] rounded-2xl h-9 w-28 flex items-center justify-center hover:opacity-60">
-            <FaMicrophoneLines />
-            따라부르기
-          </button>
         </div>
 
         {/*아이콘 */}
-        <div className="flex items-center justify-around mt-24">
-          <FaStepBackward
+        <div className="flex items-center justify-between mt-16">
+          {/* <FaStepBackward
             onClick={playPrevious}
             className="fill-[white] w-8 h-8 hover:opacity-60"
-          />
+          /> */}
+          <button
+            onClick={() => goStudy(track)}
+            className="font-bold bg-[white] rounded-2xl h-9 w-28 flex items-center justify-center hover:opacity-60"
+          >
+            <LuPencilLine />
+            공부하기
+          </button>
           {!isPlaying ? (
             <FaPlayCircle
               className="fill-[white] w-16 h-16 hover:opacity-60"
@@ -252,10 +267,18 @@ function PlayMusic() {
               onClick={pause}
             />
           )}
-          <FaStepForward
+          <button
+            onClick={() => goStudy(track)}
+            className="font-bold bg-[white] rounded-2xl h-9 w-28 flex items-center justify-center hover:opacity-60"
+          >
+            <LuPencilLine />
+            모의고사
+          </button>
+
+          {/* <FaStepForward
             onClick={playNext}
             className="fill-[white] w-8 h-8 hover:opacity-60"
-          />
+          /> */}
         </div>
       </div>
     </div>

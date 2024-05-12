@@ -3,6 +3,7 @@ import axios, {
   AxiosResponse,
   InternalAxiosRequestConfig,
 } from "axios";
+import { useNavigate } from "react-router-dom";
 
 const axiosApi = axios.create({
   baseURL: "http://localhost:8080",
@@ -43,18 +44,26 @@ const handleResponseInterceptor = async (
   error: AxiosError
 ): Promise<AxiosResponse> => {
   if (error.response?.status === 401) {
-    window.location.href = "/"; //로그인 창으로 리다이렉션
+    const errorData = error.response.data as { message: string };
+    alert(errorData.message);
+    window.location.href = "/";
+    return new Promise(() => {}); // interceptor에서 에러 처리후 Promise chaining 끊기
   } else if (error.response?.status === 403) {
     const res = await axiosApi.get("/reIssueJwt"); //토큰 재발급
     const accessToken = res.data.accessToken;
-
     localStorage.setItem("accessToken", accessToken);
+    return new Promise(() => {});
   } else if (error.response?.status === 404) {
-    console.error("404err");
+    const errorData = error.response.data as { message: string };
+    alert(errorData.message);
   } else if (error.response?.status === 409) {
     const errorData = error.response.data as { message: string };
     alert(errorData.message);
+    window.location.href = "/home/main5";
+  } else {
+    // 다른 예외 상황 처리
   }
+
   return Promise.reject(error.toJSON());
 };
 
@@ -72,8 +81,17 @@ const handleSpotifyResponseInterceptor = async (
   error: AxiosError
 ): Promise<AxiosResponse> => {
   if (error.response?.status === 401) {
-    console.log("err");
     window.location.href = "/"; //로그인 창으로 리다이렉션
+    return new Promise(() => {});
+  } else if (error.response?.status === 403) {
+    alert("프리미엄 계정 유저가 아닙니다.");
+
+    return new Promise(() => {});
+  } else if (error.response?.status === 404) {
+    //const deviceId = localStorage.getItem("deviceId");
+    alert("연결된 장치가 존재하지 않습니다. 다시 로그인 해주세요");
+    window.location.href = "/";
+    return new Promise(() => {});
   }
   return Promise.reject(error.toJSON());
 };
@@ -86,7 +104,7 @@ axiosApi.interceptors.request.use(
 );
 axiosApi.interceptors.response.use(
   (response) => response,
-  handleResponseInterceptor
+  (error) => handleResponseInterceptor(error)
 );
 /* spotify */
 axiosSpotify.interceptors.request.use(

@@ -4,6 +4,7 @@ import artistReducer from "./artist/artistSlice";
 import playerReducer from "./player/playerSlice";
 import trackMetaReducer from "./trackMeta/trackMetaSlice";
 import recommendReducer from "./recommend/recommendSlice";
+import recordReducer from "./mockSpeaking/recordSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     recommend: recommendReducer,
     player: playerReducer,
     trackMeta: trackMetaReducer,
+    record: recordReducer,
   },
 });
 

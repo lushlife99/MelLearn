@@ -1,5 +1,3 @@
-import React from "react";
-import { Button } from "@mui/joy";
 import BgCircle from "../components/BgCircle";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -7,7 +5,6 @@ export const Score = (): JSX.Element => {
   const location = useLocation();
   const navigate = useNavigate();
   const { comments } = location.state;
-  console.log(comments);
 
   const goCommentary = () => {
     navigate("/comment", {

@@ -46,7 +46,7 @@ function Callback() {
           transferDevice(device_id, player);
         });
         player.addListener("not_ready", ({ device_id }) => {
-          console.log("Device ID has gone offline", device_id);
+          console.log("Device ID has gone offline");
         });
 
         player.addListener("initialization_error", ({ message }) => {

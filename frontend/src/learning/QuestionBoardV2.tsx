@@ -1,13 +1,9 @@
-import React, { useEffect, useState } from "react";
-import Input from "@mui/joy/Input";
-import { Button, LinearProgress, Radio, RadioGroup } from "@mui/joy";
-import DoDisturbAltIcon from "@mui/icons-material/DoDisturbAlt";
+import React, { useState } from "react";
+import { LinearProgress, Radio, RadioGroup } from "@mui/joy";
 import { FormControlLabel } from "@mui/material";
 import BgCircle from "../components/BgCircle";
 import { useLocation, useNavigate } from "react-router-dom";
 import { IoIosArrowRoundBack } from "react-icons/io";
-import { BsCheckCircle } from "react-icons/bs";
-import { GiCancel } from "react-icons/gi";
 import "../css/scroll.css";
 import axiosApi from "../api";
 
@@ -60,7 +56,6 @@ export const QuestionBoardV2 = (): JSX.Element => {
     }
   };
   const submitProblem = async () => {
-    console.log("제출", answers, category);
     const hasZeroAnswer = answers.some((answer) => answer === 0);
     if (hasZeroAnswer) {
       alert("풀지 않은 문제가 있습니다.");

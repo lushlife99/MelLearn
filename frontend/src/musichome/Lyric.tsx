@@ -1,13 +1,9 @@
-import React, { useEffect } from "react";
-import { axiosSpotify, axiosSpotifyScraper } from "../api";
-import { useLocation } from "react-router-dom";
-import { useQuery } from "react-query";
+import React from "react";
+import { axiosSpotify } from "../api";
 import { LyricData } from "../redux/type";
 import Spinner from "react-bootstrap/Spinner";
-import { Transition } from "@headlessui/react";
 import "../css/scroll.css";
 import { IoIosArrowDown } from "react-icons/io";
-import { current } from "@reduxjs/toolkit";
 
 interface LyricProps {
   trackId: string;
@@ -16,6 +12,8 @@ interface LyricProps {
   setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
   currentTime: number;
   lyricClick: boolean;
+  lyricData: LyricData[];
+  lyricLoading: boolean;
 }
 
 function Lyric(props: LyricProps) {
@@ -26,19 +24,21 @@ function Lyric(props: LyricProps) {
     currentTime,
     lyricClick,
     setCurrentTime,
+    lyricData,
+    lyricLoading,
   } = props;
-  const getFetchLyric = async () => {
-    const res = await axiosSpotifyScraper.get(
-      `/track/lyrics?trackId=${trackId}&format=json`
-    );
-    return res.data;
-  };
-  const { data: lyricData, isLoading: lyricLoading } = useQuery<
-    LyricData[],
-    Error
-  >(["lyric", trackId], getFetchLyric, {
-    staleTime: 10800000,
-  });
+  // const getFetchLyric = async () => {
+  //   const res = await axiosSpotifyScraper.get(
+  //     `/track/lyrics?trackId=${trackId}&format=json`
+  //   );
+  //   return res.data;
+  // };
+  // const { data: lyricData, isLoading: lyricLoading } = useQuery<
+  //   LyricData[],
+  //   Error
+  // >(["lyric", trackId], getFetchLyric, {
+  //   staleTime: 10800000,
+  // });
 
   const lyricTimeline = async (progressMs: number) => {
     if (lyricClick) {

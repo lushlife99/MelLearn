@@ -35,8 +35,6 @@ public class Member implements UserDetails {
     private Language langType;
     private String spotifyAccountId;
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-    private List<History> history;
-    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<WordList> wordLists;
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<SpeakingSubmit> speakingSubmitList;

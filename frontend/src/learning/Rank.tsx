@@ -1,127 +1,143 @@
-import React, { useEffect } from "react";
-import {
-  Paper,
-  TableBody,
-  TableCell,
-  tableCellClasses,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from "@mui/material";
-import { styled, Table } from "@mui/joy";
-import { useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import axiosApi from "../api";
-
-function createData(rank: number, userName: string, accuracy: number) {
-  return { rank, userName, accuracy };
+import { IoIosArrowRoundBack } from "react-icons/io";
+import "../css/scroll.css";
+interface IMember {
+  id: number;
+  langType: string;
+  level: string;
+  levelPoint: number;
+  memberId: string;
+  name: string;
 }
-
-const rows = [
-  createData(1, "user1", 90.9),
-  createData(2, "user2", 80.44),
-  createData(3, "user3", 55.52),
-];
-
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  [`&.${tableCellClasses.head}`]: {
-    backgroundColor: "#007aff",
-    color: theme.palette.common.white,
-    fontSize: 16,
-  },
-  [`&.${tableCellClasses.body}`]: {
-    backgroundColor: "#007aff",
-    fontSize: 16,
-    color: theme.palette.common.white,
-  },
-}));
-
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  // '&:nth-of-type(odd)': {
-  //     // backgroundColor: theme.palette.action.hover,
-  // },
-  // // hide last border
-  // '&:last-child td, &:last-child th': {
-  //     border: 0,
-  // },
-}));
+interface ScoreList {
+  [key: string]: number;
+}
+interface IRank {
+  id: number;
+  musicId: string;
+  score_list: ScoreList;
+}
 
 export const Rank = (): JSX.Element => {
   const location = useLocation();
-  const { trackId } = location.state;
-  console.log(trackId);
+  const { track } = location.state;
+  const navigate = useNavigate();
+  const [rank, setRank] = useState<[string, number][]>([]);
+
+  const [member, setMember] = useState<IMember>();
+  const [memberId, setMemberId] = useState<string>();
 
   const getRank = async () => {
     const res = await axiosApi.get(
-      `/api/problem/speaking/ranking?musicId=${trackId.replace(/['"]+/g, "")}`
+      `/api/problem/speaking/ranking?musicId=${track.id.replace(/['"]+/g, "")}`
     );
-    console.log(res.data);
+
+    const entries: [string, number][] = Object.entries(res.data.score_list);
+
+    const sortedEntries: [string, number][] = entries.sort(
+      (a, b) => b[1] - a[1]
+    );
+
+    setRank(sortedEntries);
+  };
+  const getMember = async () => {
+    const res = await axiosApi.get("/api/member/info");
+
+    setMember(res.data);
+    setMemberId(res.data.memberId);
+  };
+
+  const getIndex = () => {
+    const index = rank.findIndex(([id, score]) => id === member?.memberId);
+
+    return index;
   };
 
   useEffect(() => {
     getRank();
+    getMember();
   }, []);
   return (
-    <div className="bg-[#121111] flex flex-row justify-center w-full">
-      <div className="bg-[#121111] w-[360px] h-[800px] relative">
-        <div className="absolute w-[84px] top-[29px] left-[137px]  font-bold text-white text-[44px] tracking-[0] leading-[normal] whitespace-nowrap">
-          랭킹
-        </div>
-        <div>
-          <img
-            className="absolute w-[300px] h-[300px] top-[100px] left-[29px] object-cover rounded"
-            src="./mardyBUm.jpg"
-            alt="?"
+    <div className="bg-[white] flex flex-row justify-center w-full h-screen font-roboto">
+      <div className="bg-[black] overflow-hidden w-[450px] h-screen relative flex flex-col px-8 ">
+        <div className="mt-4">
+          <IoIosArrowRoundBack
+            onClick={() => navigate(-1)}
+            className="w-10 h-10 fill-white hover:opacity-60"
           />
         </div>
-        <div className="absolute w-[262px] top-[417px] left-[30px] [font-family:'Acme-Regular',Helvetica] font-normal text-white text-[24px] tracking-[1.44px] leading-[normal] whitespace-nowrap">
-          Mardy Bum
+        <div className="flex items-center justify-center w-full my-4">
+          <span className="text-4xl font-bold text-white ">랭킹</span>
         </div>
-        <div className="absolute w-[306px] h-[194px] top-[475px] left-[29px]">
-          <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 300 }} aria-label="simple table">
-              <TableHead>
-                <TableRow>
-                  <StyledTableCell>랭크 </StyledTableCell>
-                  <StyledTableCell align="center">유저</StyledTableCell>
-                  <StyledTableCell align="center">정확도</StyledTableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {rows.map((row) => (
-                  <TableRow
-                    key={row.rank}
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <StyledTableCell component="th" scope="row">
-                      {row.rank}
-                    </StyledTableCell>
-                    <StyledTableCell align="left">
-                      {row.userName}
-                    </StyledTableCell>
-                    <StyledTableCell align="left">
-                      {row.accuracy}
-                    </StyledTableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+        <div className="flex items-center justify-center">
+          <img
+            className="w-100 h-100"
+            src={track.album.images[0].url}
+            alt="Album Cover"
+          />
         </div>
-        <div className="h-[51px] top-[716px] left-[29px] absolute w-[306px]">
-          <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 300 }} aria-label="simple table">
-              <TableHead>
-                <TableRow>
-                  <StyledTableCell>랭크 </StyledTableCell>
-                  <StyledTableCell align="center">유저</StyledTableCell>
-                  <StyledTableCell align="center">정확도</StyledTableCell>
-                </TableRow>
-              </TableHead>
-            </Table>
-          </TableContainer>
+        <div className="flex justify-start mt-4">
+          <span className="text-3xl font-bold text-white">{track.name}</span>
         </div>
-        <div className="absolute w-[64px] top-[687px] left-[36px] font-normal text-[#8a9a9d] text-[14px] tracking-[0.77px] leading-[normal]">
-          내 순위
+
+        <div className="w-full my-4">
+          <table className="bg-[#007AFF] w-full rounded-xl text-white font-bold h-28">
+            <thead>
+              <tr>
+                <th className="p-2 w-[33%]">순위</th>
+                <th className="p-2 w-[33%]">유저</th>
+                <th className="p-2 w-[33%]">점수</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rank.slice(0, 3).map((user, index) => (
+                <tr>
+                  <td className="p-2">
+                    <div className="flex items-center text-lg">
+                      <span>{index + 1}</span>
+                      <div className="w-8 h-8">
+                        {index + 1 === 1 && "🥇"}
+                        {index + 1 === 2 && "🥈"}
+                        {index + 1 === 3 && "🥉"}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-2 ">{user[0]}</td>
+                  <td className="p-2 ">{user[1].toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-4 ">
+          <div className="mb-2">
+            <span className="text-sm font-bold text-[#8A9A9D]">내 순위</span>
+          </div>
+
+          <table className="bg-[#007AFF] w-full rounded-xl text-white font-bold h-12 ">
+            <thead>
+              <tr>
+                <td className="p-2  w-[33%] ">
+                  <div className="flex items-center text-lg">
+                    <span>{getIndex() + 1}</span>
+
+                    <div className="w-8 h-8">
+                      {getIndex() + 1 === 1 && "🥇"}
+                      {getIndex() + 1 === 2 && "🥈"}
+                      {getIndex() + 1 === 3 && "🥉"}
+                    </div>
+                  </div>
+                </td>
+                <td className="ml-4  w-[33%]">{member?.memberId}</td>
+                <td className="px-2 w-[33%]">
+                  {rank.find(([key]) => key === memberId)?.[1].toFixed(2)}
+                </td>
+              </tr>
+            </thead>
+          </table>
         </div>
       </div>
     </div>

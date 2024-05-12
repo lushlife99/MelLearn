@@ -21,10 +21,6 @@ public class NaverCloudConfig {
     @Value("${naver.cloud.api.key}")
     private String apiKey;
 
-    @Bean
-    public Logger.Level feignLogger() {
-        return Logger.Level.FULL;
-    }
 
     @Bean
     public RequestInterceptor requestInterceptor() {

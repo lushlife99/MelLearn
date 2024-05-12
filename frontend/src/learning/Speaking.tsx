@@ -1,32 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../api";
-import axios from "axios";
 import LearningStart from "./LearningStart";
-import {
-  IoIosArrowBack,
-  IoIosArrowRoundBack,
-  IoIosArrowUp,
-} from "react-icons/io";
+import { IoIosArrowRoundBack, IoIosArrowUp } from "react-icons/io";
 import { useQuery } from "react-query";
 import Lyric from "../musichome/Lyric";
-interface Track {
-  album: {
-    images: {
-      url: string;
-    }[];
-  };
-  artists: {
-    id: string;
-    name: string;
-  }[];
-  is_playable: boolean;
-  name: string;
-  type: string;
-  uri: string;
-  duration_ms: number;
-  id: string;
-}
 
 const Speaking = () => {
   const [intervalId, setIntervalId] =
@@ -40,6 +18,7 @@ const Speaking = () => {
   const { track } = location.state;
   const [start, setStart] = useState<boolean>(false);
   const [isLyric, setIsLyric] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const getLyric = async () => {
     const res = await axiosSpotifyScraper.get(
@@ -99,7 +78,7 @@ const Speaking = () => {
           const musicId = new Blob([track.id], {
             type: "text/plain",
           });
-          console.log(JSON.stringify(track.id));
+
           formData.append("musicId", musicId, "musicId.json");
           const res = await axiosApi.post(
             "/api/problem/speaking/transcription",
@@ -110,12 +89,14 @@ const Speaking = () => {
               },
             }
           ); // 파일명은 선택사항
-          console.log(res.data);
+          setIsLoading(true);
           if (res.status === 200) {
+            setIsLoading(false);
             navigate("/speakingScore", {
               state: {
                 comments: res.data,
-                trackId: track.id,
+
+                track: track,
               },
             });
           }
@@ -190,6 +171,8 @@ const Speaking = () => {
                 currentTime={currentTime}
                 lyricClick={lyricClick}
                 setCurrentTime={setCurrentTime}
+                lyricData={lyricData}
+                lyricLoading={lyricLoading}
               />
             )}
             <img
@@ -227,12 +210,20 @@ const Speaking = () => {
                 <span>가사</span>
               </div>
             </div>
+
             <button
               className="bg-[#007AFF] text-white font-bold w-[100%] h-10 rounded-xl mt-12"
               onClick={accessMicrophone}
             >
               시작하기
             </button>
+            {isLoading && (
+              <div className="z-10 flex items-center justify-center w-full h-12 font-bold text-center text-white animate-pulse top-50 rounded-xl">
+                <div className="animate-bounce bg-[#007AFF] h-12 flex items-center rounded-xl w-[80%] justify-center">
+                  인공지능이 채점중이에요
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

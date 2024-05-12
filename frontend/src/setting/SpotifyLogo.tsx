@@ -20,7 +20,6 @@ export const SpotifyLogo = () => {
     if (!codeVerifier) {
       codeVerifier = generateRandomString(128);
       localStorage.setItem("code_verifier", codeVerifier);
-      console.log(codeVerifier);
     }
 
     // 2. Code Challenge

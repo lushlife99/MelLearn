@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Button } from "@mui/joy";
 import { useLocation, useNavigate } from "react-router-dom";
 import BgCircle from "../components/BgCircle";
 import { IoIosArrowRoundBack } from "react-icons/io";
@@ -39,8 +38,6 @@ const Commentary = () => {
   const [currentPage, setCurrentPage] = useState(1); // 현재 페이지 상태
 
   // 현재 페이지에 따라 해당 범위의 항목을 선택하는 함수
-
-  console.log(comments);
 
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">

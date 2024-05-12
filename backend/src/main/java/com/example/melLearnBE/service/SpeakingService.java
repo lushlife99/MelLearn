@@ -1,9 +1,9 @@
 package com.example.melLearnBE.service;
 
+import com.example.melLearnBE.dto.model.MusicDto;
 import com.example.melLearnBE.dto.request.LrcLyric;
 import com.example.melLearnBE.dto.request.SpeakingSubmitRequest;
 import com.example.melLearnBE.dto.model.SpeakingSubmitDto;
-import com.example.melLearnBE.dto.response.SupportQuizCategories;
 import com.example.melLearnBE.dto.response.openAI.WhisperSegment;
 import com.example.melLearnBE.dto.response.openAI.WhisperTranscriptionResponse;
 import com.example.melLearnBE.error.CustomException;
@@ -23,6 +23,7 @@ import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +33,7 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -50,13 +52,13 @@ public class SpeakingService {
 
     private static final String AUDIO_PATH = "." + File.separator + "audio" + File.separator;
 
-    @Transactional
-    public SpeakingSubmitDto submit(SpeakingSubmitRequest submitRequest, String musicId, HttpServletRequest request) {
+    @Async
+    public CompletableFuture<SpeakingSubmitDto> submit(SpeakingSubmitRequest submitRequest, String musicId, HttpServletRequest request) {
 
         List<LrcLyric> lyricList = submitRequest.getLyricList();
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-        SupportQuizCategories supportQuizCategory = supportService.getSupportQuizCategory(lyricList, request);
-        if (!supportQuizCategory.isSpeaking())
+        MusicDto musicDto = supportService.getSupportQuizCategory(musicId, lyricList, request);
+        if (!musicDto.isSpeaking())
             throw new CustomException(ErrorCode.UN_SUPPORTED_QUIZ_LANG);
 
         // 1. 전처리 1 - audio 파일을 lrc파일에 맞게 분할하고 사이에 temp audio 삽입
@@ -74,7 +76,7 @@ public class SpeakingService {
         SpeakingSubmitDto answerSpeaking = grade(musicId, lyricList, member, transcription);
 
         // 5. 랭킹
-        return answerSpeaking;
+        return CompletableFuture.completedFuture(answerSpeaking);
     }
 
     private void convertGradableFormat(List<LrcLyric> answerLyrics, WhisperTranscriptionResponse transcription) {
@@ -109,7 +111,6 @@ public class SpeakingService {
     }
 
     public SpeakingSubmitDto grade(String musicId, List<LrcLyric> answerLyrics, Member member, WhisperTranscriptionResponse transcriptionResponse) {
-
         List<WhisperSegment> submitLyrics = transcriptionResponse.getSegments();
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit");
@@ -188,7 +189,7 @@ public class SpeakingService {
 
 
         try {
-            File originalFile = new File(directory + File.separator + multipartFile.getOriginalFilename());
+            File originalFile = new File(directory + File.separator + UUID.randomUUID());
             multipartFile.transferTo(originalFile);
 
             // FFmpeg을 사용하여 오디오 파일을 WAV 형식으로 변환

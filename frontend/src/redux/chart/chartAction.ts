@@ -1,21 +1,47 @@
 import { ChartData } from "../type";
-import { axiosSpotify, axiosSpotifyScraper } from "../../api";
+import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../../api";
+interface Member {
+  id: number;
+  langType: string;
+  level: string;
+  levelPoint: number;
+  memberId: string;
+  name: string;
+}
+export const fetchChartData = async (
+  langType: string | undefined
+): Promise<ChartData> => {
+  if (langType === "en") {
+    langType = "us";
+  } else if (langType === "ja") {
+    langType = "jp";
+  }
 
-export const fetchChartData = async (): Promise<ChartData> => {
-  const res = await axiosSpotifyScraper.get("/chart/tracks/top?region=us");
-
-  // track.playabe이 사라짐
-  console.log(res.data);
-  const trackIds = res.data.tracks.slice(0, 50).map((track: any) => track.id);
-  const trackReq = trackIds.map((id: string) =>
-    axiosSpotify.get(`/tracks/${id}`)
+  const res = await axiosSpotifyScraper.get(
+    `/chart/tracks/top?region=${langType}`
   );
 
-  const responses = await Promise.all(trackReq);
+  // track.playabe이 사라짐
 
-  const tracks = responses.map((res) => res.data);
+  const trackIds = res.data.tracks.slice(0, 50).map((track: any) => track.id);
+  const trackIdsString = trackIds.join(",");
+  const trackReq = axiosSpotify.get(`/tracks?ids=${trackIdsString}`);
+  // const trackReq = trackIds.map((id: string) =>
+  //   axiosSpotify.get(`/tracks/${id}`)
+  // );
+  const responses = await trackReq;
 
-  const playableTracks = tracks.filter((track) => track.preview_url !== null);
+  const tracks = responses.data;
+
+  const playableTracks = tracks.tracks.filter(
+    (track: any) => track.preview_url !== null
+  );
+
+  // const responses = await Promise.all(trackReq);
+
+  // const tracks = responses.map((res) => res.data);
+
+  // const playableTracks = tracks.filter((track) => track.preview_url !== null);
 
   return { tracks: playableTracks };
 };

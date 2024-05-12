@@ -30,7 +30,7 @@ export const RecommendMusicList = (): JSX.Element => {
             />
           </div>
           <span className="text-[18px] font-bold  text-white w-[33%] border border-black">
-            인기 음악 목록
+            추천 음악 목록
           </span>
           <div className="w-[33%]"></div>
         </div>

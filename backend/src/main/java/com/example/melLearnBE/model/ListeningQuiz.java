@@ -15,6 +15,9 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Builder
+@Table(name = "listening_quiz", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"music_id", "level"})
+})
 public class ListeningQuiz {
 
     @Id @GeneratedValue
@@ -26,8 +29,10 @@ public class ListeningQuiz {
     private String blankedText;
 
     @OneToMany(mappedBy = "listeningQuiz")
+    @Builder.Default
     private List<ListeningSubmit> submitList = new ArrayList<>();
 
-    @ElementCollection(fetch = FetchType.LAZY) @Builder.Default
+    @ElementCollection(fetch = FetchType.LAZY)
+    @Builder.Default
     private List<String> answerList = new ArrayList<>();
 }
