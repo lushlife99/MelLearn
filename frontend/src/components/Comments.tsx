@@ -8,7 +8,7 @@ interface Comment {
     quizzes: {
       answer: number;
       comment: string;
-      correctRate: 75;
+      correctRate: number;
       id: number;
       optionList: string[];
       question: string;
@@ -22,14 +22,13 @@ interface IComment {
 interface CommentQuiz {
   answer: number;
   comment: string;
-  correctRate: 75;
+  correctRate: number;
   id: number;
   optionList: string[];
   question: string;
 }
 
 function Comments({ comments }: IComment) {
-  console.log("z", comments);
   return (
     <div>
       {comments?.quizList?.quizzes.map((quiz: CommentQuiz, index: number) => (
