@@ -34,6 +34,7 @@ function HistoryList({ quizType }: IHistory) {
   const [tracks, setTracks] = useState();
   const [history, setHistory] = useState<History>();
   const [page, setPage] = useState(1);
+  const [pageGroup, setPageGroup] = useState(1);
   const navigate = useNavigate();
 
   const fetchHistory = async (page: number) => {
@@ -50,6 +51,7 @@ function HistoryList({ quizType }: IHistory) {
   const handlePageChange = (pageNumber: number) => {
     setPage(pageNumber);
     fetchHistory(pageNumber);
+    setPageGroup(Math.ceil(pageNumber / 10));
   };
   const goComment = (item: any) => {
     navigate("/comment", {
@@ -87,52 +89,31 @@ function HistoryList({ quizType }: IHistory) {
           </div>
         </div>
       ))}
-      <div className="flex items-end justify-center fixed-bottom">
+      <div className="flex items-end justify-center w-full fixed-bottom">
         <Pagination>
-          {history?.totalPages && history.totalPages > 10 && (
-            <>
-              <Pagination.First onClick={() => handlePageChange(1)} />
-              <Pagination.Prev
-                onClick={() => handlePageChange(page - 1)}
-                disabled={page === 1}
-              />
-              {Array.from({ length: 10 }, (_, i) => i + 1).map((pageNumber) => (
-                <Pagination.Item
-                  key={pageNumber}
-                  active={pageNumber === page}
-                  onClick={() => handlePageChange(pageNumber)}
-                >
-                  {pageNumber}
-                </Pagination.Item>
-              ))}
-              <Pagination.Ellipsis disabled />
+          <Pagination.First onClick={() => handlePageChange(1)} />
+          <Pagination.Prev
+            onClick={() => setPageGroup(pageGroup - 1)}
+            disabled={pageGroup === 1}
+          />
+          {Array.from({ length: 10 }, (_, i) => (pageGroup - 1) * 10 + i + 1)
+            .filter((pageNumber) => pageNumber <= history?.totalPages)
+            .map((pageNumber) => (
               <Pagination.Item
-                onClick={() => handlePageChange(history.totalPages)}
+                key={pageNumber}
+                active={pageNumber === page}
+                onClick={() => handlePageChange(pageNumber)}
               >
-                {history.totalPages}
+                {pageNumber}
               </Pagination.Item>
-              <Pagination.Next
-                onClick={() => handlePageChange(page + 1)}
-                disabled={page === history.totalPages}
-              />
-              <Pagination.Last
-                onClick={() => handlePageChange(history.totalPages)}
-              />
-            </>
-          )}
-          {history?.totalPages &&
-            history.totalPages <= 10 &&
-            Array.from({ length: history.totalPages }, (_, i) => i + 1).map(
-              (pageNumber) => (
-                <Pagination.Item
-                  key={pageNumber}
-                  active={pageNumber === page}
-                  onClick={() => handlePageChange(pageNumber)}
-                >
-                  {pageNumber}
-                </Pagination.Item>
-              )
-            )}
+            ))}
+          <Pagination.Next
+            onClick={() => setPageGroup(pageGroup + 1)}
+            disabled={pageGroup === Math.ceil(history?.totalPages / 10)}
+          />
+          <Pagination.Last
+            onClick={() => handlePageChange(history?.totalPages)}
+          />
         </Pagination>
       </div>
     </div>

@@ -70,7 +70,7 @@ function Login() {
               비밀번호를 입력해주세요
             </span>
           )}
-          <button className="mt-6 rounded-2xl bg-[#495867] h-12 text-[white] hover:bg-[gray] hover:text-[#495867] font-bold flex items-center justify-center">
+          <button className="mt-6 rounded-2xl bg-[#495867] h-12 text-[white] hover:opacity-60 font-bold flex items-center justify-center">
             로그인
           </button>
         </form>
@@ -83,7 +83,7 @@ function Login() {
             <div className="h-[2px] bg-white w-32"></div>
             <Link
               to="/join"
-              className="text-[#007AFF] font-bold mx-2 hover:text-[#87ceeb] text-decoration-none"
+              className="text-[#007AFF] font-bold mx-2 hover:opacity-60 text-decoration-none"
             >
               회원가입
             </Link>
