@@ -1,39 +1,29 @@
 import React, { useEffect, useState } from "react";
-import axiosApi, { axiosSpotify } from "../api";
 import { useNavigate } from "react-router-dom";
-import Pagination from "react-bootstrap/Pagination";
+import axiosApi, { axiosSpotify } from "../api";
 import { ChartData } from "../redux/type";
+import { Pagination } from "react-bootstrap";
 
 interface History {
   content: {
     id: number;
-    quizList: {
-      id: number;
-      musicId: string;
-      level: number;
-      quizzes: {
-        id: number;
-        question: string;
-        answer: number;
-        comment: string;
-        correctRate: number;
-        optionList: string[];
-      }[];
-    };
+    markedText: string;
+    musicId: string;
     score: number;
-    submitAnswerList: number[];
+    submitAnswerList: string;
   }[];
   number: number;
   numberOfElements: number;
   size: number;
   totalPages: number;
 }
-interface IHistory {
+
+interface Speaking {
   quizType: string;
 }
-function HistoryList({ quizType }: IHistory) {
-  const [tracks, setTracks] = useState<ChartData>();
+function HistorySpeaking({ quizType }: Speaking) {
   const [history, setHistory] = useState<History>();
+  const [tracks, setTracks] = useState<ChartData>();
   const [page, setPage] = useState(1);
   const [pageGroup, setPageGroup] = useState(1);
   const navigate = useNavigate();
@@ -44,24 +34,34 @@ function HistoryList({ quizType }: IHistory) {
       `/api/quiz/submit?page=${page - 1}&quizType=${upperQuiz}`
     );
 
-    const musicIds = res.data.content.map((item: any) => item.quizList.musicId);
+    setHistory(res.data);
+    const musicIds = res.data.content.map((item: any) => item.musicId);
 
     if (musicIds.length >= 1) {
       const idsParam = musicIds.join(",");
       const trackReq = await axiosSpotify.get(`/tracks?ids=${idsParam}`);
       setTracks(trackReq.data);
     }
-    setHistory(res.data);
+    //const musicIds = res.data.content.map((item: any) => item.quizList.musicId);
+    // const idsParam = musicIds.join(",");
+    // const trackReq = await axiosSpotify.get(`/tracks?ids=${idsParam}`);
+    // const tracksData = trackReq.data.tracks.map((track: any) => ({
+    // }));
+    // setTracks(tracksData);
   };
   const handlePageChange = (pageNumber: number) => {
     setPage(pageNumber);
     fetchHistory(pageNumber);
     setPageGroup(Math.ceil(pageNumber / 5));
   };
-  const goComment = (item: any) => {
-    navigate("/comment", {
+  const goComment = async (item: any) => {
+    console.log(item.musicId);
+    const res = await axiosSpotify.get(`/tracks/${item.musicId}`);
+    console.log(res.data);
+    navigate("/speakingScore", {
       state: {
         comments: item,
+        track: res.data,
       },
     });
   };
@@ -79,7 +79,7 @@ function HistoryList({ quizType }: IHistory) {
           <div className="mr-4">
             <img
               src={tracks?.tracks[index].album.images[2].url}
-              alt="Album Cover"
+              alt=""
               className="w-16 h-16 rounded-lg"
             />
           </div>
@@ -92,7 +92,7 @@ function HistoryList({ quizType }: IHistory) {
             </span>
           </div>
           <div className="flex flex-col items-center justify-center  w-[15%] ">
-            <span className="mb-2 font-bold">{item.score}점</span>
+            <span className="mb-2 font-bold">{item.score.toFixed(2)}점</span>
             <button
               onClick={() => goComment(item)}
               className="font-bold bg-[#1889FE] h-4 text-xs w-20 rounded-sm hover:opacity-60 flex items-center justify-center"
@@ -102,8 +102,8 @@ function HistoryList({ quizType }: IHistory) {
           </div>
         </div>
       ))}
-      <div className="flex items-end justify-center w-full px-4 fixed-bottom">
-        <Pagination className="px-4">
+      <div className="flex items-end justify-center w-full fixed-bottom">
+        <Pagination>
           <Pagination.First onClick={() => handlePageChange(1)} />
           <Pagination.Prev
             onClick={() => setPageGroup(pageGroup - 1)}
@@ -133,4 +133,4 @@ function HistoryList({ quizType }: IHistory) {
   );
 }
 
-export default HistoryList;
+export default HistorySpeaking;

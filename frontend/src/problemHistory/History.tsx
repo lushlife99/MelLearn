@@ -4,6 +4,7 @@ import { IoIosArrowRoundBack } from "react-icons/io";
 import HistoryList from "./HistoryList";
 import { useNavigate } from "react-router-dom";
 import HistoryListListenig from "./HistoryListListenig";
+import HistorySpeaking from "./HistorySpeaking";
 
 const History = () => {
   const navigate = useNavigate();
@@ -64,7 +65,12 @@ const History = () => {
           )}
           {quizType === "Listening" && (
             <div>
-              <HistoryListListenig />
+              <HistoryListListenig quizType={quizType} />
+            </div>
+          )}
+          {quizType === "Speaking" && (
+            <div>
+              <HistorySpeaking quizType={quizType} />
             </div>
           )}
         </div>
