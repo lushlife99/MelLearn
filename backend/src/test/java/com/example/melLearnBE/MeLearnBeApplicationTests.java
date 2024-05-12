@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -76,6 +75,7 @@ class MeLearnBeApplicationTests {
                     .score(100.0)
                     .member(member)
                     .build();
+
             speakingSubmitRepository.save(speakingSubmit);
 
             QuizSubmit vocaQuizSubmit = QuizSubmit.builder()

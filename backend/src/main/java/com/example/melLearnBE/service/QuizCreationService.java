@@ -53,7 +53,6 @@ public class QuizCreationService {
     private final static String TXT_EXTENSION = ".txt";
 
 
-
     @Transactional
     public CompletableFuture<ListeningQuizDto> createListeningQuiz(QuizRequest quizRequest, Member member) {
         QuizType quizType = quizRequest.getQuizType();
@@ -77,7 +76,8 @@ public class QuizCreationService {
                         .setLenient()
                         .create();
 
-                Type listType = new TypeToken<List<ListeningAnswer>>(){}.getType();
+                Type listType = new TypeToken<List<ListeningAnswer>>() {
+                }.getType();
                 List<ListeningAnswer> answerContext = gson.fromJson(probListJsonArray, listType);
                 ListeningQuiz listeningQuiz = ListeningQuiz.builder()
                         .level(member.getLevel())
@@ -143,7 +143,7 @@ public class QuizCreationService {
                                 break;
                             }
                         }
-                        if(answerList.size() >= totalBlankSize) {
+                        if (answerList.size() >= totalBlankSize) {
                             break;
                         }
                     }
@@ -153,7 +153,7 @@ public class QuizCreationService {
                 modifiedLyrics.append("\n");
 
                 if (answerList.size() >= totalBlankSize) {
-                    for(int j = i+1; j < lyricArray.length; j++) {
+                    for (int j = i + 1; j < lyricArray.length; j++) {
                         modifiedLyrics.append(lyricArray[j] + "\n");
                     }
                     break;
@@ -170,9 +170,10 @@ public class QuizCreationService {
     @Transactional
     public CompletableFuture<QuizListDto> createQuizList(QuizRequest quizRequest, Member member) {
         QuizType quizType = quizRequest.getQuizType();
-        if(quizType.equals(QuizType.READING) || quizType.equals(QuizType.VOCABULARY) || quizType.equals(QuizType.GRAMMAR)) {
+        if (quizType.equals(QuizType.READING) || quizType.equals(QuizType.VOCABULARY) || quizType.equals(QuizType.GRAMMAR)) {
             return CompletableFuture.completedFuture(requestQuiz(quizRequest, member));
-        } throw new CustomException(ErrorCode.UN_SUPPORTED_QUIZ_TYPE);
+        }
+        throw new CustomException(ErrorCode.UN_SUPPORTED_QUIZ_TYPE);
     }
 
     private QuizListDto requestQuiz(QuizRequest quizRequest, Member member) {
@@ -192,20 +193,20 @@ public class QuizCreationService {
         int retries = 0;
         final int maxRetries = 3;
         boolean success = false;
-
         while (!success && retries < maxRetries) {
             try {
                 ChatGPTResponse chatGPTResponse;
-                if(quizRequest.getQuizType().equals(QuizType.GRAMMAR)) {
+                if (quizRequest.getQuizType().equals(QuizType.GRAMMAR)) {
                     chatGPTResponse = openAIService.requestFinetuningModel(chatRequest);
-                } else if (member.getLangType().equals(Language.ENGLISH)){
+                } else if (member.getLangType().equals(Language.ENGLISH)) {
                     chatGPTResponse = openAIService.requestGPT(chatRequest);
                 } else chatGPTResponse = openAIService.requestGPT4(chatRequest);
 
                 String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
                 JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
                 JsonArray probListJsonArray = jsonObject.getAsJsonArray(QUIZ_JSON_PREFIX);
-                Type listType = new TypeToken<List<Quiz>>(){}.getType();
+                Type listType = new TypeToken<List<Quiz>>() {
+                }.getType();
                 Gson gson = new GsonBuilder()
                         .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeTypeAdapter())
                         .setLenient()
@@ -242,27 +243,20 @@ public class QuizCreationService {
 
         throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
     }
+
     private String getPrompt(QuizType quizType, Member member) {
 
         String filePath = "." + File.separator + PROMPT_PREFIX + File.separator + quizType;
 
-        if(member.getLangType().equals(Language.ENGLISH)) {
-            if(quizType.equals(QuizType.VOCABULARY)) {
-                filePath += File.separator + member.getLangType().getIso639Value() + File.separator + member.getLevel().toString() + TXT_EXTENSION;
-            } else if (quizType.equals(QuizType.READING)) {
-                filePath += File.separator + member.getLangType().getIso639Value() + File.separator + quizType + TXT_EXTENSION;
-            } else {
-                filePath += File.separator + quizType + TXT_EXTENSION;
-            }
-        } else if (member.getLangType().equals(Language.JAPANESE)) {
-            if(quizType.equals(QuizType.VOCABULARY)) {
-                filePath += File.separator + member.getLevel().toString() + TXT_EXTENSION;
-            } else if (quizType.equals(QuizType.READING)) {
-                filePath += File.separator + member.getLangType().getIso639Value() + File.separator + quizType + TXT_EXTENSION;
-            } else {
-                filePath += File.separator + quizType + TXT_EXTENSION;
-            }
+
+        if (quizType.equals(QuizType.VOCABULARY)) {
+            filePath += File.separator + member.getLevel().toString() + TXT_EXTENSION;
+        } else if (quizType.equals(QuizType.READING)) {
+            filePath += File.separator + quizType + TXT_EXTENSION;
+        } else {
+            filePath += File.separator + quizType + TXT_EXTENSION;
         }
+
 
         try {
             return new String(Files.readAllBytes(Paths.get(filePath)));

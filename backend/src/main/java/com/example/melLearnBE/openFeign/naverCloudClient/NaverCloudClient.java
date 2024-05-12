@@ -1,6 +1,7 @@
 package com.example.melLearnBE.openFeign.naverCloudClient;
 
 import com.example.melLearnBE.dto.response.naverCloud.DetectLang;
+import com.example.melLearnBE.enums.Language;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

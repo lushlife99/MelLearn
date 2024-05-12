@@ -29,7 +29,7 @@ public class SupportService {
     private final NaverCloudClient naverCloudClient;
     private final JwtTokenProvider jwtTokenProvider;
     private final MusicRepository musicRepository;
-    private static final int MAX_CHAR_SIZE = 2000;
+    private static final int MAX_CHAR_SIZE = 100;
 
     public List<String> getSupportLang() {
         List<Language> langList = Arrays.stream(Language.values()).toList();
@@ -62,8 +62,8 @@ public class SupportService {
 
         if(StringUtils.hasText(pureLyric)) {
             String truncateLyric = truncateLyricByCharLimit(pureLyric);
-            DetectLang detectLang = naverCloudClient.detectLanguage(truncateLyric);
-            if (member.getLangType().getIso639Value().equals(detectLang.getLangCode())) {
+            DetectLang language = naverCloudClient.detectLanguage(truncateLyric);
+            if (member.getLangType().getIso639Value().equals(language.getLangCode())) {
                 listening = true;
                 reading = true;
                 grammar = true;
@@ -104,25 +104,16 @@ public class SupportService {
 
         return new MusicDto(musicRepository.save(music));
     }
+
     private String truncateLyricByCharLimit(String lyric) {
-        byte[] bytes = lyric.getBytes(StandardCharsets.UTF_8);
-        if (bytes.length <= MAX_CHAR_SIZE) {
-            return lyric;
-        }
+        int charCount = lyric.length();
 
-        int byteCount = 0;
-        int index = 0;
-        while (index < lyric.length()) {
-            int charByteSize = Character.charCount(lyric.codePointAt(index));
-            byteCount += charByteSize;
-            if (byteCount >= MAX_CHAR_SIZE) {
-                break;
-            }
-            index += Character.charCount(lyric.codePointAt(index));
+        if (charCount > MAX_CHAR_SIZE) {
+            return lyric.substring(0, MAX_CHAR_SIZE);
         }
-
-        return lyric.substring(0, index);
+        return lyric;
     }
+
 
     private String getPureLyric(List<LrcLyric> lrcLyrics) {
         StringBuilder stringBuilder = new StringBuilder();
