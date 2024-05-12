@@ -84,6 +84,7 @@ function MusicHome() {
     ["artists", langType],
     () => fetchArtistData(langType),
     {
+      enabled: !!langType,
       onSuccess: (data) => {
         dispatch(setArtistData(data));
       },
@@ -93,6 +94,7 @@ function MusicHome() {
     ["recommends", langType],
     () => fetchRecommendData(langType),
     {
+      enabled: !!langType,
       onSuccess: (data) => {
         dispatch(setRecommendData(data));
       },

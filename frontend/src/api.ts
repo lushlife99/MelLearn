@@ -59,6 +59,7 @@ const handleResponseInterceptor = async (
   } else if (error.response?.status === 409) {
     const errorData = error.response.data as { message: string };
     alert(errorData.message);
+    window.location.href = "/home/main5";
   } else {
     // 다른 예외 상황 처리
   }

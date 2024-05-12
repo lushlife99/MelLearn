@@ -30,7 +30,7 @@ const History = () => {
     setHistory(res.data);
   };
   useEffect(() => {
-    //fetchHistory(READING);
+    fetchHistory("VOCABULARY");
   }, []);
 
   const onClickCategory = (category: string) => {

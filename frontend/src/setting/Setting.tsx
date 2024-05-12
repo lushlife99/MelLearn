@@ -47,6 +47,7 @@ export const Setting = (): JSX.Element => {
     });
 
     if (res.status === 200) {
+      console.log(res.data);
       setMember(res.data);
       setLanguage(eventKey);
     }

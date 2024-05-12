@@ -24,15 +24,24 @@ export const fetchChartData = async (
   // track.playabe이 사라짐
 
   const trackIds = res.data.tracks.slice(0, 50).map((track: any) => track.id);
-  const trackReq = trackIds.map((id: string) =>
-    axiosSpotify.get(`/tracks/${id}`)
+  const trackIdsString = trackIds.join(",");
+  const trackReq = axiosSpotify.get(`/tracks?ids=${trackIdsString}`);
+  // const trackReq = trackIds.map((id: string) =>
+  //   axiosSpotify.get(`/tracks/${id}`)
+  // );
+  const responses = await trackReq;
+
+  const tracks = responses.data;
+
+  const playableTracks = tracks.tracks.filter(
+    (track: any) => track.preview_url !== null
   );
 
-  const responses = await Promise.all(trackReq);
+  // const responses = await Promise.all(trackReq);
 
-  const tracks = responses.map((res) => res.data);
+  // const tracks = responses.map((res) => res.data);
 
-  const playableTracks = tracks.filter((track) => track.preview_url !== null);
+  // const playableTracks = tracks.filter((track) => track.preview_url !== null);
 
   return { tracks: playableTracks };
 };
