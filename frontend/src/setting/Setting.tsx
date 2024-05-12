@@ -16,6 +16,7 @@ export const Setting = (): JSX.Element => {
   const [member, setMember] = useState<Member>(); //멤버 정보 데이터
   const [languages, setLanguages] = useState<string[]>(); //언어 정보
   const [langauge, setLanguage] = useState<string>("en"); // 지원하는 언어 정보 (default en)
+  const [level, setLevel] = useState<string>("Begginner");
   const [point, setPoint] = useState<number>();
   const [img, setImg] = useState<string>();
 
@@ -26,7 +27,6 @@ export const Setting = (): JSX.Element => {
     const res = await axiosApi.get("/api/member/info");
     if (res.status === 200) {
       setMember(res.data);
-      console.log(res.data);
     }
   };
 
@@ -43,9 +43,19 @@ export const Setting = (): JSX.Element => {
     const res = await axiosApi.put("/api/member/info", {
       langType: eventKey,
     });
+
     if (res.status === 200) {
       setMember(res.data);
       setLanguage(eventKey);
+    }
+  };
+  const selectLevel = async (eventKey: any, event: Object) => {
+    const res = await axiosApi.put("/api/member/info", {
+      level: eventKey,
+    });
+    if (res.status === 200) {
+      setMember(res.data);
+      setLevel(res.data.level);
     }
   };
 
@@ -151,7 +161,7 @@ export const Setting = (): JSX.Element => {
             {/* 언어 설정 drop down */}
             <Navbar>
               <Nav variant="dark">
-                <NavDropdown title={langauge} onSelect={selectLanguage}>
+                <NavDropdown title={member?.langType} onSelect={selectLanguage}>
                   {languages &&
                     languages.map((lang: string, index: number) => (
                       <NavDropdown.Item key={index} eventKey={lang}>
@@ -168,10 +178,16 @@ export const Setting = (): JSX.Element => {
             {/* 난이도 설정 drop down */}
             <Navbar>
               <Nav variant="dark">
-                <NavDropdown title="Beginner">
-                  <NavDropdown.Item>Beginner</NavDropdown.Item>
-                  <NavDropdown.Item>Intermediate</NavDropdown.Item>
-                  <NavDropdown.Item>Advanced</NavDropdown.Item>
+                <NavDropdown title={member?.level} onSelect={selectLevel}>
+                  <NavDropdown.Item eventKey="Beginner">
+                    Beginner
+                  </NavDropdown.Item>
+                  <NavDropdown.Item eventKey="Intermediate">
+                    Intermediate
+                  </NavDropdown.Item>
+                  <NavDropdown.Item eventKey="Advanced">
+                    Advanced
+                  </NavDropdown.Item>
                 </NavDropdown>
               </Nav>
             </Navbar>
