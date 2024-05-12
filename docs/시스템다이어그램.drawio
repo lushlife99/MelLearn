@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 <mxfile host="app.diagrams.net" modified="2024-05-08T09:42:02.859Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" etag="b9zcHygvrjJoxzYLK6AZ" version="24.2.5" type="device">
   <diagram name="페이지-1" id="D9u9Lj1Fh6GgVe7wLwOT">
     <mxGraphModel dx="5187" dy="2429" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+=======
+<mxfile host="app.diagrams.net" modified="2024-05-08T09:36:32.150Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" etag="Nr47Px3OgCOYZHYYCiYy" version="24.2.5" type="device">
+  <diagram name="페이지-1" id="D9u9Lj1Fh6GgVe7wLwOT">
+    <mxGraphModel dx="1660" dy="1415" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+>>>>>>> f0d729b158176bc7844aacfcc1b2bf5e1a6e25d8
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -139,18 +145,29 @@
         <mxCell id="-X6ACY5F_YXX9V9hznT9-48" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=-0.007;entryY=0.52;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=5;" edge="1" parent="1" source="-X6ACY5F_YXX9V9hznT9-4" target="-X6ACY5F_YXX9V9hznT9-10">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
+<<<<<<< HEAD
+=======
+        <mxCell id="-X6ACY5F_YXX9V9hznT9-54" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=5;" edge="1" parent="1" source="-X6ACY5F_YXX9V9hznT9-49">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1590" y="1430.47" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+>>>>>>> f0d729b158176bc7844aacfcc1b2bf5e1a6e25d8
         <mxCell id="-X6ACY5F_YXX9V9hznT9-49" value="" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#232F3D;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.user;" vertex="1" parent="1">
           <mxGeometry x="1682" y="1306.47" width="248" height="248" as="geometry" />
         </mxCell>
         <mxCell id="-X6ACY5F_YXX9V9hznT9-50" value="Developer" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=60;" vertex="1" parent="1">
           <mxGeometry x="1665" y="1592.5" width="300" height="90" as="geometry" />
         </mxCell>
+<<<<<<< HEAD
         <mxCell id="-X6ACY5F_YXX9V9hznT9-60" value="" style="endArrow=classic;html=1;rounded=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=5;" edge="1" parent="1" target="-X6ACY5F_YXX9V9hznT9-39">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="1680" y="1470" as="sourcePoint" />
             <mxPoint x="1662.5" y="1340" as="targetPoint" />
           </mxGeometry>
         </mxCell>
+=======
+>>>>>>> f0d729b158176bc7844aacfcc1b2bf5e1a6e25d8
       </root>
     </mxGraphModel>
   </diagram>
