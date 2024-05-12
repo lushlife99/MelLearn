@@ -1,5 +1,6 @@
 package com.example.melLearnBE.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -13,6 +14,7 @@ public enum Language {
 
     private final String iso639Value;
 
+    @JsonCreator
     public static Language valueOfIso(String iso639Value) {
         for (Language language : Language.values()) {
             if (language.iso639Value.equals(iso639Value)) {

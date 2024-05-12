@@ -96,6 +96,7 @@ public class QuizService {
         String redisKey = getRedisKey(quizRequest, member);
         if (optionalQuiz.isEmpty()) {
             if (redisTemplate.hasKey(redisKey)) {
+                System.out.println(redisTemplate.opsForValue().get(redisKey));
                 throw new CustomException(ErrorCode.CREATING_OTHER_REQUEST);
             } else {
                 redisTemplate.opsForValue().set(redisKey, "true", 1, TimeUnit.MINUTES);

@@ -28,10 +28,6 @@ public class ListeningQuiz {
     @Column(columnDefinition="LONGTEXT")
     private String blankedText;
 
-    @OneToMany(mappedBy = "listeningQuiz")
-    @Builder.Default
-    private List<ListeningSubmit> submitList = new ArrayList<>();
-
     @ElementCollection(fetch = FetchType.LAZY)
     @Builder.Default
     private List<String> answerList = new ArrayList<>();

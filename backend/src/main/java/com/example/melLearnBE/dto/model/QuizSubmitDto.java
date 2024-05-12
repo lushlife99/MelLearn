@@ -38,7 +38,7 @@ public class QuizSubmitDto {
     public QuizSubmitDto(Long id, QuizListDto quizList, List<Integer> submitAnswerList, double score, LocalDateTime createdTime) {
         this.id = id;
         this.quizList = quizList;
-        this.submitAnswerList = submitAnswerList;
+        this.submitAnswerList = List.copyOf(submitAnswerList);
         this.score = score;
         this.createdTime = createdTime;
     }

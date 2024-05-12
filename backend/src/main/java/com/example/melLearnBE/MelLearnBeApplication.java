@@ -11,5 +11,4 @@ public class MelLearnBeApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(MelLearnBeApplication.class, args);
 	}
-
 }

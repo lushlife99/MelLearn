@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +29,7 @@ public class SupportService {
     private final NaverCloudClient naverCloudClient;
     private final JwtTokenProvider jwtTokenProvider;
     private final MusicRepository musicRepository;
-    private static final int MAX_CHAR_SIZE = 2000;
+    private static final int MAX_CHAR_SIZE = 100;
 
     public List<String> getSupportLang() {
         List<Language> langList = Arrays.stream(Language.values()).toList();
@@ -61,8 +62,8 @@ public class SupportService {
 
         if(StringUtils.hasText(pureLyric)) {
             String truncateLyric = truncateLyricByCharLimit(pureLyric);
-            DetectLang detectLang = naverCloudClient.detectLanguage(truncateLyric);
-            if (member.getLangType().getIso639Value().equals(detectLang.getLangCode())) {
+            DetectLang language = naverCloudClient.detectLanguage(truncateLyric);
+            if (member.getLangType().getIso639Value().equals(language.getLangCode())) {
                 listening = true;
                 reading = true;
                 grammar = true;
@@ -108,11 +109,12 @@ public class SupportService {
         int charCount = lyric.length();
 
         if (charCount > MAX_CHAR_SIZE) {
-            String trimmedLyric = lyric.substring(0, MAX_CHAR_SIZE);
-            return trimmedLyric;
+            return lyric.substring(0, MAX_CHAR_SIZE);
         }
         return lyric;
     }
+
+
     private String getPureLyric(List<LrcLyric> lrcLyrics) {
         StringBuilder stringBuilder = new StringBuilder();
 

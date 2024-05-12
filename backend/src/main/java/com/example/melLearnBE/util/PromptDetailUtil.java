@@ -15,38 +15,43 @@ public class PromptDetailUtil {
         LearningLevel level = member.getLevel();
         StringBuilder promptDetail = new StringBuilder();
 
+        promptDetail.append(DetailedPromptInstruction.COMMON.getDetail());
+
         if (quizType.equals(QuizType.LISTENING)) {
-            if(level.equals(LearningLevel.Beginner)) {
-                promptDetail.append(DetailedPromptInstruction.LISTENING_LEVEL1.getDetail());
-            } else if (level.equals(LearningLevel.Intermediate)) {
-                promptDetail.append(DetailedPromptInstruction.LISTENING_LEVEL2.getDetail());
-            } else if (level.equals(LearningLevel.Advanced)) {
-                promptDetail.append(DetailedPromptInstruction.LISTENING_LEVEL3.getDetail());
-            }
-
-            return promptDetail.toString();
+            return getListeningPromptDetails(level, promptDetail);
         }
 
-        promptDetail.append(DetailedPromptInstruction.COMMON.getDetail() + " ");
-
-        if (quizType.equals(QuizType.READING)) {
-
-            if(level.equals(LearningLevel.Beginner)) {
-                promptDetail.append(DetailedPromptInstruction.READING_OPTIONLIST_LANG_LEVEL1.getDetail());
-            } else {
-                promptDetail.append(DetailedPromptInstruction.READING_OPTIONLIST_LANG_TYPE.getDetail() + " " + member.getLangType().getIso639Value() + ". ");
-            }
-
-            if(level.equals(LearningLevel.Intermediate)) {
-                promptDetail.append(DetailedPromptInstruction.READING_OPTIONLIST_LANG_LEVEL2.getDetail());
-
-            } else if(level.equals(LearningLevel.Advanced)) {
-                promptDetail.append(DetailedPromptInstruction.READING_OPTIONLIST_LANG_LEVEL3.getDetail());
-            }
-        } else if(quizType.equals(QuizType.VOCABULARY)) {
-
+        else if (quizType.equals(QuizType.READING) || quizType.equals(QuizType.VOCABULARY)) {
+            return getQuizPromptDetails(member, level, promptDetail);
         }
 
+        return promptDetail.toString();
+    }
+
+    private static String getQuizPromptDetails(Member member, LearningLevel level, StringBuilder promptDetail) {
+        if(level.equals(LearningLevel.Beginner)) {
+            promptDetail.append(DetailedPromptInstruction.READING_OPTIONLIST_LANG_LEVEL1.getDetail() + "\n");
+        } else {
+            promptDetail.append(DetailedPromptInstruction.READING_OPTIONLIST_LANG_TYPE.getDetail() + " " + member.getLangType().toString() + ".\n");
+        }
+
+        if(level.equals(LearningLevel.Intermediate)) {
+            promptDetail.append(DetailedPromptInstruction.READING_OPTIONLIST_LANG_LEVEL2.getDetail());
+        } else if(level.equals(LearningLevel.Advanced)) {
+            promptDetail.append(DetailedPromptInstruction.READING_OPTIONLIST_LANG_LEVEL3.getDetail());
+        }
+
+        return promptDetail.toString();
+    }
+
+    private static String getListeningPromptDetails(LearningLevel level, StringBuilder promptDetail) {
+        if(level.equals(LearningLevel.Beginner)) {
+            promptDetail.append(DetailedPromptInstruction.LISTENING_LEVEL1.getDetail());
+        } else if (level.equals(LearningLevel.Intermediate)) {
+            promptDetail.append(DetailedPromptInstruction.LISTENING_LEVEL2.getDetail());
+        } else if (level.equals(LearningLevel.Advanced)) {
+            promptDetail.append(DetailedPromptInstruction.LISTENING_LEVEL3.getDetail());
+        }
         return promptDetail.toString();
     }
 }

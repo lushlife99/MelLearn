@@ -35,20 +35,20 @@ e.g) Comment :  "'Broken'은 이 노래 가사에서 신체적으로나 감정�
 Question. 'I'ma feed you to the monster' 이 문장에서 'monster'의 의미로 가장 가까운 것을 고르세요
 
 OptionList :
-A. A metaphor for a threatening or destructive force or situation: This phrase describes a concept used to represent something that poses a significant threat or potential for extensive damage, much like a storm looming on the horizon, warning of its impending devastation.
-B. A large, frightening mythical creature: This refers to a fantastical beast often found in folklore or myth, typically of immense size and terrifying appearance, which evokes fear and awe in those who hear tales of its legendary exploits.
-C. A person who is extremely kind or gentle: This describes an individual whose behavior is exceptionally compassionate and tender, making them stand out for their benevolence and soft-heartedness in a way that deeply impacts others around them.
-D. A popular character from a children's television show: This is a beloved figure in children's media, known for their engaging and endearing traits, who captures the hearts of young audiences through their adventures and lessons on television.
+A. a metaphor for a threatening or destructive force or situation: This phrase describes a concept used to represent something that poses a significant threat or potential for extensive damage, much like a storm looming on the horizon, warning of its impending devastation.
+B. a large, frightening mythical creature: This refers to a fantastical beast often found in folklore or myth, typically of immense size and terrifying appearance, which evokes fear and awe in those who hear tales of its legendary exploits.
+C. a person who is extremely kind or gentle: This describes an individual whose behavior is exceptionally compassionate and tender, making them stand out for their benevolence and soft-heartedness in a way that deeply impacts others around them.
+D. a popular character from a children's television show: This is a beloved figure in children's media, known for their engaging and endearing traits, who captures the hearts of young audiences through their adventures and lessons on television.
 
 The word you ask in the quiz : monster
 answer : 1 (A metaphor for a threatening or destructive force or situation: This phrase describes a concept used to represent something that poses a significant threat or potential for extensive damage, much like a storm looming on the horizon, warning of its impending devastation.)
 
-
 Comment : 정답 A에서 'monster'는 문자적인 의미가 아닌 비유적으로 사용되었습니다. 이 구절에서 'monster'는 직접적으로 위협적이거나 파괴적인 힘 또는 상황을 의미하는 메타포로 활용되었습니다. 이는 상대방을 물리적, 실제 존재하는 괴물에게 먹이로 주겠다는 직접적인 의미가 아니라, 어떤 위험하거나 해로운 상황에 처하게 하겠다는 의도를 표현한 것입니다. 따라서 B, C, D 선택지는 이 문맥에서의 'monster'의 사용과 관련 없는 잘못된 해석을 제공합니다. 이는 강력한 이미지와 감정을 전달하기 위해 일상 언어에서 자주 사용되는 비유적 표현의 한 예시입니다.
 
-### Output Format
-Your output should be provided in Json format.
+###It is a form that outputs 5 quizzes.
+
 e.g) {"probList":[{"question":"'Very unmanageable day' What is the meaning of 'unmanageable' in this sentence?","optionList":["A situation or element that is impossible to manage or resolve, presenting significant difficulties as it defies standard approaches or interventions.","An arrangement or timetable that has not been organized effectively, leading to conflicts or disruptions due to poor coordination and planning.","An object or individual that is notably bigger than what is typically expected, making it stand out because of its considerable size or stature.", "A place or time characterized by a significant absence of sunlight, resulting in darker, gloomier conditions that affect the overall ambiance."],"word":"unmanageable","answer":"1","comment":"'Very unmanageable day'에서 'unmanageable'은 일상의 사건이나 상황이 너무 복잡하거나 어려워서 쉽게 다루거나 제어할 수 없을 때 사용되는 형용사입니다. 이 경우, 'unmanageable'은 그 날이 너무 혼란스럽거나 예측할 수 없는 상황들로 가득 차서 일상적인 관리나 대처가 힘든 상태를 의미합니다. 선택지 B, C, D는 이 문맥에서 'unmanageable'의 의미와 직접적으로 관련이 없습니다. B는 일정이 제대로 계획되지 않았음을, C는 물리적 크기와 관련된 의미를, D는 날씨 상태와 관련된 의미를 나타내지만, 이들은 'unmanageable'이 표현하고자 하는 복잡하고 제어하기 어려운 상황의 본질과는 거리가 있습니다. 따라서 정답 A는 이 구절에서 'unmanageable'이 의미하는 바를 가장 잘 반영합니다."}, ... four more quizzes]}
 
-The format above is just one quiz output format. You have to produce a total of 5 quizzes to match this format.
+The format above is just one quiz output format.
+You have to produce a total of 5 quizzes to match this format.
 Create a quiz to match the output format above.
