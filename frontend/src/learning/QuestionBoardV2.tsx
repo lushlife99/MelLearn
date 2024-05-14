@@ -128,7 +128,7 @@ export const QuestionBoardV2 = (): JSX.Element => {
                           <div className="flex flex-col items-start">
                             <div className="flex items-center mb-1">
                               <span className="text-[black] text-lg ">
-                                {option}
+                                {idx + 1}. {option}
                               </span>
                             </div>
                           </div>
@@ -139,7 +139,7 @@ export const QuestionBoardV2 = (): JSX.Element => {
                 </div>
               )
           )}
-          <div className="flex justify-center w-full mt-28">
+          <div className="flex justify-center w-full mb-20 fixed-bottom">
             <button
               onClick={!isLast ? handleNextProblem : submitProblem}
               className="bg-[#007AFF] w-[80%] h-10 text-white rounded-lg hover:opacity-60"

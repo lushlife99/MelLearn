@@ -29,7 +29,7 @@ function Login() {
   };
 
   return (
-    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-roboto">
+    <div className="bg-[#9bd1e5] sm:flex sm:flex-row sm:justify-center sm:w-full sm:h-screen font-roboto">
       <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col px-8">
         <BgCircle />
 
@@ -74,19 +74,19 @@ function Login() {
           </button>
         </form>
 
-        <div className="z-10 flex flex-col mt-24 text-center ">
+        <div className="z-10 flex flex-col w-full mt-24 text-center">
           <span className="text-[#232121] text-[15px] font-bold mb-4 ">
             아직 회원이 아니시라구요?
           </span>
           <div className="flex flex-wrap items-center justify-center ">
-            <div className="h-[2px] bg-white w-32"></div>
+            <div className=" h-[2px] bg-white w-[33%]"></div>
             <Link
               to="/join"
               className="text-[#007AFF] font-bold mx-2 hover:opacity-60 text-decoration-none"
             >
               회원가입
             </Link>
-            <div className="h-[2px] bg-white w-32"></div>
+            <div className="w-[33%] h-[2px]  bg-white"></div>
           </div>
         </div>
       </div>

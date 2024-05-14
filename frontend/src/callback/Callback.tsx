@@ -2,8 +2,6 @@ import React, { useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axiosApi, { axiosSpotify } from "../api";
 import axios from "axios";
-import { transcode } from "buffer";
-import { FaGalacticSenate } from "react-icons/fa6";
 
 function Callback() {
   const location = useLocation();
@@ -78,19 +76,16 @@ function Callback() {
             if (response.status === 200) {
               nav("/home");
             }
-
-            // dispatch(setSpotifyPlayer(player));
           }
         });
       };
     }
     const { id } = res.data;
-    //res.stats === 2000
   };
 
   // 유저의 access_token 가져오기
   const getToken = async (code: string) => {
-    const clientId = "f7d3088794d14901af7c8bf354326039"; //env 파일로
+    const clientId: string = process.env.REACT_APP_SPOTIFY_CLIENTID || "";
     const codeVerifier = localStorage.getItem("code_verifier");
     const params = new URLSearchParams();
 

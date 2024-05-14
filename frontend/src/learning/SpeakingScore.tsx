@@ -20,7 +20,7 @@ function SpeakingScore() {
   console.log(parts);
 
   return (
-    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
+    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
       <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col ">
         <BgCircle />
         <div className="z-10 flex flex-col items-center justify-center w-full h-full px-12">

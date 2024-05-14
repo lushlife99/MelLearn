@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-
 import { IoIosArrowRoundBack } from "react-icons/io";
 import HistoryList from "./HistoryList";
 import { useNavigate } from "react-router-dom";
@@ -24,7 +23,7 @@ const History = () => {
 
   return (
     <>
-      <div className="bg-[white] flex flex-row justify-center w-full h-screen font-roboto">
+      <div className="bg-[white] flex flex-row justify-center w-full h-screen font-[roboto]">
         <div className="bg-[black] overflow-hidden w-[450px] h-screen relative flex flex-col">
           <div className="flex items-center justify-between px-8 mt-4 ">
             <div className=" w-[33%] hover:opacity-60">
@@ -34,7 +33,7 @@ const History = () => {
               />
             </div>
             <div className="w-[33%]">
-              <span className="text-3xl font-bold text-white">히스토리</span>
+              <span className="text-2xl font-bold text-white">히스토리</span>
             </div>
 
             <div className="w-[33%]"></div>
@@ -48,7 +47,7 @@ const History = () => {
                   quizType === category
                     ? "text-[#3D5AF1] h-16 rounded-t-xl"
                     : "text-[#C0C0C0] "
-                } flex items-center justify-center w-24 h-12 bg-white font-bold text-lg px-2 hover:opacity-60`}
+                } flex items-center justify-center w-24 h-10 bg-white font-bold text-lg px-2 hover:opacity-60`}
               >
                 <div>
                   <span>{category}</span>

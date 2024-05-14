@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import BgCircle from "../components/BgCircle";
 import { IoIosArrowRoundBack } from "react-icons/io";
 
-const pageSize = 2; // 페이지당 항목 수
 interface Comment {
   id: number;
   quizList: {
@@ -36,11 +35,12 @@ const Commentary = () => {
   const { comments } = location.state;
 
   const [currentPage, setCurrentPage] = useState(1); // 현재 페이지 상태
+  const pageSize = 2; // 페이지당 항목 수
 
   // 현재 페이지에 따라 해당 범위의 항목을 선택하는 함수
 
   return (
-    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
+    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
       <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col px-8">
         <BgCircle />
 
@@ -57,7 +57,7 @@ const Commentary = () => {
             .map((quiz: CommentQuiz, index: number) => (
               <div
                 key={index}
-                className="mb-8 bg-white w-[92%] h-[40%] rounded-3xl p-3"
+                className="mb-12 bg-white w-[92%] h-[40%] rounded-3xl p-3"
               >
                 <div className="flex items-center justify-between">
                   {/* 문제 표시 */}
@@ -107,9 +107,9 @@ const Commentary = () => {
                       quiz.question
                     )}
                   </span>
-                  <div className="flex flex-col">
-                    <span className="mb-0 font-extrabold">제출 답안:</span>
-                    <span className="px-1 mb-2 text-lg font-semibold">
+                  <div className="">
+                    <span className="font-extrabold">
+                      제출 답안:{" "}
                       {quiz.optionList[
                         comments.submitAnswerList[
                           (currentPage - 1) * pageSize + index
@@ -119,7 +119,7 @@ const Commentary = () => {
                   </div>
 
                   {/* Comment */}
-                  <div>
+                  <div className="mt-2">
                     <span className="text-lg font-extrabold ">Note:</span>
                     <p className="px-1 text-[9px] text-gray-500">
                       {quiz.comment}
@@ -129,7 +129,7 @@ const Commentary = () => {
               </div>
             ))}
           {/* 페이징 버튼 */}
-          <div className="flex">
+          <div className="flex justify-center w-full fixed-bottom">
             {Array.from(
               { length: comments.quizList.quizzes.length / 2 + 1 },
               (_, i) => i + 1

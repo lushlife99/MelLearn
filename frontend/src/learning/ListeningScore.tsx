@@ -8,7 +8,7 @@ function ListeningScore() {
   const { comments } = location.state;
 
   return (
-    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
+    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
       <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col px-4 ">
         <BgCircle />
         <div className="z-10 w-full px-4 py-2 mt-8 overflow-y-auto bg-white border h-100 scrollbarwhite rounded-xl">
@@ -59,9 +59,9 @@ function ListeningScore() {
         </div>
         <div
           onClick={() => navigate("/home")}
-          className="hover:opacity-60 flex items-center justify-center w-full h-20 bg-[#007AFF] rounded-lg"
+          className="z-10 hover:opacity-60 flex items-center justify-center w-full h-20 bg-[#007AFF] rounded-lg"
         >
-          <button className="font-bold text-white">홈으로</button>
+          <button className="font-bold w-[60%] text-white">홈으로</button>
         </div>
       </div>
     </div>

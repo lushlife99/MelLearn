@@ -91,7 +91,9 @@ function HistorySpeaking({ quizType }: Speaking) {
             </span>
           </div>
           <div className="flex flex-col items-center justify-center  w-[15%] ">
-            <span className="mb-2 font-bold">{item.score.toFixed(2)}점</span>
+            <span className="mb-2 text-sm font-bold">
+              {item.score.toFixed(2)}점
+            </span>
             <button
               onClick={() => goComment(item)}
               className="font-bold bg-[#1889FE] h-4 text-xs w-20 rounded-sm hover:opacity-60 flex items-center justify-center"
