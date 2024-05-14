@@ -31,42 +31,44 @@ function SelectCategory() {
     };
   }, []);
 
-  const {
-    data: categories,
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery<Category[]>(["categories", track.id], async () => {
-    //서버에 보낼 가사 데이터, 데이터 변환
-    const res = await axiosSpotifyScraper.get(
-      `/track/lyrics?trackId=${track.id}`
-    );
-    const data = res.data;
-    let modifiedString = data.replace(/\[.*?\]/g, "");
-    modifiedString = modifiedString.replace(/\n/g, ".\n");
-    setServerLyric(modifiedString);
+  const { data: categories, isLoading } = useQuery<Category[]>(
+    ["categories", track.id],
+    async () => {
+      //서버에 보낼 가사 데이터, 데이터 변환
+      const res = await axiosSpotifyScraper.get(
+        `/track/lyrics?trackId=${track.id}`
+      );
+      const data = res.data;
+      let modifiedString = data.replace(/\[.*?\]/g, "");
+      modifiedString = modifiedString.replace(/\n/g, ".\n");
+      setServerLyric(modifiedString);
 
-    // 카테고리 조회용 가사
-    const res1 = await axiosSpotifyScraper.get(
-      `/track/lyrics?trackId=${track.id}&format=json`
-    );
-    setLyric(res1.data);
-    const res2 = await axiosApi.post(
-      `/api/support/quiz/category/${track.id}`,
-      res1.data
-    );
+      // 카테고리 조회용 가사
+      const res1 = await axiosSpotifyScraper.get(
+        `/track/lyrics?trackId=${track.id}&format=json`
+      );
+      setLyric(res1.data);
+      const res2 = await axiosApi.post(
+        `/api/support/quiz/category/${track.id}`,
+        res1.data
+      );
 
-    return Object.entries(res2.data)
-      .filter(([key, value]) =>
-        ["grammar", "speaking", "listening", "reading", "vocabulary"].includes(
-          key
+      return Object.entries(res2.data)
+        .filter(([key, value]) =>
+          [
+            "grammar",
+            "speaking",
+            "listening",
+            "reading",
+            "vocabulary",
+          ].includes(key)
         )
-      )
-      .map(([name, value]) => ({
-        name,
-        value: value as boolean,
-      }));
-  });
+        .map(([name, value]) => ({
+          name,
+          value: value as boolean,
+        }));
+    }
+  );
 
   const handleMenuClick = (e: any) => {
     setCategory(e.key);
@@ -142,7 +144,7 @@ function SelectCategory() {
   };
 
   return (
-    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
+    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
       <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col ">
         <BgCircle />
         {isLoading ? (
@@ -171,7 +173,7 @@ function SelectCategory() {
               </div>
             )}
 
-            <div className="fixed bottom-0 w-[430px] bg-white h-88 rounded-t-2xl flex justify-center flex-col items-center">
+            <div className="flex flex-col items-center justify-center w-full bg-white fixed-bottom h-88 rounded-t-2xl">
               <div className="flex justify-start w-full pt-4 pl-4">
                 <span className="text-2xl font-extrabold text-black">
                   Category
@@ -180,7 +182,7 @@ function SelectCategory() {
 
               <Menu
                 mode="vertical"
-                className="flex flex-col items-center justify-center text-xl font-extrabold rounded-t-2xl"
+                className="flex flex-col items-center justify-center text-xl font-bold rounded-t-2xl"
                 onSelect={handleMenuClick}
                 items={categories?.map((category, index) => ({
                   key: category.name,

@@ -105,16 +105,13 @@ export const Setting = (): JSX.Element => {
   }, [member]);
 
   return (
-    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
+    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
       <div className="bg-white overflow-hidden w-[450px] h-screen relative flex flex-col  px-8">
-        <div className="relative z-10 w-12 h-12 mt-8 hover:text-gray-300">
-          <IoIosArrowRoundBack
-            onClick={goHome}
-            className="absolute top-0 w-full h-full right-2"
-          />
+        <div className="z-10 mt-8 hover:text-gray-300">
+          <IoIosArrowRoundBack onClick={goHome} className="w-10 h-10 right-2" />
         </div>
         {/** 아이콘 타이틀 */}
-        {/*    여기 레벨 아이콘 자리  자리  3개 만들어야함 */}
+
         <div className="flex flex-col items-center justify-start ">
           <div className="p-0 w-60 h-60 ">
             <img src={img} alt="Dia" />
@@ -127,12 +124,11 @@ export const Setting = (): JSX.Element => {
 
         <div className="flex flex-col">
           <span className="font-bold text-[30px] mb-2 ">{member?.level}</span>
-          <span className="text-[#0000004c] font-bold text-[18px]">
+          <span className="text-[#0000004c] font-bold text-lg">
             {point} points to next level
           </span>
         </div>
 
-        {/** ProGgess Bar ToDo 라벨 처리 하기**/}
         <div className="mt-8">
           <ProgressBar
             variant="warning"
@@ -150,14 +146,12 @@ export const Setting = (): JSX.Element => {
 
         {/** 환경 설정 */}
 
-        <div className="mt-32">
-          <span className="font-bold text-[#0000004c] text-[14px]">
-            환경설정
-          </span>
+        <div className="mt-20">
+          <span className="font-bold text-[#0000004c] text-sm">환경설정</span>
           <hr className="object-cover mt-1 mb-3 border-2" />
 
           <div className="flex items-center justify-between">
-            <span className="font-bold text-[14px]">학습 언어</span>
+            <span className="text-sm font-bold">학습 언어</span>
             {/* 언어 설정 drop down */}
             <Navbar>
               <Nav variant="dark">
@@ -174,7 +168,7 @@ export const Setting = (): JSX.Element => {
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="font-bold text-[14px]">난이도</span>
+            <span className="text-sm font-bold">난이도</span>
             {/* 난이도 설정 drop down */}
             <Navbar>
               <Nav variant="dark">

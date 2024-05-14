@@ -26,15 +26,9 @@ interface SearchTrack {
   }[];
 }
 
-interface Category {
-  name: string;
-  value: boolean;
-}
-
 function SearchExam() {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
-  const [isCategory, setIsCategory] = useState<boolean>(false);
 
   const getArtistAlbum = async (search: string) => {
     const response = await axiosSpotify.get(`/search?q=${search}&type=track`);
@@ -79,20 +73,22 @@ function SearchExam() {
           onSubmit={handleSubmit}
           className="flex items-center justify-between w-full px-2"
         >
-          <div className="relative flex items-center rounded-md">
+          <div className="relative flex items-center w-full rounded-md">
             <input
-              placeholder="모의고사를 풀 노래를 검색해주세요"
               value={search}
               onChange={onChangeInput}
-              className="bg-[#282828] rounded-md h-10 p-3 w-72 text-[white]"
+              className="bg-[#282828] rounded-md h-10 p-3 w-[85%] text-[white]"
+              placeholder="노래를 검색해주세요"
             />
             <button type="submit">
-              <FaMagnifyingGlass className="w-5 h-5 fill-[white] hover:opacity-60 absolute right-2 bottom-2" />
+              <FaMagnifyingGlass className="w-5 h-5 fill-[white] hover:opacity-60 absolute right-14 bottom-2" />
             </button>
+            <Link to={"/home"} className="text-decoration-none">
+              <span className="ml-2 text-white text-md hover:opacity-60">
+                취소
+              </span>
+            </Link>
           </div>
-          <Link to={"/home"} className="text-decoration-none">
-            <span className="text-lg text-white hover:opacity-60">취소</span>
-          </Link>
         </form>
 
         {/* 검색한 가수 앨범 목록*/}

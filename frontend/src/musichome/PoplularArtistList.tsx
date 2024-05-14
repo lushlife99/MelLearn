@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { IoIosArrowRoundBack } from "react-icons/io";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "../css/scroll.css";
 
 interface Artist {
@@ -32,7 +32,7 @@ export const PoplularArtistList = (): JSX.Element => {
   };
 
   return (
-    <div className="container flex justify-center w-full h-screen">
+    <div className="flex justify-center w-full h-screen font-[roboto]">
       <div className="flex  flex-col items-center w-full  bg-black max-w-[450px]  p-3 ">
         <div className="flex items-center justify-between w-full py-2">
           <div className="w-[33%] h-10 flex justify-start items-center ">
@@ -41,7 +41,7 @@ export const PoplularArtistList = (): JSX.Element => {
               className="w-12 h-12 fill-white hover:fill-gray-500"
             />
           </div>
-          <span className="text-[18px] font-bold  text-white w-[33%] border border-black">
+          <span className="text-md font-bold  text-white w-[33%] border border-black">
             인기 가수 목록
           </span>
           <div className="w-[33%]"></div>

@@ -155,6 +155,11 @@ function PlayMusic() {
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
       <div className="relative bg-[black] overflow-hidden w-full max-w-[450px] h-screen  flex flex-col px-5">
+        <iframe
+          src="https://cross-origin.com/myvideo.html"
+          allow="autoplay"
+          title="my music"
+        />
         <IoIosArrowRoundBack
           onClick={goBack}
           className="fill-[white] w-10 h-10 mt-8 hover:opacity-60"

@@ -60,20 +60,24 @@ export const Rank = (): JSX.Element => {
     getMember();
   }, []);
   return (
-    <div className="bg-[white] flex flex-row justify-center w-full h-screen font-roboto">
+    <div className="bg-[white] flex flex-row justify-center w-full h-screen font-[roboto]">
       <div className="bg-[black] overflow-hidden w-[450px] h-screen relative flex flex-col px-8 ">
-        <div className="mt-4">
-          <IoIosArrowRoundBack
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 fill-white hover:opacity-60"
-          />
+        <div className="flex items-center justify-between mt-4">
+          <div className="w-[33%]">
+            <IoIosArrowRoundBack
+              onClick={() => navigate(-1)}
+              className="w-10 h-10 fill-white hover:opacity-60"
+            />
+          </div>
+          <div className="flex items-center justify-center my-4 w-[33%]">
+            <span className="text-3xl font-bold text-white ">랭킹</span>
+          </div>
+          <div className="w-[33%]"></div>
         </div>
-        <div className="flex items-center justify-center w-full my-4">
-          <span className="text-4xl font-bold text-white ">랭킹</span>
-        </div>
+
         <div className="flex items-center justify-center">
           <img
-            className="w-100 h-100"
+            className="rounded-md w-80 h-80"
             src={track.album.images[0].url}
             alt="Album Cover"
           />

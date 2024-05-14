@@ -49,7 +49,7 @@ function Join() {
   };
 
   return (
-    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
+    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
       <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col px-8">
         <BgCircle />
 
