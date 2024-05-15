@@ -44,9 +44,9 @@ const Commentary = () => {
       <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col px-8">
         <BgCircle />
 
-        <div className="z-10 flex flex-col items-center justify-around h-full">
+        <div className="z-10 flex flex-col items-center h-full ">
           <div
-            className="flex justify-start w-[90%] mb-4 h-10"
+            className="flex justify-start w-[90%] mb-8 h-10"
             onClick={() => navigate(-1)}
           >
             <IoIosArrowRoundBack className="w-8 h-10 mt-4 fill-black hover:opacity-55" />
@@ -57,12 +57,12 @@ const Commentary = () => {
             .map((quiz: CommentQuiz, index: number) => (
               <div
                 key={index}
-                className="mb-12 bg-white w-[92%] h-[40%] rounded-3xl p-3"
+                className="mb-12 bg-white w-[92%] h-[40%] rounded-3xl p-3 shadow-[0px_4px_4px_#00000040]"
               >
                 <div className="flex items-center justify-between">
                   {/* 문제 표시 */}
                   <span
-                    className={`text-3xl font-bold text-[${
+                    className={`text-3xl font-extrabold text-[${
                       quiz.answer ===
                       comments.submitAnswerList[
                         (currentPage - 1) * pageSize + index
@@ -82,49 +82,61 @@ const Commentary = () => {
                 </div>
 
                 <div className="flex flex-col mt-2">
-                  <span className="mb-3 text-xl font-bold">
-                    {quiz.question.includes("_____") ? (
-                      <>
-                        {quiz.question.split("_____")[0]}
-                        <span
-                          className={`text-[${
-                            quiz.answer ===
-                            comments.submitAnswerList[
-                              (currentPage - 1) * pageSize + index
-                            ]
-                              ? "#007AFF"
-                              : "red"
-                          }]`}
-                        >
-                          {quiz.optionList[quiz.answer - 1]?.replace(
-                            /\d+\./g,
-                            ""
-                          )}
-                        </span>
-                        {quiz.question.split("_____")[1]}
-                      </>
-                    ) : (
-                      quiz.question
-                    )}
-                  </span>
                   <div className="">
-                    <span className="font-extrabold">
-                      제출 답안:{" "}
-                      {quiz.optionList[
-                        comments.submitAnswerList[
-                          (currentPage - 1) * pageSize + index
-                        ] - 1
-                      ]?.replace(/\d+\./g, "")}
+                    <span className="mb-3 text-xl font-bold">
+                      {quiz.question.includes("_____") ? (
+                        <>
+                          {quiz.question.split("_____")[0]}
+                          <span
+                            className={`text-[${
+                              quiz.answer ===
+                              comments.submitAnswerList[
+                                (currentPage - 1) * pageSize + index
+                              ]
+                                ? "#007AFF"
+                                : "red"
+                            }]`}
+                          >
+                            {quiz.optionList[quiz.answer - 1]?.replace(
+                              /\d+\./g,
+                              ""
+                            )}
+                          </span>
+                          {quiz.question.split("_____")[1]}
+                        </>
+                      ) : (
+                        quiz.question
+                      )}
                     </span>
                   </div>
 
                   {/* Comment */}
                   <div className="mt-2">
                     <span className="text-lg font-extrabold ">Note:</span>
-                    <p className="px-1 text-[9px] text-gray-500">
+                    <p className="px-1 text-[9px] text-gray-500 text-sm font-bold">
                       {quiz.comment}
                     </p>
                   </div>
+                </div>
+
+                <div className="flex justify-center mt-2 border border-black  shadow-[0px_4px_4px_#00000040] rounded-md">
+                  <span className="mr-2 font-extrabold">사용자 답안: </span>
+                  <span
+                    className={`font-extrabold  text-[${
+                      quiz.answer ===
+                      comments.submitAnswerList[
+                        (currentPage - 1) * pageSize + index
+                      ]
+                        ? "#007AFF"
+                        : "red"
+                    }]`}
+                  >
+                    {quiz.optionList[
+                      comments.submitAnswerList[
+                        (currentPage - 1) * pageSize + index
+                      ] - 1
+                    ]?.replace(/\d+\./g, "")}
+                  </span>
                 </div>
               </div>
             ))}

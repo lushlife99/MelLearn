@@ -65,6 +65,18 @@ function HistoryList({ quizType }: IHistory) {
       },
     });
   };
+  const getLevel = (level: number | undefined) => {
+    switch (level) {
+      case 1:
+        return "초급";
+      case 2:
+        return "중급";
+      case 3:
+        return "고급";
+      default:
+        return "초급";
+    }
+  };
   useEffect(() => {
     setPage(1);
     fetchHistory(1);
@@ -87,9 +99,14 @@ function HistoryList({ quizType }: IHistory) {
             <span className="font-bold text-md">
               {tracks?.tracks[index].name}
             </span>
-            <span className="text-[#DED9D9] text-sm">
-              {tracks?.tracks[index].artists[0].name}
-            </span>
+            <div className="flex justify-between w-full">
+              <span className="text-[#DED9D9] text-sm">
+                {tracks?.tracks[index].artists[0].name}
+              </span>
+              <span className="mr-12 text-sm font-bold text-white">
+                {getLevel(item.quizList.level)}
+              </span>
+            </div>
           </div>
           <div className="flex flex-col items-center justify-center  w-[15%] ">
             <span className="mb-2 font-bold">{item.score}점</span>

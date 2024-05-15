@@ -1,10 +1,9 @@
-import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
 import Login from "./login/Login";
 import Join from "./login/Join";
-import Setting from "./setting/Setting";
-import { SpotifyLogo } from "./setting/SpotifyLogo";
+import Setting from "./settingview/Setting";
+import { SpotifyLogo } from "./settingview/SpotifyLogo";
 import Callback from "./callback/Callback";
 import MusicHome from "./musichome/MusicHome";
 import { PopularMusicList } from "./musichome/PoplularMusicList";

@@ -152,13 +152,37 @@ function MusicHome() {
     );
   }
 
-  //리액트 쿼리 사용 -> 메인화면 올때 멤버 정보를 받아서 langtype으로 en ,jp 구분해서
-  //플레이리스트를 보여줘야함
-  // 메인환경올때마다 이걸 요청? -> 리액트 쿼리 이용해서 불필요한 호출 방지 되면 환경설정에서도 적용
-
   return (
     <div className="bg-[white] flex flex-row justify-center w-full h-screen font-[roboto]">
-      <div className="relative bg-black overflow-hidden w-full max-w-[450px] h-screen  flex flex-col ">
+      <div className="relative bg-black overflow-hidden w-full sm:max-w-[450px] h-screen flex sm:flex-col ">
+        <BottomNavigation
+          className="bg-black  sm:fixed sm:bottom-0 sm:w-full"
+          showLabels
+          value={page}
+          onChange={handleChange}
+        >
+          <BottomNavigationAction
+            className="text-white hover:opacity-60 "
+            label="홈"
+            icon={<HomeIcon />}
+          />
+          <BottomNavigationAction
+            className="text-white hover:opacity-60"
+            label="모의고사"
+            icon={<MenuBookIcon />}
+          />
+          <BottomNavigationAction
+            className="text-white hover:opacity-60"
+            label="히스토리"
+            icon={<HistoryIcon />}
+          />
+          <BottomNavigationAction
+            className="text-white hover:opacity-60"
+            label="설정"
+            icon={<SettingsIcon />}
+          />
+        </BottomNavigation>
+
         {/* 타이틀*/}
         <div className="flex items-center justify-between h-16 px-3 mb-2 bg-black ">
           <span className="px-2 text-3xl font-bold text-white">MelLearn</span>
@@ -167,7 +191,7 @@ function MusicHome() {
             className="w-5 h-5 hover:opacity-60 fill-white"
           />
         </div>
-        <div className="h-[85%] overflow-y-auto">
+        <div className="h-[85%] overflow-y-auto scrollbar">
           {/* 사용자 추천 음악*/}
           <div className="px-3 mt-4 ">
             <div className="flex items-center justify-between">
@@ -183,7 +207,7 @@ function MusicHome() {
             </div>
             <Swiper
               spaceBetween={10}
-              slidesPerView={1.5}
+              slidesPerView={1.6}
               modules={[Pagination]}
               loop={true}
               className="mySwiper"
@@ -198,7 +222,7 @@ function MusicHome() {
                 >
                   <img
                     src={track.album.images[0].url}
-                    className="p-2"
+                    className="p-2 "
                     alt="Album Cover"
                   />
                   <span className="px-3 overflow-hidden text-lg font-extrabold text-white whitespace-nowrap overflow-ellipsis">
@@ -227,7 +251,7 @@ function MusicHome() {
           </div>
 
           {/* 인기 가수*/}
-          <div className="z-10 px-3 mt-4">
+          <div className="px-3 mt-4 ">
             <div className="flex items-center justify-between ">
               <span className="px-2 text-xl font-extrabold text-white">
                 인기 가수
@@ -329,34 +353,7 @@ function MusicHome() {
         </div>
 
         {/* <div className="bottom-0 left-0 right-0 z-10 w-full "> */}
-        <BottomNavigation
-          className="fixed-bottom w-[100%] bg-black"
-          showLabels
-          value={page}
-          onChange={handleChange}
-        >
-          <BottomNavigationAction
-            className="text-white hover:opacity-60 "
-            label="홈"
-            icon={<HomeIcon />}
-          />
-          <BottomNavigationAction
-            className="text-white hover:opacity-60"
-            label="모의고사"
-            icon={<MenuBookIcon />}
-          />
-          <BottomNavigationAction
-            className="text-white hover:opacity-60"
-            label="히스토리"
-            icon={<HistoryIcon />}
-          />
-          <BottomNavigationAction
-            className="text-white hover:opacity-60"
-            label="설정"
-            icon={<SettingsIcon />}
-          />
-          ;
-        </BottomNavigation>
+
         {/* </div> */}
       </div>
     </div>
