@@ -49,7 +49,6 @@ interface Artist {
 function MusicHome() {
   const [page, setPage] = useState(0);
   const navigation = useNavigate();
-  const location = useLocation();
   const dispatch = useDispatch();
   const [member, setMember] = useState<Member>(); //멤버 정보 데이터
   const [langType, setLangType] = useState();

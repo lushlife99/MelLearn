@@ -44,8 +44,6 @@ function App() {
           <Route path="/home/main3" element={<PoplularArtistList />}></Route>
           <Route path="/home/main5" element={<SearchMusic />}></Route>
 
-          {/* TODO frontend -main 작업 시작 확인 후 지울것 */}
-
           <Route path="/main4" element={<ArtistDetial />}></Route>
           <Route path="/playMusic" element={<PlayMusic />}></Route>
           <Route path="/category" element={<SelectCategory />}></Route>
