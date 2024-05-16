@@ -29,7 +29,7 @@ interface CommentQuiz {
 
 function Comments({ comments }: IComment) {
   return (
-    <div>
+    <div className="font-[roboto]">
       {comments?.quizList?.quizzes.map((quiz: CommentQuiz, index: number) => (
         <div
           key={index}
@@ -38,7 +38,7 @@ function Comments({ comments }: IComment) {
           <div className="flex items-center justify-between">
             {/* 문제 표시 */}
             <span
-              className={`text-3xl font-bold text-[${
+              className={`text-3xl font-extrabold text-[${
                 quiz.answer === comments.submitAnswerList[index]
                   ? "#007AFF"
                   : "red"

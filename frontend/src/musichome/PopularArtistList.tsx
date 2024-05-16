@@ -26,7 +26,7 @@ export const PoplularArtistList = (): JSX.Element => {
     navigation(-1);
   };
   const goDetailArtist = (artist: Artist) => {
-    navigation(`/main4?artistId=${artist.id}`, {
+    navigation(`/artistDetail?artistId=${artist.id}`, {
       state: { artist },
     });
   };

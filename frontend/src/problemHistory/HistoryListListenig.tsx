@@ -10,7 +10,7 @@ interface History {
   content: {
     id: number;
     createdTime: string;
-    level: string;
+    level: number;
     listeningQuiz: {
       id: number;
       blankedText: string;
@@ -59,6 +59,18 @@ function HistoryListListenig({ quizType }: Listening) {
       },
     });
   };
+  const getLevel = (level: number | undefined) => {
+    switch (level) {
+      case 1:
+        return "초급";
+      case 2:
+        return "중급";
+      case 3:
+        return "고급";
+      default:
+        return "초급";
+    }
+  };
   useEffect(() => {
     setPage(1);
     fetchHistory(1);
@@ -75,7 +87,12 @@ function HistoryListListenig({ quizType }: Listening) {
           </div>
           <div className="flex flex-col items-start justify-center  w-[70%]">
             <span className="font-bold text-md">Lucky</span>
-            <span className="text-[#DED9D9] text-sm">Json Mraz</span>
+            <div className="flex justify-between w-full">
+              <span className="text-[#DED9D9] text-sm">Json Mraz</span>
+              <span className="mr-12 text-sm font-bold text-white">
+                {getLevel(item?.level)}
+              </span>
+            </div>
           </div>
           <div className="flex flex-col items-center justify-center  w-[15%] ">
             <span className="mb-2 font-bold">{item.score}점</span>

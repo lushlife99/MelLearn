@@ -2,6 +2,8 @@ import React, { useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axiosApi, { axiosSpotify } from "../api";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setSpotifyPlayer } from "../redux/player/playerSlice";
 
 function Callback() {
   const location = useLocation();
@@ -9,6 +11,7 @@ function Callback() {
   const error = queryParams.get("error");
   const code = queryParams.get("code");
   const nav = useNavigate();
+  const dispatch = useDispatch();
 
   // spotify 내 로컬에 device 설치
   const transferDevice = async (devcieId: string, player: Spotify.Player) => {
@@ -40,13 +43,15 @@ function Callback() {
 
           volume: 0.5,
         });
+        //dispatch(setSpotifyPlayer(player));
         player.addListener("ready", ({ device_id }) => {
           transferDevice(device_id, player);
+          player.activateElement();
         });
+
         player.addListener("not_ready", ({ device_id }) => {
           console.log("Device ID has gone offline");
         });
-
         player.addListener("initialization_error", ({ message }) => {
           console.error("초기화 에러", message);
         });

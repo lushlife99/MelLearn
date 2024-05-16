@@ -56,6 +56,7 @@ function MockExam() {
     useState<ReturnType<typeof setInterval>>();
 
   const quizLen = 5;
+  const listenLen = 10;
   const [readingSubmit, setReadingSubmit] = useState<number[]>(
     new Array(quizLen).fill(0)
   );
@@ -66,7 +67,7 @@ function MockExam() {
     new Array(quizLen).fill(0)
   );
   const [listeningSubmit, setListeningSubmit] = useState<string[]>(
-    new Array(listening?.answerList.length).fill("")
+    new Array(listenLen).fill("")
   );
   const recordedBlobUrl = useSelector(
     (state: RootState) => state.record.recordedBlobUrl
@@ -195,31 +196,43 @@ function MockExam() {
       grammarSubmit,
       listeningSubmit,
     };
-    if (recordedBlobUrl) {
+    const validateReading = readingSubmit.includes(0);
+    const validateVoca = grammarSubmit.includes(0);
+    const validateGrammar = vocabularySubmit.includes(0);
+    const validateListening = listeningSubmit.includes("");
+
+    if (
+      validateReading ||
+      validateVoca ||
+      validateGrammar ||
+      validateListening ||
+      !recordedBlobUrl
+    ) {
+      alert("작성하지 않은 답안이 있습니다.");
+    } else {
       const res = await fetch(recordedBlobUrl);
       const blob = await res.blob();
       formData.append("speakingSubmitFile", blob);
-    }
-    //formData.append(`speakingSubmitFile`, recordedBlob);
-    const submitBlob = new Blob([JSON.stringify(submitRequest)], {
-      type: "application/json",
-    });
-    formData.append("submitRequest", submitBlob, "submit.json");
-    const res = await axiosApi.post(
-      "/api/comprehensive-quiz/submit",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-    if (res.status === 200) {
-      navigate("/mockComment", {
-        state: {
-          comment: res.data,
-        },
+      const submitBlob = new Blob([JSON.stringify(submitRequest)], {
+        type: "application/json",
       });
+      formData.append("submitRequest", submitBlob, "submit.json");
+      const res2 = await axiosApi.post(
+        "/api/comprehensive-quiz/submit",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      if (res.status === 200) {
+        navigate("/mockComment", {
+          state: {
+            comment: res2.data,
+          },
+        });
+      }
     }
   };
   useEffect(() => {
@@ -232,7 +245,7 @@ function MockExam() {
   if (isLoading) {
     return (
       <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
-        <div className="bg-[#9bd1e5] whi overflow-hidden w-[450px] h-full relative flex flex-col px-8 border border-black">
+        <div className="bg-[#9bd1e5] whi overflow-hidden w-[450px] h-full relative flex flex-col px-8 ">
           <div className="absolute left-0 z-10 flex items-center justify-center w-full h-12 font-bold text-center text-white animate-pulse top-50 rounded-xl ">
             <div className="animate-bounce bg-[#007AFF] h-12 flex items-center rounded-xl w-[80%] justify-center">
               모의고사 생성중...
@@ -245,7 +258,7 @@ function MockExam() {
 
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
-      <div className="bg-[#9bd1e5] whi overflow-hidden w-[450px] h-full relative flex flex-col px-8 border border-black">
+      <div className="bg-[#9bd1e5] whi overflow-hidden w-[450px] h-full relative flex flex-col px-8 ">
         {/* 모의고사 제목*/}
         <BgCircle />
         <div className="h-[10%] z-10 ">
@@ -259,7 +272,7 @@ function MockExam() {
         </div>
 
         {/* 문제 */}
-        <div className="h-[80%] z-10">
+        <div className="h-[70%] z-10">
           <span className="font-bold ">
             {currentPage === 1 &&
               "[01-05] Read the following passages. Then choose the option that best completes the passage."}
@@ -271,10 +284,12 @@ function MockExam() {
               listening &&
               `[16-${
                 16 + listening?.answerList.length - 1
-              }]  Listen the following passages. Then choose the option that best completes the passage.`}
+              }]  Listen to the music and write appropriate words in the blank spaces.`}
             {currentPage === 5 &&
               listening &&
-              `[${16 + listening.answerList.length}] spaeking test`}
+              `[${
+                16 + listening.answerList.length
+              }] Listen to the song and sing along paying attention to pronunciation.`}
           </span>
           <div className="h-full overflow-y-auto whitespace-normal scrollbarwhite ">
             {exam
@@ -320,14 +335,14 @@ function MockExam() {
                     <img
                       src={track.album.images[2].url}
                       alt="Album Cover"
-                      className="w-12 h-12 rounded-xl"
+                      className="w-12 h-12 ml-4 rounded-xl"
                     />
-                    <div className="flex flex-col justify-start ml-4">
+                    <div className="flex flex-col justify-start ml-2">
                       <span className="text-sm font-bold">{track.name}</span>
-                      <span className="text-sm">{track.artists[0].name}</span>
+                      <span className="text-xs">{track.artists[0].name}</span>
                     </div>
 
-                    <div className="ml-44 hover:opacity-50">
+                    <div className="ml-36 hover:opacity-50">
                       {isPlaying ? (
                         <FaPause onClick={pause} className="w-6 h-6" />
                       ) : (
@@ -374,7 +389,7 @@ function MockExam() {
               </div>
             )}
             {currentPage === 6 && (
-              <div className="h-[80%] w-full">
+              <div className="h-[70%] w-full">
                 <div className="grid grid-cols-2 grid-rows-2 gap-4">
                   <MockSubmitDisplay
                     title="Grammar"
@@ -405,7 +420,7 @@ function MockExam() {
             )}
           </div>
 
-          <div className="flex justify-center w-full h-[10%] mt-1">
+          <div className="flex justify-center w-full h-[10%] mt-8  ">
             {Array.from(
               { length: (exam.length + 10) / 5 + 1 },
               (_, i) => i + 1

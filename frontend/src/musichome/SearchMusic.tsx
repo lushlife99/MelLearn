@@ -74,25 +74,28 @@ export const SearchMusic = () => {
   return (
     <div className="flex justify-center w-full h-screen font-[roboto]">
       <div
-        className={`flex flex-col items-center w-full bg-[black] max-w-[450px] px-8 py-12 `}
+        className={`flex flex-col items-center w-full bg-[black]  px-8 py-12 `}
       >
         {/* 검색 창 */}
         <form
           onSubmit={handleSubmit}
           className="flex items-center justify-between w-full px-2"
         >
-          <div className="relative flex items-center w-full rounded-md">
+          <div className="relative flex items-center justify-center w-full rounded-md">
             <input
               value={search}
               onChange={onChangeInput}
-              className="bg-[#282828] rounded-md h-10 p-3 w-[85%] text-[white]"
+              className="bg-[#282828] rounded-md h-10 p-3 sm:w-[85%] w-[55%] text-[white] "
               placeholder="노래를 검색해주세요"
             />
-            <button type="submit">
-              <FaMagnifyingGlass className="w-5 h-5 fill-[white] hover:opacity-60 absolute right-14 bottom-2" />
+            <button
+              type="submit"
+              className="absolute sm:right-14 right-[360px]"
+            >
+              <FaMagnifyingGlass className="w-5 h-5 fill-[white] hover:opacity-60 bottom-1" />
             </button>
             <Link to={"/home"} className="text-decoration-none">
-              <span className="ml-2 text-white text-md hover:opacity-60">
+              <span className="ml-4 text-white sm:ml-2 text-md hover:opacity-60">
                 취소
               </span>
             </Link>
@@ -100,9 +103,9 @@ export const SearchMusic = () => {
         </form>
 
         {/* 검색한 가수 앨범 목록*/}
-        <div className="w-full px-2 mt-8 overflow-y-auto scrollbar">
+        <div className="flex flex-col items-center w-full px-2 mt-8 overflow-y-auto scrollbar">
           {isLoading ? (
-            <div className="flex flex-col justify-center items-center w-full bg-black max-w-[450px] h-full px-3 py-4">
+            <div className="flex flex-col items-center justify-center w-full h-full px-3 py-4 bg-black">
               <Spinner animation="border" role="status" />
             </div>
           ) : (
@@ -111,16 +114,16 @@ export const SearchMusic = () => {
               .map((track, index) => (
                 <div
                   key={index}
-                  className=" rounded-2xl bg-[#282828]  h-40 mb-4"
+                  className=" rounded-2xl bg-[#282828]  sm:h-40 h-56 mb-4 sm:w-full w-[60%]"
                 >
-                  <div className="flex items-center p-4">
+                  <div className="flex items-center p-4 ">
                     <img
                       src={track.album.images[2].url}
                       alt="Album Cover"
-                      className="rounded-md"
+                      className="w-32 h-32 rounded-md sm:w-16 sm:h-16"
                     />
                     <div className="flex flex-col justify-between ml-4 ">
-                      <span className="text-bold text-[white] ">
+                      <span className="text-bold text-[white] sm:text-md">
                         {track.name.length > 30
                           ? `${track.name.slice(0, 25)}...`
                           : track.name}
@@ -128,7 +131,7 @@ export const SearchMusic = () => {
                       <span className="text-[#B3B3B3] text-sm font-semibold">
                         {track.artists[0].name}
                       </span>
-                      <span className="text-[#B3B3B3] text-sm">
+                      <span className="text-[#B3B3B3] sm:text-sm">
                         {Math.floor(track.duration_ms / 1000 / 60)}:
                         {Math.floor((track.duration_ms / 1000) % 60) < 10
                           ? `0${Math.floor((track.duration_ms / 1000) % 60)}`
@@ -136,7 +139,7 @@ export const SearchMusic = () => {
                       </span>
                     </div>
                   </div>
-                  <div className="flex justify-between px-4">
+                  <div className="flex justify-between px-4 mb-4">
                     <button
                       onClick={() => goPlayMusic(track)}
                       className="bg-[white] w-28 rounded-2xl h-8 hover:opacity-60 flex items-center justify-center"

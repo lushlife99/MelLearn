@@ -16,7 +16,7 @@ export const Setting = (): JSX.Element => {
   const [member, setMember] = useState<Member>(); //멤버 정보 데이터
   const [languages, setLanguages] = useState<string[]>(); //언어 정보
   const [langauge, setLanguage] = useState<string>("en"); // 지원하는 언어 정보 (default en)
-  const [level, setLevel] = useState<string>("Begginner");
+  const [level, setLevel] = useState<string>("초급");
   const [point, setPoint] = useState<number>();
   const [img, setImg] = useState<string>();
 
@@ -91,6 +91,18 @@ export const Setting = (): JSX.Element => {
 
   const goHome = () => {
     navigation("/home");
+  };
+  const getLevel = (level: string | undefined) => {
+    switch (level) {
+      case "Beginner":
+        return "초급";
+      case "Intermediate":
+        return "중급";
+      case "Advanced":
+        return "고급";
+      default:
+        return "초급";
+    }
   };
 
   useEffect(() => {
@@ -172,16 +184,15 @@ export const Setting = (): JSX.Element => {
             {/* 난이도 설정 drop down */}
             <Navbar>
               <Nav variant="dark">
-                <NavDropdown title={member?.level} onSelect={selectLevel}>
-                  <NavDropdown.Item eventKey="Beginner">
-                    Beginner
-                  </NavDropdown.Item>
+                <NavDropdown
+                  title={getLevel(member?.level)}
+                  onSelect={selectLevel}
+                >
+                  <NavDropdown.Item eventKey="Beginner">초급</NavDropdown.Item>
                   <NavDropdown.Item eventKey="Intermediate">
-                    Intermediate
+                    중급
                   </NavDropdown.Item>
-                  <NavDropdown.Item eventKey="Advanced">
-                    Advanced
-                  </NavDropdown.Item>
+                  <NavDropdown.Item eventKey="Advanced">고급</NavDropdown.Item>
                 </NavDropdown>
               </Nav>
             </Navbar>
