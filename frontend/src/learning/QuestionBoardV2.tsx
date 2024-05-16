@@ -20,8 +20,6 @@ interface Quiz {
   }[];
 }
 
-// TODO 결과보기 했을 때 랭크나오게
-
 export const QuestionBoardV2 = (): JSX.Element => {
   const [index, setIndex] = useState(0); // 현재 문제 인덱스
   const location = useLocation();

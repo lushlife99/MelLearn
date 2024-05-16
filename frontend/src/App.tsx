@@ -33,22 +33,27 @@ function App() {
     <Provider store={store}>
       <BrowserRouter>
         <Routes>
+          {/* 로그인 관련 페이지 */}
           <Route path="/" element={<Login />}></Route>
-          <Route path="/setting" element={<Setting />}></Route>
           <Route path="/join" element={<Join />}></Route>
-          <Route path="/spotify" element={<SpotifyLogo />}></Route>
           <Route path="/callback" element={<Callback />}></Route>
+
+          {/* 설정 관련 페이지 */}
+          <Route path="/setting" element={<Setting />}></Route>
+          <Route path="/spotify" element={<SpotifyLogo />}></Route>
+
+          {/* 메인 화면 */}
           <Route path="/home" element={<MusicHome />}></Route>
           <Route path="/home/main6" element={<RecommendMusicList />}></Route>
           <Route path="/home/main2" element={<PopularMusicList />}></Route>
           <Route path="/home/main3" element={<PoplularArtistList />}></Route>
           <Route path="/home/main5" element={<SearchMusic />}></Route>
-
           <Route path="/main4" element={<ArtistDetial />}></Route>
           <Route path="/playMusic" element={<PlayMusic />}></Route>
+
+          {/* 학습 관련 페이지 */}
           <Route path="/category" element={<SelectCategory />}></Route>
           <Route path="/speaking" element={<Speaking />}></Route>
-
           <Route path="/question" element={<QuestionBoardV2 />}></Route>
           <Route path="/score" element={<Score />}></Route>
           <Route path="/comment" element={<Commentary />}></Route>
@@ -56,9 +61,13 @@ function App() {
           <Route path="/listening" element={<Listening />}></Route>
           <Route path="/lsScore" element={<ListeningScore />}></Route>
           <Route path="/speakingScore" element={<SpeakingScore />}></Route>
+
+          {/* 모의고사 관련 페이지 */}
           <Route path="/compQuiz" element={<SearchExam />}></Route>
           <Route path="/mockExam" element={<MockExam />}></Route>
           <Route path="/mockComment" element={<MockComment />}></Route>
+
+          {/* 히스토리 페이지 */}
           <Route path="/history" element={<History />}></Route>
         </Routes>
       </BrowserRouter>
