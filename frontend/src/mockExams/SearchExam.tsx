@@ -66,7 +66,7 @@ function SearchExam() {
   return (
     <div className="flex justify-center w-full h-screen">
       <div
-        className={`flex flex-col items-center w-full bg-[black] max-w-[450px] px-8 py-12 `}
+        className={`flex flex-col items-center w-full bg-[black]  px-8 py-12 `}
       >
         {/* 검색 창 */}
         <form
@@ -81,7 +81,7 @@ function SearchExam() {
               placeholder="노래를 검색해주세요"
             />
             <button type="submit">
-              <FaMagnifyingGlass className="w-5 h-5 fill-[white] hover:opacity-60 absolute right-14 bottom-2" />
+              <FaMagnifyingGlass className="w-5 h-5 fill-[white] hover:opacity-60 absolute sm:right-14 bottom-2 right-56" />
             </button>
             <Link to={"/home"} className="text-decoration-none">
               <span className="ml-2 text-white text-md hover:opacity-60">

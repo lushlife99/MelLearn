@@ -1,10 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface PlayerState {
-  spotifyPlyaer: Spotify.Player | null;
+  player: Spotify.Player | null;
 }
 const initialState: PlayerState = {
-  spotifyPlyaer: null,
+  player: null,
 };
 
 const playerSlice = createSlice({
@@ -12,7 +12,7 @@ const playerSlice = createSlice({
   initialState,
   reducers: {
     setSpotifyPlayer: (state, action: PayloadAction<Spotify.Player>) => {
-      state.spotifyPlyaer = action.payload;
+      state.player = action.payload;
     },
   },
 });

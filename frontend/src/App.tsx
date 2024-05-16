@@ -6,15 +6,15 @@ import Setting from "./settingview/Setting";
 import { SpotifyLogo } from "./settingview/SpotifyLogo";
 import Callback from "./callback/Callback";
 import MusicHome from "./musichome/MusicHome";
-import { PopularMusicList } from "./musichome/PoplularMusicList";
-import { PoplularArtistList } from "./musichome/PoplularArtistList";
+import { PopularMusicList } from "./musichome/PopularMusicList";
+import { PoplularArtistList } from "./musichome/PopularArtistList";
 import { ArtistDetial } from "./musichome/ArtistDetail";
 import { SearchMusic } from "./musichome/SearchMusic";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import PlayMusic from "./musichome/PlayMusic";
 import Speaking from "./learning/Speaking";
-import { QuestionBoardV2 } from "./learning/QuestionBoardV2";
+import { QuestionBoard } from "./learning/QuestionBoard";
 import { Score } from "./learning/Score";
 import Commentary from "./learning/Commentary";
 import { Rank } from "./learning/Rank";
@@ -44,17 +44,21 @@ function App() {
 
           {/* 메인 화면 */}
           <Route path="/home" element={<MusicHome />}></Route>
-          <Route path="/home/main6" element={<RecommendMusicList />}></Route>
-          <Route path="/home/main2" element={<PopularMusicList />}></Route>
-          <Route path="/home/main3" element={<PoplularArtistList />}></Route>
-          <Route path="/home/main5" element={<SearchMusic />}></Route>
-          <Route path="/main4" element={<ArtistDetial />}></Route>
+          <Route
+            path="/recommendCharts"
+            element={<RecommendMusicList />}
+          ></Route>
+          <Route path="/charts" element={<PopularMusicList />}></Route>
+          <Route path="/artists" element={<PoplularArtistList />}></Route>
+          <Route path="/searchMusic" element={<SearchMusic />}></Route>
+
+          <Route path="/artistDetail" element={<ArtistDetial />}></Route>
           <Route path="/playMusic" element={<PlayMusic />}></Route>
 
           {/* 학습 관련 페이지 */}
           <Route path="/category" element={<SelectCategory />}></Route>
           <Route path="/speaking" element={<Speaking />}></Route>
-          <Route path="/question" element={<QuestionBoardV2 />}></Route>
+          <Route path="/question" element={<QuestionBoard />}></Route>
           <Route path="/score" element={<Score />}></Route>
           <Route path="/comment" element={<Commentary />}></Route>
           <Route path="/rank" element={<Rank />}></Route>

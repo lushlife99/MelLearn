@@ -8,6 +8,8 @@ import { LuPencilLine } from "react-icons/lu";
 import Lyric from "./Lyric";
 import { useQuery } from "react-query";
 import { LyricData } from "../redux/type";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
 
 export interface CurrentTimeData {
   progress_ms: number;
@@ -22,6 +24,8 @@ function PlayMusic() {
     useState<ReturnType<typeof setInterval>>();
   const [duration, setDuration] = useState<number>(0); //트랙 시간 길이
   const [isLyric, setIsLyric] = useState<boolean>(false);
+
+  //const player = useSelector((state: RootState) => state.player);
 
   const { track } = location.state;
 
@@ -153,16 +157,11 @@ function PlayMusic() {
   // };
 
   return (
-    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
-      <div className="relative bg-[black] overflow-hidden w-full max-w-[450px] h-screen  flex flex-col px-5">
-        <iframe
-          src="https://cross-origin.com/myvideo.html"
-          allow="autoplay"
-          title="my music"
-        />
+    <div className="bg-[black] flex flex-row justify-center w-full h-screen">
+      <div className="relative bg-[black] overflow-hidden  max-w-[450px] h-screen  flex flex-col px-5">
         <IoIosArrowRoundBack
           onClick={goBack}
-          className="fill-[white] w-10 h-10 mt-8 hover:opacity-60"
+          className="fill-[white] w-10 h-10 mt-8 hover:opacity-60 "
         />
 
         {isLyric && (
@@ -178,7 +177,7 @@ function PlayMusic() {
           />
         )}
         {/* 앪범 커버 */}
-        <div className="flex items-center justify-center mt-4 ">
+        <div className="flex items-center justify-center mt-4">
           <img
             src={track.album.images[0].url}
             alt="Album Cover"
@@ -192,7 +191,7 @@ function PlayMusic() {
         </span>
 
         {/* 아티스트 이름*/}
-        <div>
+        <div className="">
           {track.artists.map((artist: any, index: number) => (
             <span key={index} className="text-[#B3B3B3] text-left text-lg ">
               {artist.name}
@@ -202,7 +201,7 @@ function PlayMusic() {
 
         {/* progress Bar */}
         <div
-          className="w-full h-2 mt-12 bg-gray-200 rounded-full cursor-pointer"
+          className="w-full h-2 mt-12 cursor-pointer bg-gray-200rounded-full"
           onClick={(e) => {
             const rect = e.currentTarget.getBoundingClientRect();
             const clickX = e.clientX - rect.left;
@@ -215,7 +214,7 @@ function PlayMusic() {
           }}
         >
           <div
-            className={`h-full bg-[#7CEEFF] rounded-full transition-all duration-500 ease-in-out`}
+            className={`h-full bg-[#7CEEFF] rounded-full transition-all duration-500 ease-in-out `}
             style={{ width: `${progressPercentage}%` }}
           ></div>
         </div>
@@ -249,7 +248,7 @@ function PlayMusic() {
         </div>
 
         {/*아이콘 */}
-        <div className="flex items-center justify-between mt-16">
+        <div className="flex items-center justify-between w-full mt-16 ">
           {/* <FaStepBackward
             onClick={playPrevious}
             className="fill-[white] w-8 h-8 hover:opacity-60"
@@ -263,12 +262,12 @@ function PlayMusic() {
           </button>
           {!isPlaying ? (
             <FaPlayCircle
-              className="fill-[white] w-16 h-16 hover:opacity-60"
+              className="fill-[white] w-16 h-16 hover:opacity-60 mx-8"
               onClick={resume}
             />
           ) : (
             <FaPauseCircle
-              className="fill-[white] w-16 h-16 hover:opacity-60"
+              className="fill-[white] w-16 h-16 hover:opacity-60 mx-4"
               onClick={pause}
             />
           )}

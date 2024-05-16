@@ -19,14 +19,13 @@ const MockSubmitDisplay: React.FC<Submission> = ({ title, submissions }) => {
   };
 
   return (
-    <div>
-      <span className="font-bold">{title}</span>
-      <div className="p-2 border border-black">
+    <div className="font-[roboto]">
+      <span className="text-xl font-bold">{title}</span>
+      <div className="p-2 bg-white rounded-lg shadow-[0px_4px_4px_#00000040]">
         {submissions.map((answer, index) => (
           <div key={index} className="flex ">
-            <span>
-              {getIndex(index)}. {answer}
-            </span>
+            <span className="font-bold">{getIndex(index)}. </span>
+            <span className="ml-2">{answer === 0 ? "" : answer}</span>
           </div>
         ))}
       </div>

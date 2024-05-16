@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaMagnifyingGlass } from "react-icons/fa6";
-import BottomNavigation from "@mui/material/BottomNavigation";
-import BottomNavigationAction from "@mui/material/BottomNavigationAction";
-import HomeIcon from "@mui/icons-material/Home";
-import SettingsIcon from "@mui/icons-material/Settings";
-import HistoryIcon from "@mui/icons-material/History";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
 import "swiper/css";
@@ -24,7 +18,11 @@ import { fetchMetaData } from "../redux/trackMeta/trackMetaAction";
 import { setTrackMetaData } from "../redux/trackMeta/trackMetaSlice";
 import { fetchRecommendData } from "../redux/recommend/recommendAction";
 import { setRecommendData } from "../redux/recommend/recommendSlice";
+import { AiOutlineHome } from "react-icons/ai";
+import { PiExam } from "react-icons/pi";
 import axiosApi from "../api";
+import { RiHistoryFill } from "react-icons/ri";
+import { IoIosSettings } from "react-icons/io";
 
 interface Member {
   id: number;
@@ -99,7 +97,7 @@ function MusicHome() {
     }
   );
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleChange = (newValue: number) => {
     setPage(newValue);
     switch (newValue) {
       case 0:
@@ -124,7 +122,7 @@ function MusicHome() {
   };
 
   const goDetailArtist = (artist: Artist) => {
-    navigation(`/main4?artistId=${artist.id}`, {
+    navigation(`/artistDetail?artistId=${artist.id}`, {
       state: { artist },
     });
   };
@@ -154,43 +152,89 @@ function MusicHome() {
   return (
     <div className="bg-[white] flex flex-row justify-center w-full h-screen font-[roboto]">
       <div className="relative bg-black overflow-hidden w-full sm:max-w-[450px] h-screen flex sm:flex-col ">
-        <BottomNavigation
-          className="bg-black  sm:fixed sm:bottom-0 sm:w-full"
-          showLabels
-          value={page}
-          onChange={handleChange}
-        >
-          <BottomNavigationAction
-            className="text-white hover:opacity-60 "
-            label="홈"
-            icon={<HomeIcon />}
-          />
-          <BottomNavigationAction
-            className="text-white hover:opacity-60"
-            label="모의고사"
-            icon={<MenuBookIcon />}
-          />
-          <BottomNavigationAction
-            className="text-white hover:opacity-60"
-            label="히스토리"
-            icon={<HistoryIcon />}
-          />
-          <BottomNavigationAction
-            className="text-white hover:opacity-60"
-            label="설정"
-            icon={<SettingsIcon />}
-          />
-        </BottomNavigation>
-
         {/* 타이틀*/}
-        <div className="flex items-center justify-between h-16 px-3 mb-2 bg-black ">
-          <span className="px-2 text-3xl font-bold text-white">MelLearn</span>
-          <FaMagnifyingGlass
-            onClick={() => navigation("/home/main5")}
-            className="w-5 h-5 hover:opacity-60 fill-white"
-          />
+        <div className="flex flex-col items-center justify-between h-16 mb-2 bg-black ">
+          <div className="flex items-center justify-between w-full px-4 mt-4">
+            <span className="text-3xl font-bold text-white">MelLearn</span>
+            <FaMagnifyingGlass
+              onClick={() => navigation("/searchMusic")}
+              className="w-5 h-5 hover:opacity-60 fill-white"
+            />
+          </div>
+
+          <div className="flex flex-col w-full mt-12 b sm:fixed sm:bottom-0 sm:flex sm:flex-row sm:mt-0 ">
+            <div
+              onClick={() => handleChange(0)}
+              className="flex sm:flex-col items-center sm:justify-center w-full sm:w-[25%] hover:text-white "
+            >
+              <AiOutlineHome
+                className={`sm:w-7 sm:h-7 w-16 h-16 fill-${
+                  page === 0 ? "white" : "gray"
+                }`}
+              />
+              <span
+                className={`font-bold text-${
+                  page === 0 ? "white" : "gray"
+                } sm:ml-0 ml-2 `}
+              >
+                홈
+              </span>
+            </div>
+            <div
+              onClick={() => handleChange(1)}
+              className="w-full flex sm:flex-col items-center sm:justify-center sm:w-[25%] hover:text-white"
+            >
+              <PiExam
+                className={`sm:w-7 sm:h-7 w-16 h-16 fill-${
+                  page === 1 ? "white" : "gray"
+                }`}
+              />
+              <span
+                className={`font-bold text-${
+                  page === 1 ? "white" : "gray"
+                } sm:ml-0 ml-2`}
+              >
+                모의고사
+              </span>
+            </div>
+            <div
+              onClick={() => handleChange(2)}
+              className="flex sm:flex-col items-center sm:justify-center w-full sm:w-[25%] hover:text-white"
+            >
+              <RiHistoryFill
+                className={`sm:w-7 sm:h-7 w-16 h-16 fill-${
+                  page === 2 ? "white" : "gray"
+                }`}
+              />
+              <span
+                className={`font-bold text-${
+                  page === 2 ? "white" : "gray"
+                } sm:ml-0 ml-4`}
+              >
+                히스토리
+              </span>
+            </div>
+            <div
+              onClick={() => handleChange(3)}
+              className="flex sm:flex-col items-center sm:justify-center w-full sm:w-[25%] hover:text-white "
+            >
+              <IoIosSettings
+                className={`sm:w-7 sm:h-7 w-16 h-16 fill-${
+                  page === 3 ? "white" : "gray"
+                }`}
+              />
+              <span
+                className={`font-bold text-${
+                  page === 3 ? "white" : "gray"
+                } sm:ml-0 ml-4 `}
+              >
+                설정
+              </span>
+            </div>
+          </div>
         </div>
-        <div className="h-[85%] overflow-y-auto scrollbar">
+
+        <div className="sm:h-[85%] overflow-y-auto scrollbar">
           {/* 사용자 추천 음악*/}
           <div className="px-3 mt-4 ">
             <div className="flex items-center justify-between">
@@ -198,7 +242,7 @@ function MusicHome() {
                 사용자 추천 음악
               </span>
               <Link
-                to={"/home/main6"}
+                to={"/recommendCharts"}
                 className="font-bold text-gray-500 hover:opacity-60 text-decoration-none"
               >
                 모두 보기
@@ -206,7 +250,7 @@ function MusicHome() {
             </div>
             <Swiper
               spaceBetween={10}
-              slidesPerView={1.6}
+              slidesPerView={2.1}
               modules={[Pagination]}
               loop={true}
               className="mySwiper"
@@ -221,7 +265,7 @@ function MusicHome() {
                 >
                   <img
                     src={track.album.images[0].url}
-                    className="p-2 "
+                    className=""
                     alt="Album Cover"
                   />
                   <span className="px-3 overflow-hidden text-lg font-extrabold text-white whitespace-nowrap overflow-ellipsis">
@@ -257,7 +301,7 @@ function MusicHome() {
               </span>
 
               <Link
-                to={"/home/main3"}
+                to={"/artists"}
                 className="font-bold text-gray-500 hover:opacity-60 text-decoration-none "
               >
                 모두 보기
@@ -298,7 +342,7 @@ function MusicHome() {
               </span>
 
               <Link
-                to={"/home/main2"}
+                to={"/charts"}
                 className="font-bold text-gray-500 hover:opacity-60 text-decoration-none"
               >
                 모두 보기
