@@ -74,8 +74,29 @@ function PlayMusic() {
   const stopProgressBar = () => {
     clearInterval(intervalId);
   };
+  const playerActivate = () => {
+    const token = localStorage.getItem("spotify_access_token") || "";
+    window.onSpotifyWebPlaybackSDKReady = () => {
+      const player = new Spotify.Player({
+        name: "MelLearn",
+        getOAuthToken: (cb) => {
+          cb(token);
+        },
+        volume: 0.5,
+      });
+      player.activateElement();
+      player.addListener("ready", async ({ device_id }) => {
+        localStorage.setItem("deviceId", device_id);
+        const response = await axiosSpotify.put(`/me/player`, {
+          device_ids: [device_id],
+          play: true,
+        });
+      });
+    };
+  };
 
   const resume = async () => {
+    playerActivate();
     const res = await axiosSpotify.get("/me/player/currently-playing");
     let progress_ms = 0;
     if (res.data.item === undefined) {
@@ -98,6 +119,7 @@ function PlayMusic() {
     }
   };
   const dragResume = async (progressMs: number) => {
+    playerActivate();
     const res = await axiosSpotify.put("/me/player/play", {
       uris: ["spotify:track:" + track.id],
       position_ms: progressMs,
