@@ -46,7 +46,6 @@ function Callback() {
         //dispatch(setSpotifyPlayer(player));
         player.addListener("ready", ({ device_id }) => {
           transferDevice(device_id, player);
-          player.activateElement();
         });
 
         player.addListener("not_ready", ({ device_id }) => {
@@ -97,7 +96,10 @@ function Callback() {
     params.set("client_id", clientId);
     params.set("grant_type", "authorization_code");
     params.set("code", code);
-    params.set("redirect_uri", "http://localhost:3000/callback");
+    params.set(
+      "redirect_uri",
+      "https://main.dx55diamovfwp.amplifyapp.com/callback"
+    );
     // @ts-ignore
     params.set("code_verifier", codeVerifier);
 

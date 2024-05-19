@@ -67,6 +67,7 @@ function PlayMusic() {
   }, []);
   useEffect(() => {
     if (isSDK) {
+      console.log("sdk is available");
       playerActivate();
     }
   }, [isSDK]);
@@ -87,7 +88,7 @@ function PlayMusic() {
   const stopProgressBar = () => {
     clearInterval(intervalId);
   };
-  const playerActivate = () => {
+  const playerActivate = async () => {
     const token = localStorage.getItem("spotify_access_token") || "";
     const spotifyPlayer = new window.Spotify.Player({
       getOAuthToken: (callback) => {
@@ -103,6 +104,7 @@ function PlayMusic() {
         play: true,
       });
     });
+    await spotifyPlayer.connect();
     // window.onSpotifyWebPlaybackSDKReady = () => {
     //   const player = new Spotify.Player({
     //     name: "MelLearn",
