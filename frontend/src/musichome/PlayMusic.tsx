@@ -43,6 +43,7 @@ function PlayMusic() {
   });
 
   const play = async () => {
+    playerActivate();
     const res = await axiosSpotify.put("/me/player/play", {
       uris: ["spotify:track:" + track.id],
       position_ms: 0,
