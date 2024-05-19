@@ -54,8 +54,8 @@ function PlayMusic() {
   };
 
   useEffect(() => {
-    play();
-    startProgressBar();
+    //play();
+    //startProgressBar();
     setDuration(track.duration_ms);
   }, []);
   useEffect(() => {
@@ -98,25 +98,28 @@ function PlayMusic() {
 
   const resume = async () => {
     playerActivate();
-    const res = await axiosSpotify.get("/me/player/currently-playing");
-    let progress_ms = 0;
-    if (res.data.item === undefined) {
-      progress_ms = 0;
-    } else {
-      if (track.id === res.data.item.id) {
-        progress_ms = res.data.progress_ms;
-      } else {
+    const check = window.confirm("재생?");
+    if (check) {
+      const res = await axiosSpotify.get("/me/player/currently-playing");
+      let progress_ms = 0;
+      if (res.data.item === undefined) {
         progress_ms = 0;
+      } else {
+        if (track.id === res.data.item.id) {
+          progress_ms = res.data.progress_ms;
+        } else {
+          progress_ms = 0;
+        }
       }
-    }
-    const res2 = await axiosSpotify.put("/me/player/play", {
-      uris: ["spotify:track:" + track.id],
-      position_ms: progress_ms,
-    });
+      const res2 = await axiosSpotify.put("/me/player/play", {
+        uris: ["spotify:track:" + track.id],
+        position_ms: progress_ms,
+      });
 
-    if (res2.status === 202) {
-      startProgressBar();
-      setIsPlaying(true);
+      if (res2.status === 202) {
+        startProgressBar();
+        setIsPlaying(true);
+      }
     }
   };
   const dragResume = async (progressMs: number) => {
