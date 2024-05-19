@@ -24,6 +24,7 @@ function PlayMusic() {
     useState<ReturnType<typeof setInterval>>();
   const [duration, setDuration] = useState<number>(0); //트랙 시간 길이
   const [isLyric, setIsLyric] = useState<boolean>(false);
+  const [isSDK, setIsSDK] = useState<boolean>(false);
 
   //const player = useSelector((state: RootState) => state.player);
 
@@ -56,8 +57,19 @@ function PlayMusic() {
   useEffect(() => {
     //play();
     //startProgressBar();
+    if (!isSDK) {
+      window.onSpotifyWebPlaybackSDKReady = () => {
+        console.log("onSpotifyWebPlaybackSDKReady");
+        setIsSDK(true);
+      };
+    }
     setDuration(track.duration_ms);
   }, []);
+  useEffect(() => {
+    if (isSDK) {
+      playerActivate();
+    }
+  }, [isSDK]);
   useEffect(() => {
     if (currentTime >= duration) {
       clearInterval(intervalId);
@@ -77,53 +89,64 @@ function PlayMusic() {
   };
   const playerActivate = () => {
     const token = localStorage.getItem("spotify_access_token") || "";
-    window.onSpotifyWebPlaybackSDKReady = () => {
-      const player = new Spotify.Player({
-        name: "MelLearn",
-        getOAuthToken: (cb) => {
-          cb(token);
-        },
-        volume: 0.5,
+    const spotifyPlayer = new window.Spotify.Player({
+      getOAuthToken: (callback) => {
+        callback(token);
+      },
+      name: "Spotify Web Player",
+      volume: 0.5,
+    });
+    spotifyPlayer.addListener("ready", async ({ device_id }) => {
+      localStorage.setItem("deviceId", device_id);
+      const response = await axiosSpotify.put(`/me/player`, {
+        device_ids: [device_id],
+        play: true,
       });
-      player.activateElement();
-      player.addListener("ready", async ({ device_id }) => {
-        localStorage.setItem("deviceId", device_id);
-        const response = await axiosSpotify.put(`/me/player`, {
-          device_ids: [device_id],
-          play: true,
-        });
-      });
-    };
+    });
+    // window.onSpotifyWebPlaybackSDKReady = () => {
+    //   const player = new Spotify.Player({
+    //     name: "MelLearn",
+    //     getOAuthToken: (cb) => {
+    //       cb(token);
+    //     },
+    //     volume: 0.5,
+    //   });
+    //   player.activateElement();
+    //   player.addListener("ready", async ({ device_id }) => {
+    //     localStorage.setItem("deviceId", device_id);
+    //     const response = await axiosSpotify.put(`/me/player`, {
+    //       device_ids: [device_id],
+    //       play: true,
+    //     });
+    //   });
+    // };
   };
 
   const resume = async () => {
-    playerActivate();
-    const check = window.confirm("재생?");
-    if (check) {
-      const res = await axiosSpotify.get("/me/player/currently-playing");
-      let progress_ms = 0;
-      if (res.data.item === undefined) {
-        progress_ms = 0;
+    //playerActivate();
+    const res = await axiosSpotify.get("/me/player/currently-playing");
+    let progress_ms = 0;
+    if (res.data.item === undefined) {
+      progress_ms = 0;
+    } else {
+      if (track.id === res.data.item.id) {
+        progress_ms = res.data.progress_ms;
       } else {
-        if (track.id === res.data.item.id) {
-          progress_ms = res.data.progress_ms;
-        } else {
-          progress_ms = 0;
-        }
+        progress_ms = 0;
       }
-      const res2 = await axiosSpotify.put("/me/player/play", {
-        uris: ["spotify:track:" + track.id],
-        position_ms: progress_ms,
-      });
+    }
+    const res2 = await axiosSpotify.put("/me/player/play", {
+      uris: ["spotify:track:" + track.id],
+      position_ms: progress_ms,
+    });
 
-      if (res2.status === 202) {
-        startProgressBar();
-        setIsPlaying(true);
-      }
+    if (res2.status === 202) {
+      startProgressBar();
+      setIsPlaying(true);
     }
   };
   const dragResume = async (progressMs: number) => {
-    playerActivate();
+    //playerActivate();
     const res = await axiosSpotify.put("/me/player/play", {
       uris: ["spotify:track:" + track.id],
       position_ms: progressMs,
