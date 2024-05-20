@@ -100,7 +100,7 @@ function MusicHome() {
     setPage(newValue);
     switch (newValue) {
       case 0:
-        //home
+        //홈 화면
         navigation("/home");
         break;
       case 1:
@@ -154,16 +154,29 @@ function MusicHome() {
         {/* 타이틀*/}
         <div className="flex flex-col items-center justify-between h-16 mb-2 bg-black  w-[33%] sm:w-full">
           <div className="flex flex-col items-start justify-between w-full px-4 mt-4 sm:items-center sm:flex-row">
-            <span className="text-6xl font-bold text-white sm:text-3xl">
+            <span className="text-5xl font-bold text-white sm:text-3xl ">
               MelLearn
             </span>
-            <FaMagnifyingGlass
-              onClick={() => navigation("/searchMusic")}
-              className="w-8 h-8 sm:w-5 sm:h-5 hover:opacity-60 fill-white"
-            />
+            {window.innerWidth > 450 ? (
+              <div
+                onClick={() => navigation("/searchMusic")}
+                className="relative flex items-center w-full mt-4 hover:opacity-60"
+              >
+                <FaMagnifyingGlass className="absolute w-6 h-6 fill-white right-3" />
+                <input
+                  placeholder="노래를 검색해주세요"
+                  className="placeholder-gray-600 bg-[#282828] rounded-md h-10 p-3  w-full text-[white] "
+                />
+              </div>
+            ) : (
+              <FaMagnifyingGlass
+                onClick={() => navigation("/searchMusic")}
+                className="sm:w-5 sm:h-5 hover:opacity-60 fill-white"
+              />
+            )}
           </div>
 
-          <div className="flex flex-col w-full mt-12 b sm:fixed sm:bottom-0 sm:flex sm:flex-row sm:mt-0 ">
+          <div className="flex flex-col w-full mt-12 ml-8 sm:ml-0 b sm:fixed sm:bottom-0 sm:flex sm:flex-row sm:mt-0">
             <div
               onClick={() => handleChange(0)}
               className="flex sm:flex-col items-center sm:justify-center w-full sm:w-[25%] hover:text-white "
@@ -183,7 +196,7 @@ function MusicHome() {
             </div>
             <div
               onClick={() => handleChange(1)}
-              className="w-full flex sm:flex-col items-center sm:justify-center sm:w-[25%] hover:text-white"
+              className="w-full flex sm:flex-col items-center sm:justify-center sm:w-[25%] hover:text-white "
             >
               <PiExam
                 className={`sm:w-7 sm:h-7 w-16 h-16 fill-${

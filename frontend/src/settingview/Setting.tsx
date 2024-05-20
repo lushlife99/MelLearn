@@ -118,7 +118,7 @@ export const Setting = (): JSX.Element => {
 
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
-      <div className="bg-white overflow-hidden w-[450px] h-screen relative flex flex-col  px-8">
+      <div className="bg-white overflow-hidden w-full sm:w-[450px] h-screen relative flex flex-col px-8 overflow-y-auto">
         <div className="z-10 mt-8 hover:text-gray-300">
           <IoIosArrowRoundBack onClick={goHome} className="w-10 h-10 right-2" />
         </div>

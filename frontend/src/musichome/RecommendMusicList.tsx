@@ -21,7 +21,7 @@ export const RecommendMusicList = (): JSX.Element => {
 
   return (
     <div className="flex justify-center w-full h-screen font-[roboto]">
-      <div className="flex  flex-col items-center w-full  bg-black max-w-[450px]  p-3">
+      <div className="flex  flex-col items-center w-full  bg-black sm:max-w-[450px]  p-3">
         <div className="flex items-center justify-between w-full py-2 mb-3">
           <div className="w-[33%] h-10 flex justify-start items-center ">
             <IoIosArrowRoundBack
