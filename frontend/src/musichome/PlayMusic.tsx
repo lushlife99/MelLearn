@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { axiosSpotify, axiosSpotifyScraper } from "../api";
+import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../api";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaPlayCircle, FaPauseCircle } from "react-icons/fa";
 import { IoIosArrowRoundBack, IoIosArrowUp } from "react-icons/io";
@@ -24,9 +24,8 @@ function PlayMusic() {
     useState<ReturnType<typeof setInterval>>();
   const [duration, setDuration] = useState<number>(0); //트랙 시간 길이
   const [isLyric, setIsLyric] = useState<boolean>(false);
-  const [isSDK, setIsSDK] = useState<boolean>(false);
 
-  //const player = useSelector((state: RootState) => state.player);
+  const player = useSelector((state: RootState) => state.player);
 
   const { track } = location.state;
 
@@ -44,7 +43,7 @@ function PlayMusic() {
   });
 
   const play = async () => {
-    playerActivate();
+    const response = await player.player?.activateElement();
     const res = await axiosSpotify.put("/me/player/play", {
       uris: ["spotify:track:" + track.id],
       position_ms: 0,
@@ -55,22 +54,12 @@ function PlayMusic() {
   };
 
   useEffect(() => {
-    //play();
-    //startProgressBar();
-    if (!isSDK) {
-      window.onSpotifyWebPlaybackSDKReady = () => {
-        console.log("onSpotifyWebPlaybackSDKReady");
-        setIsSDK(true);
-      };
-    }
     setDuration(track.duration_ms);
+    return () => {
+      pause();
+    };
   }, []);
-  useEffect(() => {
-    if (isSDK) {
-      console.log("sdk is available");
-      playerActivate();
-    }
-  }, [isSDK]);
+
   useEffect(() => {
     if (currentTime >= duration) {
       clearInterval(intervalId);
@@ -88,44 +77,9 @@ function PlayMusic() {
   const stopProgressBar = () => {
     clearInterval(intervalId);
   };
-  const playerActivate = async () => {
-    const token = localStorage.getItem("spotify_access_token") || "";
-    const spotifyPlayer = new window.Spotify.Player({
-      getOAuthToken: (callback) => {
-        callback(token);
-      },
-      name: "Spotify Web Player",
-      volume: 0.5,
-    });
-    spotifyPlayer.addListener("ready", async ({ device_id }) => {
-      localStorage.setItem("deviceId", device_id);
-      const response = await axiosSpotify.put(`/me/player`, {
-        device_ids: [device_id],
-        play: true,
-      });
-    });
-    await spotifyPlayer.connect();
-    // window.onSpotifyWebPlaybackSDKReady = () => {
-    //   const player = new Spotify.Player({
-    //     name: "MelLearn",
-    //     getOAuthToken: (cb) => {
-    //       cb(token);
-    //     },
-    //     volume: 0.5,
-    //   });
-    //   player.activateElement();
-    //   player.addListener("ready", async ({ device_id }) => {
-    //     localStorage.setItem("deviceId", device_id);
-    //     const response = await axiosSpotify.put(`/me/player`, {
-    //       device_ids: [device_id],
-    //       play: true,
-    //     });
-    //   });
-    // };
-  };
 
   const resume = async () => {
-    //playerActivate();
+    await player.player?.activateElement();
     const res = await axiosSpotify.get("/me/player/currently-playing");
     let progress_ms = 0;
     if (res.data.item === undefined) {
@@ -148,7 +102,6 @@ function PlayMusic() {
     }
   };
   const dragResume = async (progressMs: number) => {
-    //playerActivate();
     const res = await axiosSpotify.put("/me/player/play", {
       uris: ["spotify:track:" + track.id],
       position_ms: progressMs,
@@ -167,18 +120,6 @@ function PlayMusic() {
     }
   };
 
-  //이전 재생
-  // const playPrevious = async () => {
-  //   const res = await axiosSpotify.post("/me/player/previous");
-  //   console.log("이전", res.status);
-  // };
-
-  // //다음재생
-  // const playNext = async () => {
-  //   const res = await axiosSpotify.post("/me/player/next");
-  //   const res2 = await axiosSpotify.get("/me/player/queue");
-  //   console.log("다음", res2.data);
-  // };
   const goBack = () => {
     navigate(-1); //뒤로가기
   };
@@ -188,24 +129,47 @@ function PlayMusic() {
     setIsLyric(true);
   };
   const goStudy = async (track: any) => {
-    navigate("/category", {
-      state: {
-        track,
-      },
-    });
+    const res1 = await axiosSpotifyScraper.get(
+      `/track/lyrics?trackId=${track.id}&format=json`
+    );
+    const res2 = await axiosApi.post(
+      `/api/support/quiz/category/${track.id}`,
+      res1.data
+    );
+    const { grammar, vocabulary, reading } = res2.data;
+    if (grammar && vocabulary && reading) {
+      navigate("/category", {
+        state: {
+          track,
+        },
+      });
+    } else {
+      alert("지원하지 않는 언어입니다.");
+    }
   };
   const lyricClick = true;
 
   const progressPercentage = (currentTime / duration) * 100;
 
-  // const goComprehensiveQuiz = () => {
-  //   navigate("/compQuiz", {
-  //     state: {
-  //       musicId: track.id,
-  //       quizType: "GRAMMAR",
-  //     },
-  //   });
-  // };
+  const goMockExam = async (track: any) => {
+    const res1 = await axiosSpotifyScraper.get(
+      `/track/lyrics?trackId=${track.id}&format=json`
+    );
+    const res2 = await axiosApi.post(
+      `/api/support/quiz/category/${track.id}`,
+      res1.data
+    );
+    const { grammar, vocabulary, reading } = res2.data;
+    if (grammar && vocabulary && reading) {
+      navigate("/mockExam", {
+        state: {
+          track,
+        },
+      });
+    } else {
+      alert("지원하지 않는 언어입니다.");
+    }
+  };
 
   return (
     <div className="bg-[black] flex flex-row justify-center w-full h-screen">
@@ -323,7 +287,7 @@ function PlayMusic() {
             />
           )}
           <button
-            onClick={() => goStudy(track)}
+            onClick={() => goMockExam(track)}
             className="font-bold bg-[white] rounded-2xl h-9 w-28 flex items-center justify-center hover:opacity-60"
           >
             <LuPencilLine />

@@ -45,8 +45,8 @@ export const SpotifyLogo = () => {
       const hashed = await sha256(codeVerifier);
       const codeChallenge = base64encode(hashed);
 
-      const clientId = "f7d3088794d14901af7c8bf354326039"; //환경 변수로 설정해놓기
-      const redirectUri = "http://localhost:3000/callback";
+      const clientId = process.env.REACT_APP_SPOTIFY_CLIENTID || ""; //환경 변수로 설정해놓기
+      const redirectUri = "http://localhost:3000/callback"; //"https://main.dx55diamovfwp.amplifyapp.com/callback";
 
       const scope =
         "user-read-private" +

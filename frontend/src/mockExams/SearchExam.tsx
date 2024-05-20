@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaMagnifyingGlass } from "react-icons/fa6";
-import { axiosSpotify } from "../api";
+import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../api";
 import { Link, useNavigate } from "react-router-dom";
 import "../css/scroll.css";
 import { useQuery } from "react-query";
@@ -55,12 +55,24 @@ function SearchExam() {
     refetch();
   };
 
-  const goQuiz = (track: any) => {
-    navigate("/mockExam", {
-      state: {
-        track,
-      },
-    });
+  const goQuiz = async (track: any) => {
+    const res1 = await axiosSpotifyScraper.get(
+      `/track/lyrics?trackId=${track.id}&format=json`
+    );
+    const res2 = await axiosApi.post(
+      `/api/support/quiz/category/${track.id}`,
+      res1.data
+    );
+    const { grammar, vocabulary, reading } = res2.data;
+    if (grammar && vocabulary && reading) {
+      navigate("/mockExam", {
+        state: {
+          track,
+        },
+      });
+    } else {
+      alert("지원하지 않는 언어입니다.");
+    }
   };
 
   return (

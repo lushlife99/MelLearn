@@ -62,7 +62,6 @@ function MusicHome() {
   useEffect(() => {
     getMember();
   }, []);
-  console.log(window.innerWidth);
 
   const { data: chartData, isLoading: chartLoading } = useQuery(
     ["chart", langType],
