@@ -9,9 +9,9 @@ function ListeningScore() {
 
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
-      <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col px-4 ">
+      <div className="bg-[#9bd1e5] w-full overflow-hidden sm:max-w-[450px] h-screen relative flex sm:flex-col sm:items-center px-4">
         <BgCircle />
-        <div className="z-10 w-full px-4 py-2 mt-8 overflow-y-auto bg-white border h-100 scrollbarwhite rounded-xl">
+        <div className="z-10 w-[40%]  sm:w-[90%] px-4 py-2 mt-8 overflow-y-auto bg-white border h-[80%] sm:h-[100%] scrollbarwhite rounded-xl shadow-[0px_4px_4px_#00000040] sm:ml-0 ml-20">
           <div className="text-2xl font-bold text-black">
             {comments.listeningQuiz.blankedText
               .split("__")
@@ -19,12 +19,12 @@ function ListeningScore() {
                 if (index < comments.listeningQuiz.answerList.length) {
                   return (
                     <span key={index} className="">
-                      <span className="text-2xl">{part}</span>
+                      <span className="text-xl">{part}</span>
                       <span
                         className={`text-2xl ${
                           comments.listeningQuiz.answerList[index] ===
                           comments.submitAnswerList[index]
-                            ? "text-blue-500" // 같을 때는 파란색
+                            ? "text-blue-600" // 같을 때는 파란색
                             : "text-red-500" // 다를 때는 빨간색
                         }`}
                       >
@@ -34,7 +34,7 @@ function ListeningScore() {
                   );
                 } else {
                   return (
-                    <span className="text-green" key={index}>
+                    <span className="text-xl" key={index}>
                       {part}
                     </span>
                   );
@@ -56,12 +56,14 @@ function ListeningScore() {
               </div>
             </div>
           </div>
-        </div>
-        <div
-          onClick={() => navigate("/home")}
-          className="z-10 hover:opacity-60 flex items-center justify-center w-full h-20 bg-[#007AFF] rounded-lg"
-        >
-          <button className="font-bold w-[60%] text-white">홈으로</button>
+          <div
+            onClick={() => navigate("/home")}
+            className="z-10 mt-4 hover:opacity-60 flex items-center justify-center w-[40%] sm:w-[80%] h-12 bg-[#007AFF] rounded-lg"
+          >
+            <button className="font-bold w-[60%] text-white text-lg">
+              홈 가기
+            </button>
+          </div>
         </div>
       </div>
     </div>

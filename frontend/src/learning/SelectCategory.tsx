@@ -23,6 +23,7 @@ function SelectCategory() {
   const [lyric, setLyric] = useState();
   const [cancelTokenSource, setCancelTokenSource] = useState<any>(); // 문제 요청 도중 나갈시 취소 용 cancel Token
   const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     const source = axios.CancelToken.source();
     setCancelTokenSource(source);

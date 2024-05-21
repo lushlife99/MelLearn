@@ -103,12 +103,12 @@ function HistoryList({ quizType }: IHistory) {
               <span className="text-[#DED9D9] text-sm">
                 {tracks?.tracks[index].artists[0].name}
               </span>
-              <span className="mr-12 text-sm font-bold text-white">
+              <span className="text-sm font-bold text-white sm:mr-12">
                 {getLevel(item.quizList.level)}
               </span>
             </div>
           </div>
-          <div className="flex flex-col items-center justify-center  w-[15%] ">
+          <div className="flex flex-col items-center justify-center w-[15%] ">
             <span className="mb-2 font-bold">{item.score}점</span>
             <button
               onClick={() => goComment(item)}

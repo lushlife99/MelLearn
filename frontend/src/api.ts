@@ -58,8 +58,14 @@ const handleResponseInterceptor = async (
   } else if (error.response?.status === 409) {
     const errorData = error.response.data as { message: string };
     alert(errorData.message);
-    window.location.href = "/home/main5";
+    //window.location.href = "/home/main5";
+    window.history.back();
+    return new Promise(() => {});
   } else {
+    const errorData = error.response?.data as { message: string };
+    alert(errorData.message);
+    window.history.back();
+    return new Promise(() => {});
     // 다른 예외 상황 처리
   }
 
@@ -94,6 +100,20 @@ const handleSpotifyResponseInterceptor = async (
   }
   return Promise.reject(error.toJSON());
 };
+
+const handleSpotifyScrapperResponseInterceptor = async (
+  error: AxiosError
+): Promise<AxiosResponse> => {
+  if (error.response?.status === 401) {
+    window.location.href = "/"; //로그인 창으로 리다이렉션
+    return new Promise(() => {});
+  } else if (error.response?.status === 429) {
+    alert("잠시후에 다시 시도해주세요");
+
+    return new Promise(() => {});
+  }
+  return Promise.reject(error.toJSON());
+};
 /* local Server */
 axiosApi.interceptors.request.use(
   handleRequestInterceptor,
@@ -115,6 +135,12 @@ axiosSpotify.interceptors.request.use(
 axiosSpotify.interceptors.response.use(
   (response) => response,
   handleSpotifyResponseInterceptor
+);
+
+/* SpotifySCrapper */
+axiosSpotifyScraper.interceptors.response.use(
+  (response) => response,
+  handleSpotifyScrapperResponseInterceptor
 );
 
 export default axiosApi;

@@ -89,7 +89,7 @@ function HistoryListListenig({ quizType }: Listening) {
             <span className="font-bold text-md">Lucky</span>
             <div className="flex justify-between w-full">
               <span className="text-[#DED9D9] text-sm">Json Mraz</span>
-              <span className="mr-12 text-sm font-bold text-white">
+              <span className="text-sm font-bold text-white sm:mr-12">
                 {getLevel(item?.level)}
               </span>
             </div>

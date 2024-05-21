@@ -17,7 +17,6 @@ function SpeakingScore() {
   const goHome = () => {
     navigate("/home");
   };
-  console.log(parts);
 
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">

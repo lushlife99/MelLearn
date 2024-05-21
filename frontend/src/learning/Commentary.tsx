@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import BgCircle from "../components/BgCircle";
 import { IoIosArrowRoundBack } from "react-icons/io";
+import "../css/scroll.css";
 
 interface Comment {
   id: number;
@@ -37,11 +38,9 @@ const Commentary = () => {
   const [currentPage, setCurrentPage] = useState(1); // 현재 페이지 상태
   const pageSize = 2; // 페이지당 항목 수
 
-  // 현재 페이지에 따라 해당 범위의 항목을 선택하는 함수
-
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
-      <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col px-8">
+      <div className="bg-[#9bd1e5] overflow-hidden w-full sm:max-w-[450px] h-screen relative flex flex-col px-8">
         <BgCircle />
 
         <div className="z-10 flex flex-col items-center h-full ">
@@ -57,7 +56,7 @@ const Commentary = () => {
             .map((quiz: CommentQuiz, index: number) => (
               <div
                 key={index}
-                className="mb-12 bg-white w-[92%] h-[40%] rounded-3xl p-3 shadow-[0px_4px_4px_#00000040]"
+                className="mb-12 bg-white w-[50%] sm:w-[92%] sm:h-[40%] rounded-3xl p-3 shadow-[0px_4px_4px_#00000040] overflow-y-auto scrollbarwhite"
               >
                 <div className="flex items-center justify-between">
                   {/* 문제 표시 */}
@@ -119,8 +118,10 @@ const Commentary = () => {
                   </div>
                 </div>
 
-                <div className="flex justify-center mt-2 border border-black  shadow-[0px_4px_4px_#00000040] rounded-md">
-                  <span className="mr-2 font-extrabold">사용자 답안: </span>
+                <div className="flex justify-center mt-2 border border-black  shadow-[0px_4px_4px_#00000040] rounded-md items-center py-1">
+                  <span className="mr-2 font-bold whitespace-nowrap">
+                    사용자 답안:{" "}
+                  </span>
                   <span
                     className={`font-extrabold  text-[${
                       quiz.answer ===
