@@ -84,16 +84,43 @@ export const QuestionBoard = (): JSX.Element => {
       navigate(-1); // 첫번째 문제면 뒤로가기
     }
   };
+  const getLevel = (level: number) => {
+    switch (level) {
+      case 1:
+        return "초급";
+      case 2:
+        return "중급";
+      case 3:
+        return "고급";
+      default:
+        return "초급";
+    }
+  };
 
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
       <div className="bg-[#9bd1e5] overflow-hidden w-full sm:max-w-[450px] h-screen relative flex flex-col px-8">
         <BgCircle />
-        <div className="z-10">
-          <IoIosArrowRoundBack
-            onClick={move}
-            className="w-10 h-10 mt-8 fill-black hover:opacity-60"
-          />
+        <div className="z-10 w-full mt-8">
+          <div className="flex items-center justify-between">
+            <div className="w-[33%] ">
+              <IoIosArrowRoundBack
+                onClick={move}
+                className="w-10 h-10 fill-black hover:opacity-60"
+              />
+            </div>
+
+            <div className="flex flex-col items-center justify-center w-[33%] ">
+              <span className="text-3xl font-bold sm:text-2xl">
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </span>
+              <span className="text-xl font-semibold">
+                {getLevel(problem.level)}
+              </span>
+            </div>
+            <div className="w-[33%]"></div>
+          </div>
+
           <div className="flex items-center justify-center mt-8 mb-12">
             <LinearProgress determinate value={progress} />
           </div>
@@ -126,7 +153,7 @@ export const QuestionBoard = (): JSX.Element => {
                           <div className="flex flex-col items-start">
                             <div className="flex items-center mb-2 sm:mb-2">
                               <span className="text-2xl font-semibold sm:text-lg">
-                                {idx + 1}. {option}
+                                {idx + 1}. {option.replace(/^\d+\.\s*/, "")}
                               </span>
                             </div>
                           </div>

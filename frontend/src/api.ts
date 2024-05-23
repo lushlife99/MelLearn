@@ -107,10 +107,12 @@ const handleSpotifyScrapperResponseInterceptor = async (
   if (error.response?.status === 401) {
     window.location.href = "/"; //로그인 창으로 리다이렉션
     return new Promise(() => {});
-  } else if (error.response?.status === 429) {
-    alert("잠시후에 다시 시도해주세요");
-
+  } else if (error.response?.status === 404) {
+    alert("가사를 지원하지 않는 음악입니다.");
     return new Promise(() => {});
+  } else if (error.response?.status === 429) {
+    // alert("잠시후에 다시 시도해주세요");
+    // return new Promise(() => {});
   }
   return Promise.reject(error.toJSON());
 };

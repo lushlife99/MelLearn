@@ -255,7 +255,7 @@ function PlayMusic() {
             className="font-bold bg-[white] rounded-2xl h-9 w-28 flex items-center justify-center hover:opacity-60"
           >
             <LuPencilLine />
-            공부하기
+            학습하기
           </button>
           {!isPlaying ? (
             <FaPlayCircle

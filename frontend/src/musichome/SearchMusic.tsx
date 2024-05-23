@@ -165,7 +165,7 @@ export const SearchMusic = () => {
                       className="bg-[white] w-28 rounded-2xl h-8 hover:opacity-60 flex items-center justify-center"
                     >
                       <LuPencilLine className="mr-2 fill-black" />
-                      <span className="font-bold">공부</span>
+                      <span className="font-bold">학습</span>
                     </button>
                   </div>
                 </div>
