@@ -33,21 +33,23 @@ export const PoplularArtistList = (): JSX.Element => {
 
   return (
     <div className="flex justify-center w-full h-screen font-[roboto]">
-      <div className="flex  flex-col items-center w-full  bg-black max-w-[450px]  p-3 ">
-        <div className="flex items-center justify-between w-full py-2">
+      <div className="flex  flex-col items-center w-full  bg-black sm:max-w-[450px]  p-3 ">
+        <div className="flex items-center justify-between w-full py-2 mb-3">
           <div className="w-[33%] h-10 flex justify-start items-center ">
             <IoIosArrowRoundBack
               onClick={goHome}
               className="w-12 h-12 fill-white hover:fill-gray-500"
             />
           </div>
-          <span className="text-md font-bold  text-white w-[33%] border border-black">
-            인기 가수 목록
-          </span>
+          <div className="w-[33%]  flex justify-center">
+            <span className="text-lg font-bold text-center text-white">
+              인기 가수 목록
+            </span>
+          </div>
           <div className="w-[33%]"></div>
         </div>
 
-        <div className="grid w-full h-full grid-cols-3 gap-4 py-4 overflow-y-auto scrollbar">
+        <div className="grid w-full h-full grid-cols-6 gap-4 py-4 overflow-y-auto sm:gap-4 sm:grid-cols-3 scrollbar">
           {artistData.artists.slice(0, 21).map((artist, index) => (
             <div
               key={index}

@@ -29,13 +29,15 @@ export const RecommendMusicList = (): JSX.Element => {
               className="w-12 h-12 fill-white hover:fill-gray-500"
             />
           </div>
-          <span className="text-md font-bold  text-white w-[33%] border border-black">
-            추천 음악 목록
-          </span>
+          <div className="w-[33%]  flex justify-center">
+            <span className="text-lg font-bold text-center text-white">
+              추천 음악 목록
+            </span>
+          </div>
           <div className="w-[33%]"></div>
         </div>
 
-        <div className="grid w-full grid-cols-3 gap-4 px-3 overflow-y-auto scrollbar">
+        <div className="grid w-full grid-cols-5 gap-4 px-3 overflow-y-auto sm:grid-cols-3 scrollbar">
           {recommendData.recommends.slice(0, 30).map((track, index) => (
             <div
               key={index}
@@ -45,7 +47,7 @@ export const RecommendMusicList = (): JSX.Element => {
               <img
                 alt="Artist Cover"
                 src={track.album.images[0].url}
-                className="w-[125px] h-[110px] rounded-md "
+                className="w-40 rounded-md h-30 "
               />
               <span className="text-[white] font-bold mt-2 overflow-hidden overflow-ellipsis ">
                 {track.name}

@@ -51,7 +51,7 @@ export const ArtistDetial = (): JSX.Element => {
   if (artistAlbumLoading) {
     return (
       <div className="flex justify-center w-full h-screen">
-        <div className="flex flex-col justify-center items-center w-full bg-black max-w-[450px] h-full px-3 py-4">
+        <div className="flex flex-col justify-center items-center w-full bg-black sm:max-w-[450px] h-full px-3 py-4">
           <Spinner animation="border" role="status" />
         </div>
       </div>
@@ -59,8 +59,8 @@ export const ArtistDetial = (): JSX.Element => {
   }
 
   return (
-    <div className="flex justify-center w-full h-screen ">
-      <div className="flex flex-col items-center w-full bg-black max-w-[450px]  px-3 py-4">
+    <div className="flex justify-center w-full h-screen font-[roboto]">
+      <div className="flex flex-col items-center w-full bg-black  sm:max-w-[450px]  px-3 py-4">
         {/* Artist 커버 이미지, 이름*/}
         <div className="flex flex-col items-center justify-center w-full ">
           <div className="flex flex-col items-center w-full">
@@ -73,7 +73,7 @@ export const ArtistDetial = (): JSX.Element => {
 
             <img
               src={artist.visuals.avatar[0].url}
-              className="w-[58%] h-[200px] rounded-md "
+              className="sm:w-[58%] sm:h-[200px] rounded-md "
               alt="Artist Cover"
             />
             <div className="w-[21%] "></div>

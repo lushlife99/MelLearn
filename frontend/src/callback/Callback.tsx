@@ -4,6 +4,7 @@ import axiosApi, { axiosSpotify } from "../api";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setSpotifyPlayer } from "../redux/player/playerSlice";
+import { setPremium } from "../redux/premium/premiumSlice";
 
 function Callback() {
   const location = useLocation();
@@ -62,6 +63,7 @@ function Callback() {
 
         player.addListener("account_error", ({ message }) => {
           console.error("계정에러", message);
+          dispatch(setPremium(false)); // spotify premium 유저가 아님
         });
         player.addListener("autoplay_failed", () => {
           console.error("ios환경 자동재생 불가능");

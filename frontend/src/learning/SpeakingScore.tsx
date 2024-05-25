@@ -25,22 +25,28 @@ function SpeakingScore() {
         <div className="z-10 flex flex-col items-center justify-center w-full h-full px-12">
           <div className="w-full px-4 py-2 mb-8 overflow-y-auto scrollbarwhite text-black bg-white rounded-3xl h-96 shadow-[0px_4px_4px_#00000040]">
             {comments.markedText
-              .split(" ")
-              .map((part: string, index: number) => {
-                const cleanedPart = part.startsWith("__") ? (
-                  <span
-                    key={index}
-                    className="text-[#FF0000] font-bold text-lg"
-                  >
-                    {part.substring(2)}{" "}
-                  </span>
-                ) : (
-                  <span className="text-lg font-bold" key={index}>
-                    {part}{" "}
-                  </span>
-                );
-                return cleanedPart;
-              })}
+              .split("\n")
+              .map((sentence: string, index: number) => (
+                <div key={index} className="sentence">
+                  {sentence.split(" ").map((word, wordIndex) => {
+                    if (word) {
+                      if (word.startsWith("__")) {
+                        return (
+                          <span
+                            key={wordIndex}
+                            className="text-red-600 whitespace-nowrap"
+                          >
+                            {word.replace(/__/g, "")}{" "}
+                          </span>
+                        );
+                      } else {
+                        return <span key={wordIndex}>{word} </span>;
+                      }
+                    }
+                    return null;
+                  })}
+                </div>
+              ))}
           </div>
           <div className="bg-[#55A2FD] w-80 h-80 rounded-full flex justify-center items-center">
             <div className="flex items-center justify-center w-72 h-72 bg-[#9bd1e5] rounded-full">

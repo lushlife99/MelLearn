@@ -26,6 +26,7 @@ function PlayMusic() {
   const [isLyric, setIsLyric] = useState<boolean>(false);
 
   const player = useSelector((state: RootState) => state.player);
+  const premium = useSelector((state: RootState) => state.premium);
 
   const { track } = location.state;
 
@@ -45,7 +46,9 @@ function PlayMusic() {
   useEffect(() => {
     setDuration(track.duration_ms);
     return () => {
-      pause();
+      if (premium.premium) {
+        pause();
+      }
     };
   }, []);
 

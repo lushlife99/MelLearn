@@ -68,6 +68,8 @@ function HistorySpeaking({ quizType }: Speaking) {
     setPage(1);
     fetchHistory(1);
   }, [quizType]);
+  console.log(history);
+  console.log(tracks);
   if (!history) {
     return <div className="text-white">Loading...</div>;
   }
@@ -77,17 +79,17 @@ function HistorySpeaking({ quizType }: Speaking) {
         <div key={index} className="flex justify-between h-16 my-2 ">
           <div className="mr-4">
             <img
-              src={tracks?.tracks[index].album.images[2].url}
+              src={tracks?.tracks[index]?.album?.images[2]?.url}
               alt=""
               className="w-16 h-16 rounded-lg"
             />
           </div>
           <div className="flex flex-col items-start justify-center  w-[70%]">
             <span className="font-bold text-md">
-              {tracks?.tracks[index].name}
+              {tracks?.tracks[index]?.name}
             </span>
             <span className="text-[#DED9D9] text-sm">
-              {tracks?.tracks[index].artists[0].name}
+              {tracks?.tracks[index]?.artists[0]?.name}
             </span>
           </div>
           <div className="flex flex-col items-center justify-center  w-[15%] ">

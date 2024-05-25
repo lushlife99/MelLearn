@@ -3,8 +3,9 @@ import { axiosSpotify, axiosSpotifyScraper } from "../api";
 import { useQuery } from "react-query";
 import { LyricData } from "../redux/type";
 import { IoMdMicrophone } from "react-icons/io";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setRecordBlobUrl } from "../redux/mockSpeaking/recordSlice";
+import { RootState } from "../redux/store";
 
 interface ITrack {
   album: {
@@ -39,6 +40,7 @@ function MockSpeaking({ track, label }: Track) {
     useState<ReturnType<typeof setInterval>>();
 
   const dispatch = useDispatch();
+  const premium = useSelector((state: RootState) => state.premium);
   const getLyric = async () => {
     const res = await axiosSpotifyScraper.get(
       `/track/lyrics?trackId=${track.id}&format=json`
@@ -125,7 +127,10 @@ function MockSpeaking({ track, label }: Track) {
   useEffect(() => {
     setDuration(track.duration_ms);
     return () => {
-      pause(); // 컴포넌트 언마운트시 음악 정지
+      if (premium.premium) {
+        pause(); // 컴포넌트 언마운트시 음악 정지
+        stopRecording();
+      }
     };
   }, []);
 

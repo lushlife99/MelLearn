@@ -42,6 +42,7 @@ export const QuestionBoard = (): JSX.Element => {
       setAnswers(newArr);
     }
   };
+  console.log(problem);
 
   const handleNextProblem = async () => {
     // 다음 문제로 이동
@@ -130,7 +131,7 @@ export const QuestionBoard = (): JSX.Element => {
           {problem.quizzes.map(
             (quiz, idx) =>
               idx === index && (
-                <div key={idx} className="">
+                <div key={idx}>
                   <span className="text-[#007AFF] text-5xl sm:text-3xl font-extrabold">
                     Q{index + 1}.
                   </span>

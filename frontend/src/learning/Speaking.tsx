@@ -5,6 +5,8 @@ import LearningStart from "./LearningStart";
 import { IoIosArrowRoundBack, IoIosArrowUp } from "react-icons/io";
 import { useQuery } from "react-query";
 import Lyric from "../musichome/Lyric";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
 
 const Speaking = () => {
   const [intervalId, setIntervalId] =
@@ -19,6 +21,8 @@ const Speaking = () => {
   const [start, setStart] = useState<boolean>(false);
   const [isLyric, setIsLyric] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const premium = useSelector((state: RootState) => state.premium);
 
   const getLyric = async () => {
     const res = await axiosSpotifyScraper.get(
@@ -37,8 +41,10 @@ const Speaking = () => {
   useEffect(() => {
     setDuration(track.duration_ms);
     return () => {
-      pause(); // 컴포넌트 언마운트시 음악 정지
-      stopRecording(); // 컴포넌트 언마운트시 녹음 중지
+      if (premium.premium) {
+        pause(); // 컴포넌트 언마운트시 음악 정지
+        stopRecording(); // 컴포넌트 언마운트시 녹음 중지
+      }
     };
   }, []);
 

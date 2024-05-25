@@ -78,6 +78,7 @@ function HistoryListListenig({ quizType }: Listening) {
   if (!history) {
     return <div className="text-white">Loading...</div>;
   }
+  console.log(history);
   return (
     <div className="w-full h-full px-4 text-white">
       {history.content.map((item, index) => (
