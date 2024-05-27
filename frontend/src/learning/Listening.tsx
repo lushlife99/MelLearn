@@ -111,16 +111,40 @@ const Listening = () => {
 
   const handleSelect = (e: any) => {};
   return (
-    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen ">
-      <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col px-8 items-center">
+    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto] ">
+      <div className="bg-[#9bd1e5] overflow-hidden w-full sm:max-w-[450px] h-full relative flex flex-col px-8 items-center">
         <BgCircle />
-        <div className="z-10 flex justify-start w-full mt-4 hover:opacity-60">
+        <div className="z-10 flex justify-start w-full mt-4 hover:opacity-60 h-[5%]">
           <IoIosArrowRoundBack
             onClick={() => navigate(-1)}
             className="w-8 h-10"
           />
         </div>
-        <div className="rounded-3xl bg-white z-10 font-bold text-black text-2xl leading-[normal]  whitespace-normal  overflow-y-auto scrollbarwhite px-4 py-2">
+        <div className="z-10 flex items-center w-[40%] sm:w-full mt-2 mb-4 bg-white rounded-2xl shadow-[0px_4px_4px_#00000040] sm:h-[20%] h-[15%] px-2 justify-between">
+          <div className="flex items-center">
+            <img
+              src={track.album.images[2].url}
+              alt="Album Cover"
+              className="w-16 h-16 sm:w-12 sm:h-12 rounded-xl"
+            />
+            <div className="flex flex-col ml-4">
+              <span className="text-lg font-bold whitespace-nowrap sm:text-md">
+                {track.name}
+              </span>
+              <span className="text-sm font-semibold text-gray-500">
+                {track.artists[0].name}
+              </span>
+            </div>
+          </div>
+          <div className="hover:opacity-50">
+            {isPlaying ? (
+              <FaPause onClick={pause} className="w-8 h-8 sm:w-6 sm:h-6" />
+            ) : (
+              <FaPlay onClick={resume} className="w-8 h-8 sm:w-6 sm:h-6" />
+            )}
+          </div>
+        </div>
+        <div className="rounded-3xl sm:w-full w-[40%]  bg-white z-10 font-bold text-black text-2xl leading-[normal] whitespace-normal  overflow-y-auto scrollbarwhite px-4 py-2 shadow-[0px_4px_4px_#00000040]">
           {timeLyric &&
             lyrics?.split("__")?.map((lyric: string, index: number) => (
               <span
@@ -147,25 +171,8 @@ const Listening = () => {
               </span>
             ))}
         </div>
-        <div className="z-10 flex items-center w-full mt-4 mb-4 bg-white rounded-2xl h-36">
-          <img
-            src={track.album.images[2].url}
-            alt="Album Cover"
-            className="w-16 h-16 rounded-xl"
-          />
-          <div className="flex flex-col ml-4">
-            <span className="font-bold">{track.name}</span>
-            <span className="text-sm">{track.artists[0].name}</span>
-          </div>
-          <div className="ml-44 hover:opacity-50">
-            {isPlaying ? (
-              <FaPause onClick={pause} className="w-6 h-6" />
-            ) : (
-              <FaPlay onClick={resume} className="w-6 h-6" />
-            )}
-          </div>
-        </div>
-        <div className="flex justify-center w-full h-16 ">
+
+        <div className="flex justify-center sm:w-[50%] w-[20%] h-24 sm:h-20 mt-12 mb-4">
           <button
             onClick={submitAnswer}
             className="z-10  bg-[#007AFF] text-white font-bold w-full rounded-lg hover:opacity-60 "

@@ -5,6 +5,8 @@ import LearningStart from "./LearningStart";
 import { IoIosArrowRoundBack, IoIosArrowUp } from "react-icons/io";
 import { useQuery } from "react-query";
 import Lyric from "../musichome/Lyric";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
 
 const Speaking = () => {
   const [intervalId, setIntervalId] =
@@ -19,6 +21,8 @@ const Speaking = () => {
   const [start, setStart] = useState<boolean>(false);
   const [isLyric, setIsLyric] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const premium = useSelector((state: RootState) => state.premium);
 
   const getLyric = async () => {
     const res = await axiosSpotifyScraper.get(
@@ -37,7 +41,10 @@ const Speaking = () => {
   useEffect(() => {
     setDuration(track.duration_ms);
     return () => {
-      pause(); // 컴포넌트 언마운트시 음악 정지
+      if (premium.premium) {
+        pause(); // 컴포넌트 언마운트시 음악 정지
+        stopRecording(); // 컴포넌트 언마운트시 녹음 중지
+      }
     };
   }, []);
 
@@ -148,11 +155,11 @@ const Speaking = () => {
   const lyricClick = false;
 
   return (
-    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
+    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
       <div
         className={` ${
           start ? "bg-black" : "bg-[#9bd1e5] relative"
-        } overflow-hidden w-full max-w-[450px] h-screen  flex flex-col px-5 items-center
+        } overflow-hidden max-w-[450px] h-screen  flex flex-col px-5 items-center
         `}
       >
         {!start ? (
@@ -161,7 +168,7 @@ const Speaking = () => {
           <div>
             <IoIosArrowRoundBack
               onClick={goBack}
-              className="z-10 w-10 h-10 my-4 fill-white hover:opacity-40"
+              className="z-10 w-10 h-10 my-4 sm:w-10 sm:h-10 fill-white hover:opacity-40"
             />
             {isLyric && (
               <Lyric

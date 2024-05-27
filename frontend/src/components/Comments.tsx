@@ -74,9 +74,17 @@ function Comments({ comments }: IComment) {
                 quiz.question
               )}
             </span>
-            <div className="flex flex-col">
-              <span className="mb-0 font-extrabold">제출 답안:</span>
-              <span className="px-1 mb-2 text-lg font-semibold">
+            <div className="flex justify-center mt-2 border border-black  shadow-[0px_4px_4px_#00000040] rounded-md items-center py-1">
+              <span className="mr-2 font-bold whitespace-nowrap">
+                사용자 답안:{" "}
+              </span>
+              <span
+                className={`font-extrabold  text-[${
+                  quiz.answer === comments.submitAnswerList[index]
+                    ? "#007AFF"
+                    : "red"
+                }]`}
+              >
                 {quiz.optionList[comments.submitAnswerList[index] - 1]?.replace(
                   /\d+\./g,
                   ""
@@ -85,9 +93,11 @@ function Comments({ comments }: IComment) {
             </div>
 
             {/* Comment */}
-            <div>
+            <div className="mt-2">
               <span className="text-lg font-extrabold ">Note:</span>
-              <p className="px-1 text-[9px] text-gray-500">{quiz.comment}</p>
+              <p className="px-1 text-[9px] text-gray-500 text-sm font-bold">
+                {quiz.comment}
+              </p>
             </div>
           </div>
         </div>

@@ -21,7 +21,7 @@ export const PopularMusicList = (): JSX.Element => {
 
   return (
     <div className="flex justify-center w-full h-screen font-[roboto]">
-      <div className="flex  flex-col items-center w-full  bg-black max-w-[450px]  p-3">
+      <div className="flex  flex-col items-center w-full  bg-black sm:max-w-[450px]  p-3">
         <div className="flex items-center justify-between w-full py-2 mb-3">
           <div className="w-[33%] h-10 flex justify-start items-center ">
             <IoIosArrowRoundBack
@@ -29,13 +29,15 @@ export const PopularMusicList = (): JSX.Element => {
               className="w-12 h-12 fill-white hover:fill-gray-500"
             />
           </div>
-          <span className="text-md font-bold  text-white w-[33%] border border-black">
-            인기 음악 목록
-          </span>
+          <div className="w-[33%]  flex justify-center">
+            <span className="text-lg font-bold text-center text-white">
+              인기 음악 목록
+            </span>
+          </div>
           <div className="w-[33%]"></div>
         </div>
 
-        <div className="grid w-full grid-cols-3 gap-4 px-3 overflow-y-auto scrollbar">
+        <div className="grid w-full grid-cols-5 gap-4 px-3 overflow-y-auto sm:grid-cols-3 scrollbar">
           {chartData.tracks.slice(0, 30).map((track, index) => (
             <div
               key={index}
@@ -45,7 +47,7 @@ export const PopularMusicList = (): JSX.Element => {
               <img
                 alt="Artist Cover"
                 src={track.album.images[0].url}
-                className="w-[125px] h-[110px] rounded-md "
+                className="w-40 rounded-md h-30 "
               />
               <span className="text-[white] font-bold mt-2 overflow-hidden overflow-ellipsis ">
                 {track.name}

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaMagnifyingGlass } from "react-icons/fa6";
-import { axiosSpotify } from "../api";
+import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../api";
 import { Link, useNavigate } from "react-router-dom";
 import "../css/scroll.css";
 import { useQuery } from "react-query";
@@ -63,12 +63,25 @@ export const SearchMusic = () => {
       },
     });
   };
-  const goStudy = (track: any) => {
-    navigate("/category", {
-      state: {
-        track,
-      },
-    });
+  const goStudy = async (track: any) => {
+    const res1 = await axiosSpotifyScraper.get(
+      `/track/lyrics?trackId=${track.id}&format=json`
+    );
+    const res2 = await axiosApi.post(
+      `/api/support/quiz/category/${track.id}`,
+      res1.data
+    );
+    const { grammar, vocabulary, reading } = res2.data;
+
+    if (grammar && vocabulary && reading) {
+      navigate("/category", {
+        state: {
+          track,
+        },
+      });
+    } else {
+      alert("지원하지 않는 언어입니다.");
+    }
   };
 
   return (
@@ -81,19 +94,14 @@ export const SearchMusic = () => {
           onSubmit={handleSubmit}
           className="flex items-center justify-between w-full px-2"
         >
-          <div className="relative flex items-center justify-center w-full rounded-md">
+          <div className="flex items-center justify-center w-full rounded-md ">
             <input
               value={search}
               onChange={onChangeInput}
               className="bg-[#282828] rounded-md h-10 p-3 sm:w-[85%] w-[55%] text-[white] "
               placeholder="노래를 검색해주세요"
             />
-            <button
-              type="submit"
-              className="absolute sm:right-14 right-[360px]"
-            >
-              <FaMagnifyingGlass className="w-5 h-5 fill-[white] hover:opacity-60 bottom-1" />
-            </button>
+
             <Link to={"/home"} className="text-decoration-none">
               <span className="ml-4 text-white sm:ml-2 text-md hover:opacity-60">
                 취소
@@ -152,7 +160,7 @@ export const SearchMusic = () => {
                       className="bg-[white] w-28 rounded-2xl h-8 hover:opacity-60 flex items-center justify-center"
                     >
                       <LuPencilLine className="mr-2 fill-black" />
-                      <span className="font-bold">공부</span>
+                      <span className="font-bold">학습</span>
                     </button>
                   </div>
                 </div>

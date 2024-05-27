@@ -18,7 +18,7 @@ export const Score = (): JSX.Element => {
   };
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
-      <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col ">
+      <div className="bg-[#9bd1e5] overflow-hidden w-full sm:max-w-[450px] h-screen relative flex flex-col ">
         <BgCircle />
         <div className="z-10 flex flex-col items-center justify-center w-full h-full">
           <div className="bg-[#55A2FD] w-80 h-80 rounded-full flex justify-center items-center">
@@ -38,13 +38,13 @@ export const Score = (): JSX.Element => {
         <div className="z-10 flex flex-col items-center justify-center w-full h-40 mb-12">
           <button
             onClick={goCommentary}
-            className="bg-[#007AFF] w-[60%] rounded-lg h-10 text-white font-bold hover:opacity-60 mb-4"
+            className="bg-[#007AFF] sm:w-[60%] w-[30%] rounded-lg h-10 text-white font-bold hover:opacity-60 mb-4"
           >
             해설보기
           </button>
           <button
             onClick={goHome}
-            className="bg-[#007AFF] w-[60%] rounded-lg h-10 text-white font-bold hover:opacity-60"
+            className="bg-[#007AFF] sm:w-[60%] w-[30%] rounded-lg h-10 text-white font-bold hover:opacity-60"
           >
             홈으로
           </button>

@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { axiosSpotify, axiosSpotifyScraper } from "../api";
+import axiosApi, { axiosSpotify, axiosSpotifyScraper } from "../api";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaPlayCircle, FaPauseCircle } from "react-icons/fa";
 import { IoIosArrowRoundBack, IoIosArrowUp } from "react-icons/io";
 import { LuPencilLine } from "react-icons/lu";
-
 import Lyric from "./Lyric";
 import { useQuery } from "react-query";
 import { LyricData } from "../redux/type";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
+import "../css/scroll.css";
 
 export interface CurrentTimeData {
   progress_ms: number;
@@ -25,7 +25,8 @@ function PlayMusic() {
   const [duration, setDuration] = useState<number>(0); //트랙 시간 길이
   const [isLyric, setIsLyric] = useState<boolean>(false);
 
-  //const player = useSelector((state: RootState) => state.player);
+  const player = useSelector((state: RootState) => state.player);
+  const premium = useSelector((state: RootState) => state.premium);
 
   const { track } = location.state;
 
@@ -42,21 +43,15 @@ function PlayMusic() {
     staleTime: 10800000,
   });
 
-  const play = async () => {
-    const res = await axiosSpotify.put("/me/player/play", {
-      uris: ["spotify:track:" + track.id],
-      position_ms: 0,
-    });
-    if (res.status === 202) {
-      setIsPlaying(true);
-    }
-  };
-
   useEffect(() => {
-    play();
-    startProgressBar();
     setDuration(track.duration_ms);
+    return () => {
+      if (premium.premium) {
+        pause();
+      }
+    };
   }, []);
+
   useEffect(() => {
     if (currentTime >= duration) {
       clearInterval(intervalId);
@@ -76,6 +71,7 @@ function PlayMusic() {
   };
 
   const resume = async () => {
+    await player.player?.activateElement();
     const res = await axiosSpotify.get("/me/player/currently-playing");
     let progress_ms = 0;
     if (res.data.item === undefined) {
@@ -116,18 +112,6 @@ function PlayMusic() {
     }
   };
 
-  //이전 재생
-  // const playPrevious = async () => {
-  //   const res = await axiosSpotify.post("/me/player/previous");
-  //   console.log("이전", res.status);
-  // };
-
-  // //다음재생
-  // const playNext = async () => {
-  //   const res = await axiosSpotify.post("/me/player/next");
-  //   const res2 = await axiosSpotify.get("/me/player/queue");
-  //   console.log("다음", res2.data);
-  // };
   const goBack = () => {
     navigate(-1); //뒤로가기
   };
@@ -137,28 +121,51 @@ function PlayMusic() {
     setIsLyric(true);
   };
   const goStudy = async (track: any) => {
-    navigate("/category", {
-      state: {
-        track,
-      },
-    });
+    const res1 = await axiosSpotifyScraper.get(
+      `/track/lyrics?trackId=${track.id}&format=json`
+    );
+    const res2 = await axiosApi.post(
+      `/api/support/quiz/category/${track.id}`,
+      res1.data
+    );
+    const { grammar, vocabulary, reading } = res2.data;
+    if (grammar && vocabulary && reading) {
+      navigate("/category", {
+        state: {
+          track,
+        },
+      });
+    } else {
+      alert("지원하지 않는 언어입니다.");
+    }
   };
   const lyricClick = true;
 
   const progressPercentage = (currentTime / duration) * 100;
 
-  // const goComprehensiveQuiz = () => {
-  //   navigate("/compQuiz", {
-  //     state: {
-  //       musicId: track.id,
-  //       quizType: "GRAMMAR",
-  //     },
-  //   });
-  // };
+  const goMockExam = async (track: any) => {
+    const res1 = await axiosSpotifyScraper.get(
+      `/track/lyrics?trackId=${track.id}&format=json`
+    );
+    const res2 = await axiosApi.post(
+      `/api/support/quiz/category/${track.id}`,
+      res1.data
+    );
+    const { grammar, vocabulary, reading } = res2.data;
+    if (grammar && vocabulary && reading) {
+      navigate("/mockExam", {
+        state: {
+          track,
+        },
+      });
+    } else {
+      alert("지원하지 않는 언어입니다.");
+    }
+  };
 
   return (
-    <div className="bg-[black] flex flex-row justify-center w-full h-screen">
-      <div className="relative bg-[black] overflow-hidden  max-w-[450px] h-screen  flex flex-col px-5">
+    <div className="bg-[black] flex flex-row justify-center w-full h-screen font-[roboto]">
+      <div className="relative bg-[black] overflow-hidden  max-w-[450px] h-screen  flex flex-col px-5 overflow-y-auto scrollbar">
         <IoIosArrowRoundBack
           onClick={goBack}
           className="fill-[white] w-10 h-10 mt-8 hover:opacity-60 "
@@ -201,14 +208,12 @@ function PlayMusic() {
 
         {/* progress Bar */}
         <div
-          className="w-full h-2 mt-12 cursor-pointer bg-gray-200rounded-full"
+          className="w-full h-2 mt-12 bg-gray-200 rounded-full cursor-pointer"
           onClick={(e) => {
             const rect = e.currentTarget.getBoundingClientRect();
             const clickX = e.clientX - rect.left;
             const progressPercentage = (clickX / rect.width) * 100;
             const progressMs = (progressPercentage / 100) * track.duration_ms;
-
-            //stopProgressBar();
             setCurrentTime(progressMs);
             dragResume(progressMs);
           }}
@@ -235,30 +240,25 @@ function PlayMusic() {
           </span>
         </div>
         {/* 버튼 div */}
-        <div className="flex flex-col items-center mt-12">
+        <div className="flex flex-col items-center mt-4">
           <div className="flex flex-col items-center">
             <div
               onClick={goLyric}
               className="flex flex-col justify-center items-center text-[#d3d3d3] hover:opacity-60"
             >
               <IoIosArrowUp />
-              <span>가사</span>{" "}
+              <span>가사</span>
             </div>
           </div>
         </div>
 
-        {/*아이콘 */}
-        <div className="flex items-center justify-between w-full mt-16 ">
-          {/* <FaStepBackward
-            onClick={playPrevious}
-            className="fill-[white] w-8 h-8 hover:opacity-60"
-          /> */}
+        <div className="flex items-center justify-between w-full mt-8">
           <button
             onClick={() => goStudy(track)}
             className="font-bold bg-[white] rounded-2xl h-9 w-28 flex items-center justify-center hover:opacity-60"
           >
             <LuPencilLine />
-            공부하기
+            학습하기
           </button>
           {!isPlaying ? (
             <FaPlayCircle
@@ -272,17 +272,12 @@ function PlayMusic() {
             />
           )}
           <button
-            onClick={() => goStudy(track)}
+            onClick={() => goMockExam(track)}
             className="font-bold bg-[white] rounded-2xl h-9 w-28 flex items-center justify-center hover:opacity-60"
           >
             <LuPencilLine />
             모의고사
           </button>
-
-          {/* <FaStepForward
-            onClick={playNext}
-            className="fill-[white] w-8 h-8 hover:opacity-60"
-          /> */}
         </div>
       </div>
     </div>

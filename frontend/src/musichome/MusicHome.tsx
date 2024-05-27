@@ -62,7 +62,6 @@ function MusicHome() {
   useEffect(() => {
     getMember();
   }, []);
-  useEffect(() => {}, [langType]);
 
   const { data: chartData, isLoading: chartLoading } = useQuery(
     ["chart", langType],
@@ -101,7 +100,7 @@ function MusicHome() {
     setPage(newValue);
     switch (newValue) {
       case 0:
-        //home
+        //홈 화면
         navigation("/home");
         break;
       case 1:
@@ -139,7 +138,7 @@ function MusicHome() {
   };
   if (chartLoading || artistLoading || recommendLoading) {
     return (
-      <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
+      <div className="bg-[black] flex flex-row justify-center w-full h-screen">
         <div className="relative bg-[black] overflow-hidden w-full max-w-[450px] h-screen  flex flex-col ">
           <div className="flex items-center justify-center h-[300%]">
             <Spinner className="border" variant="primary" />
@@ -153,16 +152,31 @@ function MusicHome() {
     <div className="bg-[white] flex flex-row justify-center w-full h-screen font-[roboto]">
       <div className="relative bg-black overflow-hidden w-full sm:max-w-[450px] h-screen flex sm:flex-col ">
         {/* 타이틀*/}
-        <div className="flex flex-col items-center justify-between h-16 mb-2 bg-black ">
-          <div className="flex items-center justify-between w-full px-4 mt-4">
-            <span className="text-3xl font-bold text-white">MelLearn</span>
-            <FaMagnifyingGlass
-              onClick={() => navigation("/searchMusic")}
-              className="w-5 h-5 hover:opacity-60 fill-white"
-            />
+        <div className="flex flex-col items-center justify-between h-16 mb-2 bg-black  w-[33%] sm:w-full">
+          <div className="flex flex-col items-start justify-between w-full px-4 mt-4 sm:items-center sm:flex-row">
+            <span className="text-5xl font-bold text-white sm:text-3xl ">
+              MelLearn
+            </span>
+            {window.innerWidth > 450 ? (
+              <div
+                onClick={() => navigation("/searchMusic")}
+                className="relative flex items-center w-full mt-4 hover:opacity-60"
+              >
+                <FaMagnifyingGlass className="absolute w-6 h-6 fill-white right-3" />
+                <input
+                  placeholder="노래를 검색해주세요"
+                  className="placeholder-gray-600 bg-[#282828] rounded-md h-10 p-3  w-full text-[white] "
+                />
+              </div>
+            ) : (
+              <FaMagnifyingGlass
+                onClick={() => navigation("/searchMusic")}
+                className="sm:w-5 sm:h-5 hover:opacity-60 fill-white"
+              />
+            )}
           </div>
 
-          <div className="flex flex-col w-full mt-12 b sm:fixed sm:bottom-0 sm:flex sm:flex-row sm:mt-0 ">
+          <div className="flex flex-col w-full mt-12 ml-8 sm:ml-0 b sm:fixed sm:bottom-0 sm:flex sm:flex-row sm:mt-0">
             <div
               onClick={() => handleChange(0)}
               className="flex sm:flex-col items-center sm:justify-center w-full sm:w-[25%] hover:text-white "
@@ -182,7 +196,7 @@ function MusicHome() {
             </div>
             <div
               onClick={() => handleChange(1)}
-              className="w-full flex sm:flex-col items-center sm:justify-center sm:w-[25%] hover:text-white"
+              className="w-full flex sm:flex-col items-center sm:justify-center sm:w-[25%] hover:text-white "
             >
               <PiExam
                 className={`sm:w-7 sm:h-7 w-16 h-16 fill-${
@@ -250,15 +264,18 @@ function MusicHome() {
             </div>
             <Swiper
               spaceBetween={10}
-              slidesPerView={2.1}
+              slidesPerView={window.innerWidth <= 450 ? 2.1 : 4.1}
               modules={[Pagination]}
               loop={true}
               className="mySwiper"
             >
               {recommendData?.recommends.slice(0, 10).map((track, index) => (
                 <SwiperSlide
+                  style={{
+                    height: window.innerWidth <= 450 ? "220px" : "300px",
+                  }}
                   key={index}
-                  className="bg-black swiper-slide-mid hover:opacity-60"
+                  className="bg-black hover:opacity-60"
                   onClick={() => {
                     goPlayMusic(track);
                   }}
@@ -310,15 +327,18 @@ function MusicHome() {
 
             <Swiper
               spaceBetween={10}
-              slidesPerView={3.3}
+              slidesPerView={window.innerWidth <= 450 ? 3.3 : 5.3}
               modules={[Pagination]}
               loop={true}
               className="mySwiper"
             >
               {artistData?.artists.slice(0, 10).map((artist, index) => (
                 <SwiperSlide
+                  style={{
+                    height: window.innerWidth <= 450 ? "150px" : "250px",
+                  }}
                   key={index}
-                  className="bg-black swiper-slide-mini hover:opacity-60 "
+                  className="bg-black hover:opacity-60 "
                   onClick={() => goDetailArtist(artist)}
                 >
                   <img
@@ -351,13 +371,16 @@ function MusicHome() {
 
             <Swiper
               spaceBetween={10}
-              slidesPerView={2.1}
+              slidesPerView={window.innerWidth <= 450 ? 2.1 : 5.1}
               modules={[Pagination]}
               loop={true}
-              className="mySwiper"
+              className=" mySwiper"
             >
               {chartData?.tracks.slice(0, 10).map((track, index) => (
                 <SwiperSlide
+                  style={{
+                    height: window.innerWidth <= 450 ? "220px" : "300px",
+                  }}
                   key={index}
                   className="bg-black swiper-slide-mid hover:opacity-60"
                   onClick={() => {

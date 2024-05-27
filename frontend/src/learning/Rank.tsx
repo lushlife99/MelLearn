@@ -97,7 +97,7 @@ export const Rank = (): JSX.Element => {
             </thead>
             <tbody>
               {rank.slice(0, 3).map((user, index) => (
-                <tr>
+                <tr key={index}>
                   <td className="p-2">
                     <div className="flex items-center text-lg">
                       <span>{index + 1}</span>

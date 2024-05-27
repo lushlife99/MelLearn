@@ -90,25 +90,25 @@ function HistoryList({ quizType }: IHistory) {
         <div key={index} className="flex justify-between h-16 my-2 ">
           <div className="mr-4">
             <img
-              src={tracks?.tracks[index].album.images[2].url}
+              src={tracks?.tracks[index]?.album?.images[2]?.url}
               alt="Album Cover"
               className="w-16 h-16 rounded-lg"
             />
           </div>
           <div className="flex flex-col items-start justify-center  w-[70%]">
             <span className="font-bold text-md">
-              {tracks?.tracks[index].name}
+              {tracks?.tracks[index]?.name}
             </span>
             <div className="flex justify-between w-full">
               <span className="text-[#DED9D9] text-sm">
-                {tracks?.tracks[index].artists[0].name}
+                {tracks?.tracks[index]?.artists[0]?.name}
               </span>
-              <span className="mr-12 text-sm font-bold text-white">
+              <span className="text-sm font-bold text-white sm:mr-12">
                 {getLevel(item.quizList.level)}
               </span>
             </div>
           </div>
-          <div className="flex flex-col items-center justify-center  w-[15%] ">
+          <div className="flex flex-col items-center justify-center w-[15%] ">
             <span className="mb-2 font-bold">{item.score}점</span>
             <button
               onClick={() => goComment(item)}

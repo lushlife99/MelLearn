@@ -42,6 +42,7 @@ export const QuestionBoard = (): JSX.Element => {
       setAnswers(newArr);
     }
   };
+  console.log(problem);
 
   const handleNextProblem = async () => {
     // 다음 문제로 이동
@@ -84,16 +85,43 @@ export const QuestionBoard = (): JSX.Element => {
       navigate(-1); // 첫번째 문제면 뒤로가기
     }
   };
+  const getLevel = (level: number) => {
+    switch (level) {
+      case 1:
+        return "초급";
+      case 2:
+        return "중급";
+      case 3:
+        return "고급";
+      default:
+        return "초급";
+    }
+  };
 
   return (
-    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen">
-      <div className="bg-[#9bd1e5] overflow-hidden w-[450px] h-screen relative flex flex-col px-8">
+    <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
+      <div className="bg-[#9bd1e5] overflow-hidden w-full sm:max-w-[450px] h-screen relative flex flex-col px-8">
         <BgCircle />
-        <div className="z-10">
-          <IoIosArrowRoundBack
-            onClick={move}
-            className="w-10 h-10 mt-8 fill-black hover:opacity-60"
-          />
+        <div className="z-10 w-full mt-8">
+          <div className="flex items-center justify-between">
+            <div className="w-[33%] ">
+              <IoIosArrowRoundBack
+                onClick={move}
+                className="w-10 h-10 fill-black hover:opacity-60"
+              />
+            </div>
+
+            <div className="flex flex-col items-center justify-center w-[33%] ">
+              <span className="text-3xl font-bold sm:text-2xl">
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </span>
+              <span className="text-xl font-semibold">
+                {getLevel(problem.level)}
+              </span>
+            </div>
+            <div className="w-[33%]"></div>
+          </div>
+
           <div className="flex items-center justify-center mt-8 mb-12">
             <LinearProgress determinate value={progress} />
           </div>
@@ -104,14 +132,14 @@ export const QuestionBoard = (): JSX.Element => {
             (quiz, idx) =>
               idx === index && (
                 <div key={idx}>
-                  <span className="text-[#007AFF] text-3xl font-extrabold">
+                  <span className="text-[#007AFF] text-5xl sm:text-3xl font-extrabold">
                     Q{index + 1}.
                   </span>
-                  <p className="mt-2 mb-12 text-2xl font-extrabold text-black">
+                  <p className="mt-2 mb-12 text-3xl font-extrabold text-black sm:text-2xl">
                     {quiz.question}
                   </p>
                   <RadioGroup
-                    className=" radio-buttons-group-focus"
+                    className="radio-buttons-group-focus"
                     onChange={(e: any) =>
                       onChagneAnswer(parseInt(e.target.value))
                     }
@@ -124,9 +152,9 @@ export const QuestionBoard = (): JSX.Element => {
                         control={<Radio className="items-center mr-2" />}
                         label={
                           <div className="flex flex-col items-start">
-                            <div className="flex items-center mb-1">
-                              <span className="text-[black] text-lg ">
-                                {idx + 1}. {option}
+                            <div className="flex items-center mb-2 sm:mb-2">
+                              <span className="text-2xl font-semibold sm:text-lg">
+                                {idx + 1}. {option.replace(/^\d+\.\s*/, "")}
                               </span>
                             </div>
                           </div>
@@ -140,7 +168,7 @@ export const QuestionBoard = (): JSX.Element => {
           <div className="flex justify-center w-full mb-20 fixed-bottom">
             <button
               onClick={!isLast ? handleNextProblem : submitProblem}
-              className="bg-[#007AFF] w-[80%] h-10 text-white rounded-lg hover:opacity-60"
+              className="bg-[#007AFF] sm:w-[80%] w-[30%] h-10 text-white rounded-lg hover:opacity-60"
             >
               {isLast ? "결과 확인 " : "다음"}
             </button>

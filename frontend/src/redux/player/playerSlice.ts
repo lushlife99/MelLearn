@@ -11,7 +11,7 @@ const playerSlice = createSlice({
   name: "player",
   initialState,
   reducers: {
-    setSpotifyPlayer: (state, action: PayloadAction<Spotify.Player>) => {
+    setSpotifyPlayer: (state, action: PayloadAction<Spotify.Player | null>) => {
       state.player = action.payload;
     },
   },

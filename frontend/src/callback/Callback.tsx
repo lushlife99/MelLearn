@@ -4,6 +4,7 @@ import axiosApi, { axiosSpotify } from "../api";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setSpotifyPlayer } from "../redux/player/playerSlice";
+import { setPremium } from "../redux/premium/premiumSlice";
 
 function Callback() {
   const location = useLocation();
@@ -43,10 +44,10 @@ function Callback() {
 
           volume: 0.5,
         });
-        //dispatch(setSpotifyPlayer(player));
+
         player.addListener("ready", ({ device_id }) => {
+          dispatch(setSpotifyPlayer(player));
           transferDevice(device_id, player);
-          player.activateElement();
         });
 
         player.addListener("not_ready", ({ device_id }) => {
@@ -62,11 +63,14 @@ function Callback() {
 
         player.addListener("account_error", ({ message }) => {
           console.error("계정에러", message);
+          dispatch(setPremium(false)); // spotify premium 유저가 아님
+        });
+        player.addListener("autoplay_failed", () => {
+          console.error("ios환경 자동재생 불가능");
         });
         player.connect().then(async (success) => {
           /* 장치 연동 성공시 스포티파이 ID 값 보내줌 */
-          // 여기에 음악 차트 데이터 인기가수데이터 받아오는거 받아와서
-          // 홈화면에서 로딩 없애기
+
           if (success) {
             const response = await axiosApi.post(
               "/api/member/spotifyAccount",
@@ -97,7 +101,10 @@ function Callback() {
     params.set("client_id", clientId);
     params.set("grant_type", "authorization_code");
     params.set("code", code);
-    params.set("redirect_uri", "http://localhost:3000/callback");
+    params.set(
+      "redirect_uri",
+      "http://localhost:3000/callback" //"https://main.dx55diamovfwp.amplifyapp.com/callback"
+    );
     // @ts-ignore
     params.set("code_verifier", codeVerifier);
 

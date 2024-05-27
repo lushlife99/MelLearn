@@ -86,6 +86,7 @@ function MockExam() {
     const res = await axiosSpotifyScraper.get(
       `/track/lyrics?trackId=${track.id}&format=json`
     );
+
     setlrcLyricList(res.data);
     const res2 = await axiosSpotifyScraper.get(
       `/track/lyrics?trackId=${track.id}`
@@ -245,7 +246,7 @@ function MockExam() {
   if (isLoading) {
     return (
       <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
-        <div className="bg-[#9bd1e5] whi overflow-hidden w-[450px] h-full relative flex flex-col px-8 ">
+        <div className="bg-[#9bd1e5] w-full overflow-hidden sm:max-w-[450px] h-full relative flex flex-col px-8 ">
           <div className="absolute left-0 z-10 flex items-center justify-center w-full h-12 font-bold text-center text-white animate-pulse top-50 rounded-xl ">
             <div className="animate-bounce bg-[#007AFF] h-12 flex items-center rounded-xl w-[80%] justify-center">
               모의고사 생성중...
@@ -258,22 +259,21 @@ function MockExam() {
 
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
-      <div className="bg-[#9bd1e5] whi overflow-hidden w-[450px] h-full relative flex flex-col px-8 ">
+      <div className="bg-[#9bd1e5]  overflow-hidden w-full sm:max-w-[450px] h-full relative flex flex-col px-8 ">
         {/* 모의고사 제목*/}
         <BgCircle />
         <div className="h-[10%] z-10 ">
           <div className="my-2 border-t-2 border-black"></div>
-          <div className="flex justify-center w-full">
-            <span className="text-3xl font-extrabold">
-              {track.name} 모의고사
-            </span>
+          <div className="flex flex-col items-center justify-center w-full">
+            <span className="text-3xl font-bold ">{track.name}</span>
+            <span className="text-xl font-bold">모의고사</span>
           </div>
           <div className="my-2 border-t-2 border-black"></div>
         </div>
 
         {/* 문제 */}
-        <div className="h-[70%] z-10">
-          <span className="font-bold ">
+        <div className="h-[70%] z-10 mt-4">
+          <span className="font-bold sm:text-md">
             {currentPage === 1 &&
               "[01-05] Read the following passages. Then choose the option that best completes the passage."}
             {currentPage === 2 &&
@@ -329,17 +329,19 @@ function MockExam() {
               ))}
             {/* 듣기 문제*/}
             {currentPage === 4 && (
-              <div className="py-2 text-2xl font-bold text-black bg-white rounded-3xl h-[80%]">
+              <div className="py-2 text-2xl font-bold text-black bg-white rounded-3xl h-[80%] mt-2">
                 <div className="flex flex-col items-start">
-                  <div className="flex items-center w-full h-16 p-2 my-2 bg-white rounded-2xl shadow-[0px_4px_4px_#00000040]">
-                    <img
-                      src={track.album.images[2].url}
-                      alt="Album Cover"
-                      className="w-12 h-12 ml-4 rounded-xl"
-                    />
-                    <div className="flex flex-col justify-start ml-2">
-                      <span className="text-sm font-bold">{track.name}</span>
-                      <span className="text-xs">{track.artists[0].name}</span>
+                  <div className="flex items-center w-full h-16 p-2 mb-4 border rounded-2xl shadow-[0px_4px_4px_#00000040] justify-between">
+                    <div className="flex items-center">
+                      <img
+                        src={track.album.images[2].url}
+                        alt="Album Cover"
+                        className="w-12 h-12 rounded-xl"
+                      />
+                      <div className="flex flex-col justify-start ml-2">
+                        <span className="text-sm font-bold">{track.name}</span>
+                        <span className="text-xs">{track.artists[0].name}</span>
+                      </div>
                     </div>
 
                     <div className="ml-36 hover:opacity-50">
@@ -351,7 +353,7 @@ function MockExam() {
                     </div>
                   </div>
                 </div>
-                <div className="h-full p-3 overflow-y-auto leading-[normal] bg-white  scrollbarwhite shadow-[0px_4px_4px_#00000040] rounded-b-2xl">
+                <div className="h-full p-3 overflow-y-auto leading-[normal] bg-white scrollbarwhite shadow-[0px_4px_4px_#00000040] rounded-b-2xl">
                   {listening?.blankedText
                     ?.split("__")
                     ?.map((lyric: string, index: number) => (
