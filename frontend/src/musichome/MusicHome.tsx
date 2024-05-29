@@ -19,10 +19,10 @@ import { setTrackMetaData } from "../redux/trackMeta/trackMetaSlice";
 import { fetchRecommendData } from "../redux/recommend/recommendAction";
 import { setRecommendData } from "../redux/recommend/recommendSlice";
 import { AiOutlineHome } from "react-icons/ai";
-import { PiExam } from "react-icons/pi";
 import axiosApi from "../api";
 import { RiHistoryFill } from "react-icons/ri";
 import { IoIosSettings } from "react-icons/io";
+import MenuBook from "@mui/icons-material/MenuBook";
 
 interface Member {
   id: number;
@@ -176,7 +176,7 @@ function MusicHome() {
             )}
           </div>
 
-          <div className="flex flex-col w-full mt-12 ml-8 sm:ml-0 b sm:fixed sm:bottom-0 sm:flex sm:flex-row sm:mt-0">
+          <div className="z-10 flex flex-col w-full mt-12 ml-8 sm:ml-0 b sm:fixed sm:bottom-0 sm:flex sm:flex-row sm:mt-0">
             <div
               onClick={() => handleChange(0)}
               className="flex sm:flex-col items-center sm:justify-center w-full sm:w-[25%] hover:text-white "
@@ -198,7 +198,7 @@ function MusicHome() {
               onClick={() => handleChange(1)}
               className="w-full flex sm:flex-col items-center sm:justify-center sm:w-[25%] hover:text-white "
             >
-              <PiExam
+              <MenuBook
                 className={`sm:w-7 sm:h-7 w-16 h-16 fill-${
                   page === 1 ? "white" : "gray"
                 }`}

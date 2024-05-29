@@ -74,7 +74,7 @@ function HistorySpeaking({ quizType }: Speaking) {
     return <div className="text-white">Loading...</div>;
   }
   return (
-    <div className="w-full h-full px-4 text-white">
+    <div className="w-full h-full px-4 overflow-y-auto text-white">
       {history.content.map((item, index) => (
         <div key={index} className="flex justify-between h-16 my-2 ">
           <div className="mr-4">
@@ -92,7 +92,7 @@ function HistorySpeaking({ quizType }: Speaking) {
               {tracks?.tracks[index]?.artists[0]?.name}
             </span>
           </div>
-          <div className="flex flex-col items-center justify-center  w-[15%] ">
+          <div className="flex flex-col items-center justify-center w-[15%] whitespace-nowrap">
             <span className="mb-2 text-sm font-bold">
               {item.score.toFixed(2)}점
             </span>

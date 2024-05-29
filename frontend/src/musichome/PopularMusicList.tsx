@@ -30,7 +30,7 @@ export const PopularMusicList = (): JSX.Element => {
             />
           </div>
           <div className="w-[33%]  flex justify-center">
-            <span className="text-lg font-bold text-center text-white">
+            <span className="text-lg font-bold text-center text-white whitespace-nowrap">
               인기 음악 목록
             </span>
           </div>

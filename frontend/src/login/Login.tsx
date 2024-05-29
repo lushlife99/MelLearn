@@ -30,7 +30,7 @@ function Login() {
 
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
-      <div className="bg-[#9bd1e5] overflow-hidden sm:w-[450px] h-screen relative flex flex-col px-8 w-full items-center">
+      <div className="bg-[#9bd1e5] overflow-hidden sm:w-[450px] h-screen relative flex flex-col px-8 w-full items-center overflow-y-auto">
         <BgCircle />
         <div className="z-10 mt-24 w-[25%] sm:w-full">
           <div className="text-[#007aff] font-extrabold text-5xl whitespace-normal">
@@ -76,11 +76,11 @@ function Login() {
             <span className="text-[#232121] text-[15px] font-bold mb-4 ">
               아직 회원이 아니시라구요?
             </span>
-            <div className="flex flex-wrap items-center justify-center ">
+            <div className="flex items-center justify-center w-full">
               <div className=" h-[2px] bg-white w-[33%]"></div>
               <Link
                 to="/join"
-                className="text-[#007AFF] font-bold mx-2 hover:opacity-60 text-decoration-none w-[20%]"
+                className="text-[#007AFF] font-bold mx-2 hover:opacity-60 text-decoration-none w-[20%] whitespace-nowrap"
               >
                 회원가입
               </Link>

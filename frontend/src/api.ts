@@ -64,7 +64,7 @@ const handleResponseInterceptor = async (
   } else {
     //const errorData = error.response?.data as { message: string };
     //alert(errorData.message);
-    window.history.back();
+    //window.history.back();
     return new Promise(() => {});
     // 다른 예외 상황 처리
   }

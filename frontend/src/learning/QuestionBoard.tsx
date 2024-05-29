@@ -151,7 +151,7 @@ export const QuestionBoard = (): JSX.Element => {
                         value={idx + 1}
                         control={<Radio className="items-center mr-2" />}
                         label={
-                          <div className="flex flex-col items-start">
+                          <div className="flex flex-col items-start overflow-y-auto">
                             <div className="flex items-center mb-2 sm:mb-2">
                               <span className="text-2xl font-semibold sm:text-lg">
                                 {idx + 1}. {option.replace(/^\d+\.\s*/, "")}

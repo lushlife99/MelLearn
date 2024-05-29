@@ -15,7 +15,7 @@ function MockComment() {
   const [currentPage, setCurrentPage] = useState(1);
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
-      <div className="bg-[#9bd1e5] whi overflow-hidden w-[450px] h-full relative flex flex-col px-8 ">
+      <div className="bg-[#9bd1e5] whi overflow-hidden w-[450px] h-full relative flex flex-col px-8">
         <BgCircle />
         <div className="z-10 h-full">
           {currentPage === 1 && (

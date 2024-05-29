@@ -58,17 +58,17 @@ const History = () => {
           {(quizType === "Reading" ||
             quizType === "Vocabulary" ||
             quizType === "Grammar") && (
-            <div className="h-[80%] ">
+            <div className="h-[70%] ">
               <HistoryList quizType={quizType} />
             </div>
           )}
           {quizType === "Listening" && (
-            <div>
+            <div className="h-[70%]">
               <HistoryListListenig quizType={quizType} />
             </div>
           )}
           {quizType === "Speaking" && (
-            <div>
+            <div className="h-[70%]">
               <HistorySpeaking quizType={quizType} />
             </div>
           )}

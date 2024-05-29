@@ -58,7 +58,7 @@ function ListeningScore() {
           </div>
           <div
             onClick={() => navigate("/home")}
-            className="z-10 mt-4 hover:opacity-60 flex items-center justify-center w-[40%] sm:w-[80%] h-12 bg-[#007AFF] rounded-lg"
+            className="z-10 mt-4 hover:opacity-60 flex items-center justify-center w-[40%] sm:w-[80%] h-12 bg-[#007AFF] rounded-lg "
           >
             <button className="font-bold w-[60%] text-white text-lg">
               홈 가기
