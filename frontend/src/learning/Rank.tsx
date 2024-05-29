@@ -61,7 +61,7 @@ export const Rank = (): JSX.Element => {
   }, []);
   return (
     <div className="bg-[white] flex flex-row justify-center w-full h-screen font-[roboto]">
-      <div className="bg-[black] overflow-hidden w-[450px] h-screen relative flex flex-col px-8 ">
+      <div className="bg-[black] overflow-hidden w-[450px] h-screen relative flex flex-col px-8 overflow-y-auto">
         <div className="flex items-center justify-between mt-4">
           <div className="w-[33%]">
             <IoIosArrowRoundBack

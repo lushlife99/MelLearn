@@ -12,7 +12,7 @@ module.exports = {
       },
     },
     screens: {
-      sm: { min: "390px", max: "450px" },
+      sm: { min: "360px", max: "450px" },
     },
   },
   plugins: [require("flowbite/plugin")],

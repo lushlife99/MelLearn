@@ -50,7 +50,7 @@ function Join() {
 
   return (
     <div className="bg-[#9bd1e5] flex flex-row justify-center w-full h-screen font-[roboto]">
-      <div className="bg-[#9bd1e5] overflow-hidden sm:w-[450px] w-full h-screen relative flex flex-col px-8 items-center">
+      <div className="bg-[#9bd1e5] overflow-hidden sm:w-[450px] w-full h-screen relative flex flex-col px-8 items-center overflow-y-auto">
         <BgCircle />
 
         <div className="z-10 flex flex-col items-start justify-between mt-12 sm:w-full w-[25%]">
@@ -118,7 +118,7 @@ function Join() {
               </span>
             )}
 
-            <button className="mt-6 rounded-2xl  bg-[#495867] h-12 text-[white] hover:bg-[gray] hover:text-[#495867] font-bold">
+            <button className="mt-6 rounded-2xl  bg-[#495867] h-12 text-[white] hover:bg-[gray] hover:text-[#495867] font-bold ">
               회원가입
             </button>
           </form>

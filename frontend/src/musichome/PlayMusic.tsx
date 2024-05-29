@@ -10,6 +10,7 @@ import { LyricData } from "../redux/type";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import "../css/scroll.css";
+import MenuBook from "@mui/icons-material/MenuBook";
 
 export interface CurrentTimeData {
   progress_ms: number;
@@ -164,12 +165,14 @@ function PlayMusic() {
   };
 
   return (
-    <div className="bg-[black] flex flex-row justify-center w-full h-screen font-[roboto]">
-      <div className="relative bg-[black] overflow-hidden  max-w-[450px] h-screen  flex flex-col px-5 overflow-y-auto scrollbar">
-        <IoIosArrowRoundBack
-          onClick={goBack}
-          className="fill-[white] w-10 h-10 mt-8 hover:opacity-60 "
-        />
+    <div className="bg-[black] flex flex-row justify-center w-full h-screen font-[roboto] overflow-y-auto">
+      <div className=" bg-[black] overflow-hidden  max-w-[450px] h-screen  flex flex-col px-5 overflow-y-auto scrollbar">
+        <div>
+          <IoIosArrowRoundBack
+            onClick={goBack}
+            className="fill-[white] w-10 h-10 mt-8 hover:opacity-60 "
+          />
+        </div>
 
         {isLyric && (
           <Lyric
@@ -255,10 +258,10 @@ function PlayMusic() {
         <div className="flex items-center justify-between w-full mt-8">
           <button
             onClick={() => goStudy(track)}
-            className="font-bold bg-[white] rounded-2xl h-9 w-28 flex items-center justify-center hover:opacity-60"
+            className="font-bold bg-[white] rounded-2xl h-9 w-32 flex items-center justify-center hover:opacity-60"
           >
             <LuPencilLine />
-            학습하기
+            <span className="ml-1 text-sm whitespace-nowrap">학습하기</span>
           </button>
           {!isPlaying ? (
             <FaPlayCircle
@@ -273,10 +276,10 @@ function PlayMusic() {
           )}
           <button
             onClick={() => goMockExam(track)}
-            className="font-bold bg-[white] rounded-2xl h-9 w-28 flex items-center justify-center hover:opacity-60"
+            className=" font-bold bg-[white] rounded-2xl h-9 w-32 flex items-center justify-center hover:opacity-60"
           >
-            <LuPencilLine />
-            모의고사
+            <MenuBook />
+            <span className="ml-1 text-sm whitespace-nowrap">모의고사</span>
           </button>
         </div>
       </div>
