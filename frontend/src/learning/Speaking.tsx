@@ -15,12 +15,15 @@ const Speaking = () => {
   const [duration, setDuration] = useState<number>(0);
   const mediaStream = useRef<MediaStream | null>(null);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
   const chunks = useRef<Blob[]>([]);
   const location = useLocation();
   const { track } = location.state;
   const [start, setStart] = useState<boolean>(false);
   const [isLyric, setIsLyric] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [auidoUrl, setAidoUrl] = useState<string | null>(null);
 
   const premium = useSelector((state: RootState) => state.premium);
 
@@ -60,11 +63,29 @@ const Speaking = () => {
   const accessMicrophone = async () => {
     try {
       // mic 접근 권한 허용
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: false,
+          autoGainControl: false,
+          noiseSuppression: false,
+        },
+      });
       // true 되면 실행
       if (stream.active) {
         playMusic(); // 마이크 연결 될시 음악 실행
         mediaStream.current = stream;
+
+        // 오디오 컨텍스트 및 게인 노드 설정
+        const audioContext = new window.AudioContext();
+        const source = audioContext.createMediaStreamSource(stream);
+        const gainNode = audioContext.createGain();
+        gainNode.gain.value = 2.0; // 볼륨을 2배로 설정
+        source.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        audioContextRef.current = audioContext;
+        gainNodeRef.current = gainNode;
+
         mediaRecorder.current = new MediaRecorder(stream);
         mediaRecorder.current.ondataavailable = (e) => {
           const wavAudioData = new Blob([e.data]);
@@ -75,7 +96,9 @@ const Speaking = () => {
         mediaRecorder.current.onstop = async () => {
           // 노래 끝나고 서버에 speaking data 보냄
           const recordedBlob = new Blob(chunks.current, { type: "audio/wav" });
-          //const url = URL.createObjectURL(recordedBlob);
+          const blobUrl = URL.createObjectURL(recordedBlob);
+          setAidoUrl(blobUrl);
+
           const formData = new FormData();
           formData.append(`file`, recordedBlob);
           const lyricsBlob = new Blob([JSON.stringify(lyricData)], {
@@ -224,6 +247,14 @@ const Speaking = () => {
             >
               시작하기
             </button>
+            <button onClick={accessMicrophone}>녹음 시작</button>
+            <button onClick={stopRecording}>녹음 중지</button>
+            {auidoUrl && (
+              <audio controls src={auidoUrl}>
+                재생
+              </audio>
+            )}
+
             {isLoading && (
               <div className="z-10 flex items-center justify-center w-full h-12 font-bold text-center text-white animate-pulse top-50 rounded-xl">
                 <div className="animate-bounce bg-[#007AFF] h-12 flex items-center rounded-xl w-[80%] justify-center">
