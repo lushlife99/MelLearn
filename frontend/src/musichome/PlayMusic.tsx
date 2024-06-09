@@ -73,6 +73,8 @@ function PlayMusic() {
 
   const resume = async () => {
     await player.player?.activateElement();
+    startProgressBar();
+    setIsPlaying(true);
     const res = await axiosSpotify.get("/me/player/currently-playing");
     let progress_ms = 0;
     if (res.data.item === undefined) {
@@ -95,6 +97,7 @@ function PlayMusic() {
     }
   };
   const dragResume = async (progressMs: number) => {
+    setIsPlaying(true);
     const res = await axiosSpotify.put("/me/player/play", {
       uris: ["spotify:track:" + track.id],
       position_ms: progressMs,
@@ -106,6 +109,8 @@ function PlayMusic() {
 
   //정지
   const pause = async () => {
+    setIsPlaying(false);
+    stopProgressBar();
     const res = await axiosSpotify.put("/me/player/pause");
     if (res.status === 202) {
       setIsPlaying(false);
