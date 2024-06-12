@@ -20,3 +20,6 @@ https://www.figma.com/file/7MYcOTyrKp69eeh8qOzWSL/music-popsong-education?type=d
 ## ERD
 ![image](https://github.com/lushlife99/MelLearn/assets/101994803/7628dd76-05d8-46d1-b763-b3b2ce05d2ed)
 
+## 시연 영상
+
+https://www.youtube.com/watch?v=SIQpdw7hlRE
