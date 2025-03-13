@@ -1,12 +1,25 @@
 # MelLearn
 
 <div align="center">
+  <h3>Front-end</h3>
+  <img src="https://img.shields.io/badge/Spotify%20API-1ED760?style=for-the-badge&logo=spotify&logoColor=white" alt="Spotify API">
+  <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React">
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Redux--Toolkit-764ABC?style=for-the-badge&logo=redux&logoColor=white" alt="Redux Toolkit">
+  <img src="https://img.shields.io/badge/TailwindCSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="TailwindCSS">
+
+  <h3>Backend</h3>
+
   
-  ![Spotify API](https://img.shields.io/badge/Spotify%20API-1ED760?style=for-the-badge&logo=spotify&logoColor=white)
-  ![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-  ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-  ![Redux](https://img.shields.io/badge/Redux--Toolkit-764ABC?style=for-the-badge&logo=redux&logoColor=white)
-  ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+  <img src="https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white" alt="Spring Boot">
+  <img src="https://img.shields.io/badge/JPA-6DB33F?style=for-the-badge&logo=spring&logoColor=white" alt="JPA">
+  <img src="https://img.shields.io/badge/QueryDSL-005E95?style=for-the-badge&logo=code&logoColor=white" alt="QueryDSL">
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
+  <img src="https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white" alt="Nginx">
+  <img src="https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&logo=jenkins&logoColor=white" alt="Jenkins">
+  <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
+  <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="Redis">
+  <img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white" alt="JWT">
   
   <h3>🎵 음악 감상과 언어 학습을 결합한 웹 애플리케이션 🎵</h3>
   
@@ -69,21 +82,23 @@
 
 <table>
   <tr>
+    <td><b>인프라</b></td>
+    <td>Docker, Nginx, AWS, Jenkins</td>
+  </tr>
+  <tr>
     <td><b>프론트엔드</b></td>
-    <td>React, TypeScript, Redux-Toolkit, TailwindCSS</td>
+    <td>React, TypeScript, Redux-Toolkit, TailwindCSS, Redux</td>
   </tr>
   <tr>
-    <td><b>API 통합</b></td>
-    <td>Spotify Web API, Spotify SDK</td>
+    <td><b>백엔드</b></td>
+    <td>Springboot, Spring Data JPA, Querydsl</td>
   </tr>
   <tr>
-    <td><b>오디오 처리</b></td>
-    <td>Web Audio API, MediaRecorder API</td>
+    <td><b>데이터베이스</b></td>
+    <td>Mysql, Redis</td>
   </tr>
-  <tr>
-    <td><b>상태 관리</b></td>
-    <td>Redux</td>
-  </tr>
+  
+
 </table>
 
 ## 📊 시스템 아키텍처
