@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CompletionException;
 
 @Service
 @RequiredArgsConstructor
@@ -30,96 +31,125 @@ public class ComprehensiveQuizService {
     private final SpeakingService speakingService;
     private final JwtTokenProvider jwtTokenProvider;
 
-
     public ComprehensiveQuizSubmitDto submit(ComprehensiveQuizSubmitRequest quizSubmitRequest, MultipartFile speakingSubmitFile, HttpServletRequest request) throws ExecutionException, InterruptedException {
+        try {
+            Member member = jwtTokenProvider.getMember(request)
+                    .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
 
-        Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
+            // 모든 비동기 작업을 병렬로 실행
+            CompletableFuture<SpeakingSubmitDto> speakingSubmit = speakingService.submit(
+                    SpeakingSubmitRequest.builder()
+                            .file(speakingSubmitFile)
+                            .lyricList(quizSubmitRequest.getLrcLyricList())
+                            .build(), quizSubmitRequest.getMusicId(), request);
 
-        CompletableFuture<SpeakingSubmitDto> speakingSubmit = speakingService.submit(
-                SpeakingSubmitRequest.builder()
-                        .file(speakingSubmitFile)
-                        .lyricList(quizSubmitRequest.getLrcLyricList())
-                        .build(), quizSubmitRequest.getMusicId(), request);
+            CompletableFuture<QuizSubmitDto> grammarSubmit = quizService.submit(
+                    QuizSubmitRequest.builder()
+                            .quizType(QuizType.GRAMMAR)
+                            .answers(quizSubmitRequest.getGrammarSubmit())
+                            .musicId(quizSubmitRequest.getMusicId())
+                            .build(), request);
 
-        CompletableFuture<QuizSubmitDto> grammarSubmit = quizService.submit(
-                QuizSubmitRequest.builder()
-                .quizType(QuizType.GRAMMAR)
-                .answers(quizSubmitRequest.getGrammarSubmit())
-                .musicId(quizSubmitRequest.getMusicId())
-                .build(), request);
+            CompletableFuture<QuizSubmitDto> vocaSubmit = quizService.submit(
+                    QuizSubmitRequest.builder()
+                            .quizType(QuizType.VOCABULARY)
+                            .answers(quizSubmitRequest.getVocabularySubmit())
+                            .musicId(quizSubmitRequest.getMusicId())
+                            .build(), request);
 
-        CompletableFuture<QuizSubmitDto> vocaSubmit = quizService.submit(
-                QuizSubmitRequest.builder()
-                .quizType(QuizType.VOCABULARY)
-                .answers(quizSubmitRequest.getVocabularySubmit())
-                .musicId(quizSubmitRequest.getMusicId())
-                .build(), request);
+            CompletableFuture<QuizSubmitDto> readingSubmit = quizService.submit(
+                    QuizSubmitRequest.builder()
+                            .quizType(QuizType.READING)
+                            .answers(quizSubmitRequest.getReadingSubmit())
+                            .musicId(quizSubmitRequest.getMusicId())
+                            .build(), request);
 
-        CompletableFuture<QuizSubmitDto> readingSubmit = quizService.submit(
-                QuizSubmitRequest.builder()
-                .quizType(QuizType.READING)
-                .answers(quizSubmitRequest.getReadingSubmit())
-                .musicId(quizSubmitRequest.getMusicId())
-                .build(), request);
+            CompletableFuture<ListeningSubmitDto> listeningSubmit = quizService.listeningSubmit(
+                    ListeningSubmitRequest.builder()
+                            .submitWordList(quizSubmitRequest.getListeningSubmit())
+                            .musicId(quizSubmitRequest.getMusicId())
+                            .build(), request);
 
-        CompletableFuture<ListeningSubmitDto> listeningSubmit = quizService.listeningSubmit(
-                ListeningSubmitRequest.builder()
-                        .submitWordList(quizSubmitRequest.getListeningSubmit())
-                        .musicId(quizSubmitRequest.getMusicId()).build(), request);
+            // 모든 작업이 완료될 때까지 대기
+            CompletableFuture.allOf(speakingSubmit, grammarSubmit, vocaSubmit, readingSubmit, listeningSubmit)
+                    .exceptionally(throwable -> {
+                        log.error("Error in comprehensive submit: {}", throwable.getMessage());
+                        throw new CompletionException(throwable);
+                    })
+                    .join();
 
-        CompletableFuture.allOf(speakingSubmit, grammarSubmit, vocaSubmit, readingSubmit, listeningSubmit).join();
+            // 결과 수집
+            SpeakingSubmitDto speakingSubmitDto = speakingSubmit.get();
+            QuizSubmitDto grammarSubmitDto = grammarSubmit.get();
+            QuizSubmitDto vocaSubmitDto = vocaSubmit.get();
+            QuizSubmitDto readingSubmitDto = readingSubmit.get();
+            ListeningSubmitDto listeningSubmitDto = listeningSubmit.get();
 
-        SpeakingSubmitDto speakingSubmitDto = speakingSubmit.get();
-        QuizSubmitDto grammarSubmitDto = grammarSubmit.get();
-        QuizSubmitDto vocaSubmitDto = vocaSubmit.get();
-        QuizSubmitDto readingSubmitDto = readingSubmit.get();
-        ListeningSubmitDto listeningSubmitDto = listeningSubmit.get();
-
-        ComprehensiveQuizSubmitDto comprehensiveQuizSubmitDto = new ComprehensiveQuizSubmitDto(
-                quizSubmitRequest.getMusicId(), member.getLevel(),
-                ComprehensiveQuizAnswerDto.builder()
-                        .speakingSubmit(speakingSubmitDto)
-                        .vocabularySubmit(vocaSubmitDto)
-                        .readingSubmit(readingSubmitDto)
-                        .grammarSubmit(grammarSubmitDto)
-                        .listeningSubmit(listeningSubmitDto).build()
-        );
-        return comprehensiveQuizSubmitDto;
+            return new ComprehensiveQuizSubmitDto(
+                    quizSubmitRequest.getMusicId(), member.getLevel(),
+                    ComprehensiveQuizAnswerDto.builder()
+                            .speakingSubmit(speakingSubmitDto)
+                            .vocabularySubmit(vocaSubmitDto)
+                            .readingSubmit(readingSubmitDto)
+                            .grammarSubmit(grammarSubmitDto)
+                            .listeningSubmit(listeningSubmitDto)
+                            .build()
+            );
+        } catch (Exception e) {
+            log.error("Error in comprehensive submit: {}", e.getMessage());
+            throw e;
+        }
     }
 
     public ComprehensiveQuizDto get(QuizRequest quizRequest, HttpServletRequest request) throws InterruptedException, ExecutionException {
-        CompletableFuture<ListeningQuizDto> listeningQuiz = quizService.getListeningQuiz(QuizRequest.builder()
-                .quizType(QuizType.LISTENING)
-                .lyric(quizRequest.getLyric())
-                .musicId(quizRequest.getMusicId())
-                .build(), request);
+        try {
+            // 모든 비동기 작업을 병렬로 실행
+            CompletableFuture<ListeningQuizDto> listeningQuiz = quizService.getListeningQuiz(
+                    QuizRequest.builder()
+                            .quizType(QuizType.LISTENING)
+                            .lyric(quizRequest.getLyric())
+                            .musicId(quizRequest.getMusicId())
+                            .build(), request);
 
-        CompletableFuture<QuizListDto> readingQuiz = quizService.getQuizList(QuizRequest.builder()
-                .quizType(QuizType.READING)
-                .lyric(quizRequest.getLyric())
-                .musicId(quizRequest.getMusicId())
-                .build(), request);
+            CompletableFuture<QuizListDto> readingQuiz = quizService.getQuizList(
+                    QuizRequest.builder()
+                            .quizType(QuizType.READING)
+                            .lyric(quizRequest.getLyric())
+                            .musicId(quizRequest.getMusicId())
+                            .build(), request);
 
-        CompletableFuture<QuizListDto> vocaQuiz = quizService.getQuizList(QuizRequest.builder()
-                .quizType(QuizType.VOCABULARY)
-                .lyric(quizRequest.getLyric())
-                .musicId(quizRequest.getMusicId())
-                .build(), request);
+            CompletableFuture<QuizListDto> vocaQuiz = quizService.getQuizList(
+                    QuizRequest.builder()
+                            .quizType(QuizType.VOCABULARY)
+                            .lyric(quizRequest.getLyric())
+                            .musicId(quizRequest.getMusicId())
+                            .build(), request);
 
-        CompletableFuture<QuizListDto> grammarQuiz = quizService.getQuizList(QuizRequest.builder()
-                .quizType(QuizType.GRAMMAR)
-                .lyric(quizRequest.getLyric())
-                .musicId(quizRequest.getMusicId())
-                .build(), request);
+            CompletableFuture<QuizListDto> grammarQuiz = quizService.getQuizList(
+                    QuizRequest.builder()
+                            .quizType(QuizType.GRAMMAR)
+                            .lyric(quizRequest.getLyric())
+                            .musicId(quizRequest.getMusicId())
+                            .build(), request);
 
-        CompletableFuture.allOf(listeningQuiz, readingQuiz, vocaQuiz, grammarQuiz).join();
+            // 모든 작업이 완료될 때까지 대기
+            CompletableFuture.allOf(listeningQuiz, readingQuiz, vocaQuiz, grammarQuiz)
+                    .exceptionally(throwable -> {
+                        log.error("Error in comprehensive get: {}", throwable.getMessage());
+                        throw new CompletionException(throwable);
+                    })
+                    .join();
 
-        ListeningQuizDto listeningResult = listeningQuiz.get();
-        QuizListDto readingResult = readingQuiz.get();
-        QuizListDto vocaResult = vocaQuiz.get();
-        QuizListDto grammarResult = grammarQuiz.get();
-        ComprehensiveQuizDto comprehensiveQuizDto = new ComprehensiveQuizDto(grammarResult, vocaResult, readingResult, listeningResult);
-        return comprehensiveQuizDto;
+            // 결과 수집
+            ListeningQuizDto listeningResult = listeningQuiz.get();
+            QuizListDto readingResult = readingQuiz.get();
+            QuizListDto vocaResult = vocaQuiz.get();
+            QuizListDto grammarResult = grammarQuiz.get();
+
+            return new ComprehensiveQuizDto(grammarResult, vocaResult, readingResult, listeningResult);
+        } catch (Exception e) {
+            log.error("Error in comprehensive get: {}", e.getMessage());
+            throw e;
+        }
     }
-
 }

@@ -57,60 +57,92 @@ public class QuizService {
         throw new CustomException(ErrorCode.BAD_REQUEST);
     }
 
-
-    @Async
+    @Async("taskExecutor")
     @Transactional
     public CompletableFuture<QuizListDto> getQuizList(QuizRequest quizRequest, HttpServletRequest request) {
-        Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-        Optional optionalQuiz = fetchQuiz(quizRequest, member);
-        String redisKey = getRedisKey(quizRequest, member);
+        try {
+            Member member = jwtTokenProvider.getMember(request)
+                    .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
+            Optional optionalQuiz = fetchQuiz(quizRequest, member);
+            String redisKey = getRedisKey(quizRequest, member);
 
-        if (optionalQuiz.isEmpty()) {
-            if (redisTemplate.hasKey(redisKey)) {
-                throw new CustomException(ErrorCode.CREATING_OTHER_REQUEST);
-            } else {
-                redisTemplate.opsForValue().set(redisKey, "true", 1, TimeUnit.MINUTES);
-                CompletableFuture<QuizListDto> quizListFuture = quizCreationService.createQuizList(quizRequest, member);
-                quizListFuture.whenComplete((result, exception) -> {
-                    redisTemplate.delete(redisKey);
-                });
-                return quizListFuture;
+            if (optionalQuiz.isEmpty()) {
+                if (redisTemplate.hasKey(redisKey)) {
+                    throw new CustomException(ErrorCode.CREATING_OTHER_REQUEST);
+                } else {
+                    redisTemplate.opsForValue().set(redisKey, "true", 1, TimeUnit.MINUTES);
+                    CompletableFuture<QuizListDto> quizListFuture = quizCreationService.createQuizList(quizRequest, member);
+                    quizListFuture.whenComplete((result, exception) -> {
+                        redisTemplate.delete(redisKey);
+                        if (exception != null) {
+                            log.error("Error creating quiz list: {}", exception.getMessage());
+                        }
+                    });
+                    return quizListFuture;
+                }
             }
-        } else return CompletableFuture.completedFuture(new QuizListDto((QuizList) optionalQuiz.get()));
+            return CompletableFuture.completedFuture(new QuizListDto((QuizList) optionalQuiz.get()));
+        } catch (Exception e) {
+            log.error("Error in getQuizList: {}", e.getMessage());
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
-    @Async
+    @Async("taskExecutor")
     @Transactional
     public CompletableFuture<ListeningQuizDto> getListeningQuiz(QuizRequest quizRequest, HttpServletRequest request) {
-        Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-        Optional optionalQuiz = fetchQuiz(quizRequest, member);
-        String redisKey = getRedisKey(quizRequest, member);
-        if (optionalQuiz.isEmpty()) {
-            if (redisTemplate.hasKey(redisKey)) {
-                throw new CustomException(ErrorCode.CREATING_OTHER_REQUEST);
-            } else {
-                redisTemplate.opsForValue().set(redisKey, "true", 1, TimeUnit.MINUTES);
-                CompletableFuture<ListeningQuizDto> listeningQuiz = quizCreationService.createListeningQuiz(quizRequest, member);
-                listeningQuiz.whenComplete((result, exception) -> {
-                    redisTemplate.delete(redisKey);
-                });
-                return listeningQuiz;
+        try {
+            Member member = jwtTokenProvider.getMember(request)
+                    .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
+            Optional optionalQuiz = fetchQuiz(quizRequest, member);
+            String redisKey = getRedisKey(quizRequest, member);
+
+            if (optionalQuiz.isEmpty()) {
+                if (redisTemplate.hasKey(redisKey)) {
+                    throw new CustomException(ErrorCode.CREATING_OTHER_REQUEST);
+                } else {
+                    redisTemplate.opsForValue().set(redisKey, "true", 1, TimeUnit.MINUTES);
+                    CompletableFuture<ListeningQuizDto> listeningQuiz = quizCreationService.createListeningQuiz(quizRequest, member);
+                    listeningQuiz.whenComplete((result, exception) -> {
+                        redisTemplate.delete(redisKey);
+                        if (exception != null) {
+                            log.error("Error creating listening quiz: {}", exception.getMessage());
+                        }
+                    });
+                    return listeningQuiz;
+                }
             }
-        } else return CompletableFuture.completedFuture(new ListeningQuizDto((ListeningQuiz) optionalQuiz.get()));
+            return CompletableFuture.completedFuture(new ListeningQuizDto((ListeningQuiz) optionalQuiz.get()));
+        } catch (Exception e) {
+            log.error("Error in getListeningQuiz: {}", e.getMessage());
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
-    @Async
+    @Async("taskExecutor")
     @Transactional
     public CompletableFuture<QuizSubmitDto> submit(QuizSubmitRequest submitRequest, HttpServletRequest request) {
-        Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-        return CompletableFuture.completedFuture(quizSubmitService.submitQuiz(submitRequest, member));
+        try {
+            Member member = jwtTokenProvider.getMember(request)
+                    .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
+            return CompletableFuture.completedFuture(quizSubmitService.submitQuiz(submitRequest, member));
+        } catch (Exception e) {
+            log.error("Error in submit: {}", e.getMessage());
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
-    @Async
+    @Async("taskExecutor")
     @Transactional
     public CompletableFuture<ListeningSubmitDto> listeningSubmit(ListeningSubmitRequest submitRequest, HttpServletRequest request) {
-        Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-        return CompletableFuture.completedFuture(quizSubmitService.submitListeningQuiz(submitRequest, member));
+        try {
+            Member member = jwtTokenProvider.getMember(request)
+                    .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
+            return CompletableFuture.completedFuture(quizSubmitService.submitListeningQuiz(submitRequest, member));
+        } catch (Exception e) {
+            log.error("Error in listeningSubmit: {}", e.getMessage());
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     public Optional fetchQuiz(QuizRequest quizRequest, Member member) {
