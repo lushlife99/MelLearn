@@ -47,11 +47,11 @@ public class QuizService {
                 .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
 
         if (quizType.equals(QuizType.LISTENING)) {
-            return submitJpaRepository.findListeningSubmit(member.getId(), pageNo, 10);
+            return submitJpaRepository.findListeningSubmitWithPaging(member.getId(), pageNo, 10);
         } else if (quizType.equals(QuizType.READING) || quizType.equals(QuizType.VOCABULARY) || quizType.equals(QuizType.GRAMMAR)) {
-            return submitJpaRepository.findSubmit(member.getId(), quizType, pageNo, 10);
+            return submitJpaRepository.findSubmitWithPaging(member.getId(), quizType, pageNo, 10);
         } else if (quizType.equals(QuizType.SPEAKING)) {
-            return submitJpaRepository.findSpeakingSubmit(member.getId(), pageNo, 10);
+            return submitJpaRepository.findSpeakingSubmitWithPaging(member.getId(), pageNo, 10);
         }
 
         throw new CustomException(ErrorCode.BAD_REQUEST);
