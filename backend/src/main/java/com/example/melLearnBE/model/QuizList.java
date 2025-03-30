@@ -27,9 +27,9 @@ public class QuizList {
     private QuizType quizType;
     @Enumerated(value = EnumType.ORDINAL)
     private LearningLevel level;
-    @OneToMany(mappedBy = "quizList", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "quizList", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Quiz> quizzes;
-    @OneToMany(mappedBy = "quizList", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "quizList", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<QuizSubmit> submitList;
     private String musicId;
     @CreationTimestamp

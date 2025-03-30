@@ -25,6 +25,7 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -35,11 +36,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class QuizCreationService {
 
     private final QuizListRepository quizListRepository;
@@ -65,7 +66,7 @@ public class QuizCreationService {
         int retries = 0;
         final int maxRetries = 3;
         boolean success = false;
-        while (!success && retries < maxRetries) {
+        while (!success) {
             try {
                 ChatGPTResponse chatGPTResponse = openAIService.requestGPT(listeningRequest);
                 String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
@@ -92,8 +93,8 @@ public class QuizCreationService {
                 return CompletableFuture.completedFuture(new ListeningQuizDto(listeningQuiz));
             } catch (Exception e) {
                 retries++;
-                e.printStackTrace();
                 if (retries >= maxRetries) {
+                    log.error("Quiz Create Error");
                     throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
                 }
             }

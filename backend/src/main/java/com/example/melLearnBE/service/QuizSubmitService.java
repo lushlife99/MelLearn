@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -29,9 +28,8 @@ public class QuizSubmitService {
     private final QuizListRepository quizListRepository;
     private final QuizSubmitRepository quizSubmitRepository;
 
-
     @Transactional
-    public CompletableFuture<ListeningSubmitDto> submitListeningQuiz(ListeningSubmitRequest submitRequest, Member member) {
+    public ListeningSubmitDto submitListeningQuiz(ListeningSubmitRequest submitRequest, Member member) {
         ListeningQuiz listeningQuiz = listeningQuizRepository.findByMusicIdAndLevel(submitRequest.getMusicId(), member.getLevel())
                 .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
 
@@ -62,11 +60,11 @@ public class QuizSubmitService {
                 .score((correctCount * 100) / answerList.size())
                 .build();
 
-        return CompletableFuture.completedFuture(new ListeningSubmitDto(listeningSubmitRepository.save(listeningSubmit)));
+        return new ListeningSubmitDto(listeningSubmitRepository.save(listeningSubmit));
     }
 
     @Transactional
-    public CompletableFuture<QuizSubmitDto> submitQuiz(QuizSubmitRequest submitRequest, Member member) {
+    public QuizSubmitDto submitQuiz(QuizSubmitRequest submitRequest, Member member) {
         QuizList quizList = quizListRepository.findByMusicIdAndQuizTypeAndLevel(submitRequest.getMusicId(), submitRequest.getQuizType(), member.getLevel())
                 .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
 
@@ -79,7 +77,7 @@ public class QuizSubmitService {
                 .score(score)
                 .build();
 
-        return CompletableFuture.completedFuture(new QuizSubmitDto(quizSubmitRepository.save(quizSubmit)));
+        return new QuizSubmitDto(quizSubmitRepository.save(quizSubmit));
     }
 
     private double calCorrectRate(QuizSubmitRequest submitRequest, QuizList quizList) {

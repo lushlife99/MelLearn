@@ -14,7 +14,6 @@ import com.example.melLearnBE.jwt.JwtTokenProvider;
 import com.example.melLearnBE.model.*;
 import com.example.melLearnBE.repository.ListeningQuizRepository;
 import com.example.melLearnBE.repository.QuizListRepository;
-import com.example.melLearnBE.repository.QuizRepository;
 import com.example.melLearnBE.repository.querydsl.SubmitJpaRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -28,7 +27,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -43,13 +41,6 @@ public class QuizService {
     private final QuizCreationService quizCreationService;
     private final QuizListRepository quizListRepository;
     private final ListeningQuizRepository listeningQuizRepository;
-    private static String delimiter = ":";
-
-
-    /**
-     * 동시성 고려해서 코드 업데이트 해야함.
-     * 아직 안했음.
-     */
 
     public Page getSubmitList(QuizType quizType, int pageNo, HttpServletRequest request) {
         Member member = jwtTokenProvider.getMember(request)
@@ -96,7 +87,6 @@ public class QuizService {
         String redisKey = getRedisKey(quizRequest, member);
         if (optionalQuiz.isEmpty()) {
             if (redisTemplate.hasKey(redisKey)) {
-                System.out.println(redisTemplate.opsForValue().get(redisKey));
                 throw new CustomException(ErrorCode.CREATING_OTHER_REQUEST);
             } else {
                 redisTemplate.opsForValue().set(redisKey, "true", 1, TimeUnit.MINUTES);
@@ -110,16 +100,17 @@ public class QuizService {
     }
 
     @Async
+    @Transactional
     public CompletableFuture<QuizSubmitDto> submit(QuizSubmitRequest submitRequest, HttpServletRequest request) {
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-        return quizSubmitService.submitQuiz(submitRequest, member);
+        return CompletableFuture.completedFuture(quizSubmitService.submitQuiz(submitRequest, member));
     }
 
     @Async
+    @Transactional
     public CompletableFuture<ListeningSubmitDto> listeningSubmit(ListeningSubmitRequest submitRequest, HttpServletRequest request) {
-
         Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-        return quizSubmitService.submitListeningQuiz(submitRequest, member);
+        return CompletableFuture.completedFuture(quizSubmitService.submitListeningQuiz(submitRequest, member));
     }
 
     public Optional fetchQuiz(QuizRequest quizRequest, Member member) {
@@ -131,7 +122,11 @@ public class QuizService {
     }
 
     private String getRedisKey(QuizRequest quizRequest, Member member) {
-        return quizRequest.getMusicId() + delimiter + quizRequest.getQuizType() + delimiter + member.getLevel();
+        return String.join(":",
+                quizRequest.getMusicId(),
+                quizRequest.getQuizType().toString(),
+                String.valueOf(member.getLevel())
+        );
     }
 
     private double calCorrectRate(QuizSubmitRequest submitRequest, QuizList quizList) {
