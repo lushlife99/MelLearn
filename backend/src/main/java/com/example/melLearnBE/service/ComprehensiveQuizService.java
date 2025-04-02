@@ -7,9 +7,8 @@ import com.example.melLearnBE.dto.response.ComprehensiveQuizSubmitDto;
 import com.example.melLearnBE.enums.QuizType;
 import com.example.melLearnBE.error.CustomException;
 import com.example.melLearnBE.error.ErrorCode;
-import com.example.melLearnBE.jwt.JwtTokenProvider;
 import com.example.melLearnBE.model.Member;
-import jakarta.servlet.http.HttpServletRequest;
+import com.example.melLearnBE.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,46 +28,45 @@ public class ComprehensiveQuizService {
 
     private final QuizService quizService;
     private final SpeakingService speakingService;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final MemberRepository memberRepository;
 
-    public ComprehensiveQuizSubmitDto submit(ComprehensiveQuizSubmitRequest quizSubmitRequest, MultipartFile speakingSubmitFile, HttpServletRequest request) throws ExecutionException, InterruptedException {
+    public ComprehensiveQuizSubmitDto submit(ComprehensiveQuizSubmitRequest quizSubmitRequest, MultipartFile speakingSubmitFile, String memberId) throws ExecutionException, InterruptedException {
         try {
-            Member member = jwtTokenProvider.getMember(request)
-                    .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
+            Member member = findMember(memberId);
 
             // 모든 비동기 작업을 병렬로 실행
             CompletableFuture<SpeakingSubmitDto> speakingSubmit = speakingService.submit(
                     SpeakingSubmitRequest.builder()
                             .file(speakingSubmitFile)
                             .lyricList(quizSubmitRequest.getLrcLyricList())
-                            .build(), quizSubmitRequest.getMusicId(), request);
+                            .build(), quizSubmitRequest.getMusicId(), memberId);
 
             CompletableFuture<QuizSubmitDto> grammarSubmit = quizService.submit(
                     QuizSubmitRequest.builder()
                             .quizType(QuizType.GRAMMAR)
                             .answers(quizSubmitRequest.getGrammarSubmit())
                             .musicId(quizSubmitRequest.getMusicId())
-                            .build(), request);
+                            .build(), memberId);
 
             CompletableFuture<QuizSubmitDto> vocaSubmit = quizService.submit(
                     QuizSubmitRequest.builder()
                             .quizType(QuizType.VOCABULARY)
                             .answers(quizSubmitRequest.getVocabularySubmit())
                             .musicId(quizSubmitRequest.getMusicId())
-                            .build(), request);
+                            .build(), memberId);
 
             CompletableFuture<QuizSubmitDto> readingSubmit = quizService.submit(
                     QuizSubmitRequest.builder()
                             .quizType(QuizType.READING)
                             .answers(quizSubmitRequest.getReadingSubmit())
                             .musicId(quizSubmitRequest.getMusicId())
-                            .build(), request);
+                            .build(), memberId);
 
             CompletableFuture<ListeningSubmitDto> listeningSubmit = quizService.listeningSubmit(
                     ListeningSubmitRequest.builder()
                             .submitWordList(quizSubmitRequest.getListeningSubmit())
                             .musicId(quizSubmitRequest.getMusicId())
-                            .build(), request);
+                            .build(), memberId);
 
             // 모든 작업이 완료될 때까지 대기
             CompletableFuture.allOf(speakingSubmit, grammarSubmit, vocaSubmit, readingSubmit, listeningSubmit)
@@ -101,7 +99,7 @@ public class ComprehensiveQuizService {
         }
     }
 
-    public ComprehensiveQuizDto get(QuizRequest quizRequest, HttpServletRequest request) throws InterruptedException, ExecutionException {
+    public ComprehensiveQuizDto get(QuizRequest quizRequest, String memberId) throws InterruptedException, ExecutionException {
         try {
             // 모든 비동기 작업을 병렬로 실행
             CompletableFuture<ListeningQuizDto> listeningQuiz = quizService.getListeningQuiz(
@@ -109,28 +107,28 @@ public class ComprehensiveQuizService {
                             .quizType(QuizType.LISTENING)
                             .lyric(quizRequest.getLyric())
                             .musicId(quizRequest.getMusicId())
-                            .build(), request);
+                            .build(), memberId);
 
             CompletableFuture<QuizListDto> readingQuiz = quizService.getQuizList(
                     QuizRequest.builder()
                             .quizType(QuizType.READING)
                             .lyric(quizRequest.getLyric())
                             .musicId(quizRequest.getMusicId())
-                            .build(), request);
+                            .build(), memberId);
 
             CompletableFuture<QuizListDto> vocaQuiz = quizService.getQuizList(
                     QuizRequest.builder()
                             .quizType(QuizType.VOCABULARY)
                             .lyric(quizRequest.getLyric())
                             .musicId(quizRequest.getMusicId())
-                            .build(), request);
+                            .build(), memberId);
 
             CompletableFuture<QuizListDto> grammarQuiz = quizService.getQuizList(
                     QuizRequest.builder()
                             .quizType(QuizType.GRAMMAR)
                             .lyric(quizRequest.getLyric())
                             .musicId(quizRequest.getMusicId())
-                            .build(), request);
+                            .build(), memberId);
 
             // 모든 작업이 완료될 때까지 대기
             CompletableFuture.allOf(listeningQuiz, readingQuiz, vocaQuiz, grammarQuiz)
@@ -151,5 +149,13 @@ public class ComprehensiveQuizService {
             log.error("Error in comprehensive get: {}", e.getMessage());
             throw e;
         }
+    }
+
+    private Member findMember(String memberId) {
+        return memberRepository.findByMemberId(memberId)
+                .orElseThrow(() -> {
+                    log.error("Member not found with id: {}", memberId);
+                    return new CustomException(ErrorCode.BAD_REQUEST);
+                });
     }
 }

@@ -8,13 +8,12 @@ import com.example.melLearnBE.dto.response.openAI.WhisperSegment;
 import com.example.melLearnBE.dto.response.openAI.WhisperTranscriptionResponse;
 import com.example.melLearnBE.error.CustomException;
 import com.example.melLearnBE.error.ErrorCode;
-import com.example.melLearnBE.jwt.JwtTokenProvider;
 import com.example.melLearnBE.model.SpeakingSubmit;
 import com.example.melLearnBE.model.Member;
 import com.example.melLearnBE.repository.SpeakingSubmitRepository;
+import com.example.melLearnBE.repository.MemberRepository;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.bramp.ffmpeg.FFmpeg;
@@ -25,7 +24,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.sound.sampled.*;
@@ -34,6 +32,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,124 +40,132 @@ import java.util.concurrent.CompletableFuture;
 public class SpeakingService {
 
     private final SpeakingSubmitRepository speakingSubmitRepository;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final MemberRepository memberRepository;
     private final SupportService supportService;
     private final OpenAIService openAIService;
+    
     @Value("${ffmpeg.mpeg}")
     private String ffmpegPath;
+    
     @Value("${ffmpeg.probe}")
     private String ffprobePath;
-
-
+    
     private static final String AUDIO_PATH = "." + File.separator + "audio" + File.separator;
 
     @Async
-    public CompletableFuture<SpeakingSubmitDto> submit(SpeakingSubmitRequest submitRequest, String musicId, HttpServletRequest request) {
+    public CompletableFuture<SpeakingSubmitDto> submit(SpeakingSubmitRequest submitRequest, String musicId, String memberId) {
+        Member member = findMember(memberId);
+        MusicDto musicDto = validateSpeakingQuiz(musicId, submitRequest.getLyricList(), memberId);
+        
+        File preprocessedAudio = audioPreprocess(submitRequest);
+        WhisperTranscriptionResponse transcription = openAIService.createTranscription(preprocessedAudio, member.getLangType().getIso639Value());
+        
+        convertGradableFormat(submitRequest.getLyricList(), transcription);
+        SpeakingSubmitDto result = grade(musicId, submitRequest.getLyricList(), member, transcription);
+        
+        return CompletableFuture.completedFuture(result);
+    }
 
-        List<LrcLyric> lyricList = submitRequest.getLyricList();
-        Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-        MusicDto musicDto = supportService.getSupportQuizCategory(musicId, lyricList, request);
-        if (!musicDto.isSpeaking())
+    private Member findMember(String memberId) {
+        return memberRepository.findByMemberId(memberId)
+                .orElseThrow(() -> {
+                    log.error("Member not found with id: {}", memberId);
+                    return new CustomException(ErrorCode.BAD_REQUEST);
+                });
+    }
+
+    private MusicDto validateSpeakingQuiz(String musicId, List<LrcLyric> lyricList, String memberId) {
+        MusicDto musicDto = supportService.getSupportQuizCategory(musicId, lyricList, memberId);
+        if (!musicDto.isSpeaking()) {
             throw new CustomException(ErrorCode.UN_SUPPORTED_QUIZ_LANG);
-
-        // 1. 전처리 1 - audio 파일을 lrc파일에 맞게 분할하고 사이에 temp audio 삽입
-        File preprocessingAudio = audioPreprocess(submitRequest);
-
-        // 2. whisper 전송
-        WhisperTranscriptionResponse transcription = openAIService.createTranscription(preprocessingAudio, member.getLangType().getIso639Value());
-
-
-        // 3. 후처리 2 - 세그먼트와 lyric 줄 싱크 맞추기, 대소문자 변경, 특수문자 제거
-        //List<WhisperSegment> whisperSegments = synchronizeLyricsAndSegments(lyricList, transcription);
-        convertGradableFormat(lyricList, transcription);
-
-        // 4. 채점
-        SpeakingSubmitDto answerSpeaking = grade(musicId, lyricList, member, transcription);
-
-        // 5. 랭킹
-        return CompletableFuture.completedFuture(answerSpeaking);
+        }
+        return musicDto;
     }
 
     private void convertGradableFormat(List<LrcLyric> answerLyrics, WhisperTranscriptionResponse transcription) {
-        convertLyricToLowerCase(answerLyrics, transcription.getSegments());
-        removeSpecialChar(answerLyrics, transcription.getSegments());
+        processLyrics(answerLyrics, transcription.getSegments(), this::convertLyricToLowerCase);
+        processLyrics(answerLyrics, transcription.getSegments(), this::removeSpecialChar);
     }
 
-    private void removeSpecialChar(List<LrcLyric> answerLyrics, List<WhisperSegment> submitLyrics) {
-        for (int i = 0; i < answerLyrics.size(); i++) {
-            LrcLyric lrcLyricLine = answerLyrics.get(i);
-            lrcLyricLine.setText(lrcLyricLine.getText().replaceAll("[^a-zA-Z0-9\\s]", ""));
-        }
-
-        for (int i = 0; i < submitLyrics.size(); i++) {
-            WhisperSegment submitLyricLine = submitLyrics.get(i);
-            submitLyricLine.setText(submitLyricLine.getText().replaceAll("[^a-zA-Z0-9\\s]", ""));
-        }
+    private void processLyrics(List<LrcLyric> answerLyrics, List<WhisperSegment> submitLyrics, LyricsProcessor processor) {
+        answerLyrics.forEach(lyric -> processor.process(lyric.getText()));
+        submitLyrics.forEach(segment -> processor.process(segment.getText()));
     }
 
-    private void convertLyricToLowerCase(List<LrcLyric> answerLyrics, List<WhisperSegment> submitLyrics) {
+    @FunctionalInterface
+    private interface LyricsProcessor {
+        void process(String text);
+    }
 
-        for (int i = 0; i < answerLyrics.size(); i++) {
-            LrcLyric lrcLyricLine = answerLyrics.get(i);
+    private void removeSpecialChar(String text) {
+        text = text.replaceAll("[^a-zA-Z0-9\\s]", "");
+    }
 
-            lrcLyricLine.setText(lrcLyricLine.getText().toLowerCase());
-        }
-
-        for (int i = 0; i < submitLyrics.size(); i++) {
-            WhisperSegment submitLyricLine = submitLyrics.get(i);
-            submitLyricLine.setText(submitLyricLine.getText().toLowerCase());
-        }
+    private void convertLyricToLowerCase(String text) {
+        text = text.toLowerCase();
     }
 
     public SpeakingSubmitDto grade(String musicId, List<LrcLyric> answerLyrics, Member member, WhisperTranscriptionResponse transcriptionResponse) {
         List<WhisperSegment> submitLyrics = transcriptionResponse.getSegments();
+        GradingResult gradingResult = calculateGradingResult(answerLyrics, submitLyrics);
+        
+        SpeakingSubmit speakingSubmit = createSpeakingSubmit(musicId, member, transcriptionResponse, gradingResult);
+        speakingSubmitRepository.save(speakingSubmit);
+        
+        return new SpeakingSubmitDto(speakingSubmit);
+    }
+
+    private GradingResult calculateGradingResult(List<LrcLyric> answerLyrics, List<WhisperSegment> submitLyrics) {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit");
+        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+        
         double allTokenSize = 0;
         double wrongTokenSize = 0;
         StringBuilder answerSheet = new StringBuilder();
 
         for (int i = 0; i < answerLyrics.size(); i++) {
             LrcLyric lrcLyricLine = answerLyrics.get(i);
-            StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-            CoreDocument doc = new CoreDocument(lrcLyricLine.getText());
-            pipeline.annotate(doc);
-            Set<String> allTokens = new HashSet<>();
-            doc.tokens().forEach(token -> allTokens.add(token.word()));
+            Set<String> allTokens = getTokens(pipeline, lrcLyricLine.getText());
             allTokenSize += allTokens.size();
-            String lyricLineText = lrcLyricLine.getText();
-
-            if (i < submitLyrics.size()) {
-
-                WhisperSegment submitLyricLine = submitLyrics.get(i);
-                List<String> wrongWords = gradeByLine(lrcLyricLine.getText(), submitLyricLine.getText());
-                wrongTokenSize += wrongWords.size();
-
-                for (String wrongWord : wrongWords) {
-                    lyricLineText = lyricLineText.replaceAll("(?i)\\b" + wrongWord + "\\b", "__" + wrongWord);
-                }
-                answerSheet.append(lyricLineText + "\n");
-
-            } else {
-                answerSheet.append(lyricLineText.replaceAll("\\b(\\w+)", "__$1"));
-            }
-
-            // 사전에 등재되어 있지 않은 단어나 수사, 감탄사 로직 추가. (아직 사전 api 허가 못받음)
-
+            
+            String lyricLineText = processLyricLine(lrcLyricLine, submitLyrics, i, pipeline);
+            answerSheet.append(lyricLineText).append("\n");
         }
 
-        SpeakingSubmit speakingSubmit = SpeakingSubmit.builder()
-                .musicId(musicId)
-                .markedText(answerSheet.toString())
-                .submit(transcriptionResponse.getText())
-                .score(100.0 - (wrongTokenSize / allTokenSize * 100.0))
-                .member(member)
-                .build();
+        return new GradingResult(allTokenSize, wrongTokenSize, answerSheet.toString());
+    }
 
-        speakingSubmitRepository.save(speakingSubmit);
+    private Set<String> getTokens(StanfordCoreNLP pipeline, String text) {
+        CoreDocument doc = new CoreDocument(text);
+        pipeline.annotate(doc);
+        return doc.tokens().stream()
+                .map(token -> token.word())
+                .collect(Collectors.toSet());
+    }
 
+    private String processLyricLine(LrcLyric lrcLyricLine, List<WhisperSegment> submitLyrics, int index, StanfordCoreNLP pipeline) {
+        String lyricLineText = lrcLyricLine.getText();
+        
+        if (index < submitLyrics.size()) {
+            WhisperSegment submitLyricLine = submitLyrics.get(index);
+            List<String> wrongWords = gradeByLine(lrcLyricLine.getText(), submitLyricLine.getText());
+            return markWrongWords(lyricLineText, wrongWords);
+        }
+        
+        return markAllWords(lyricLineText);
+    }
 
-        return new SpeakingSubmitDto(speakingSubmit);
+    private String markWrongWords(String text, List<String> wrongWords) {
+        String result = text;
+        for (String wrongWord : wrongWords) {
+            result = result.replaceAll("(?i)\\b" + wrongWord + "\\b", "__" + wrongWord);
+        }
+        return result;
+    }
+
+    private String markAllWords(String text) {
+        return text.replaceAll("\\b(\\w+)", "__$1");
     }
 
     private List<String> gradeByLine(String answerTextLine, String submitTextLine) {
@@ -166,27 +173,18 @@ public class SpeakingService {
         props.setProperty("annotators", "tokenize, ssplit");
         StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 
-        CoreDocument doc1 = new CoreDocument(answerTextLine);
-        CoreDocument doc2 = new CoreDocument(submitTextLine);
-        pipeline.annotate(doc1);
-        pipeline.annotate(doc2);
-        Set<String> words1 = new HashSet<>();
-        Set<String> words2 = new HashSet<>();
+        Set<String> answerWords = getTokens(pipeline, answerTextLine);
+        Set<String> submitWords = getTokens(pipeline, submitTextLine);
 
-        doc1.tokens().forEach(token -> words1.add(token.word()));
-        doc2.tokens().forEach(token -> words2.add(token.word()));
-
-        Set<String> difference = new HashSet<>(words1);
-        difference.removeAll(words2);
-        return difference.stream().toList();
+        Set<String> difference = new HashSet<>(answerWords);
+        difference.removeAll(submitWords);
+        return new ArrayList<>(difference);
     }
-
 
     private File audioPreprocess(SpeakingSubmitRequest submitRequest) {
         MultipartFile multipartFile = submitRequest.getFile();
         List<LrcLyric> lrcLyrics = submitRequest.getLyricList();
         Path directory = Paths.get(AUDIO_PATH).toAbsolutePath();
-
 
         try {
             File originalFile = new File(directory + File.separator + UUID.randomUUID());
@@ -204,7 +202,6 @@ public class SpeakingService {
                     .setFormat("wav")
                     .done();
 
-
             FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
             executor.createJob(builder).run();
 
@@ -215,7 +212,6 @@ public class SpeakingService {
             } catch (Exception e) {
                 throw new CustomException(ErrorCode.AUDIO_PRE_PROCESSING_ERROR);
             }
-
 
             List<AudioInputStream> audioParts = new ArrayList<>();
             File silenceFile = new File(directory + File.separator + "silence.wav");
@@ -238,7 +234,7 @@ public class SpeakingService {
             }
 
             // 오디오 스트림 병합
-            AudioInputStream concatenatedStream = new SequenceAudioInputStream(audioFormat, Arrays.stream(audioParts.stream().toArray(AudioInputStream[]::new)).toList());
+            AudioInputStream concatenatedStream = createSequenceAudioInputStream(audioFormat, audioParts);
 
             // 최종 오디오 파일 저장
             File preProcessingAudio = new File(directory + File.separator + "pre" + UUID.randomUUID() + ".wav");
@@ -250,30 +246,25 @@ public class SpeakingService {
             throw new CustomException(ErrorCode.AUDIO_PRE_PROCESSING_ERROR);
         }
     }
-    class SequenceAudioInputStream extends AudioInputStream {
-        public SequenceAudioInputStream(AudioFormat audioFormat, List<AudioInputStream> audioInputStreams) {
-            super(new SequenceInputStream(Collections.enumeration(getInputStreams(audioInputStreams))), audioFormat, getFrameLength(audioInputStreams));
-        }
 
-        private static Vector<InputStream> getInputStreams(List<AudioInputStream> streams) {
-            Vector<InputStream> inputStreams = new Vector<>();
-            for (AudioInputStream stream : streams) {
-                inputStreams.add(stream);
-            }
-            return inputStreams;
+    private AudioInputStream createSequenceAudioInputStream(AudioFormat audioFormat, List<AudioInputStream> audioInputStreams) {
+        Vector<InputStream> inputStreams = new Vector<>();
+        for (AudioInputStream stream : audioInputStreams) {
+            inputStreams.add(stream);
         }
-
-        private static long getFrameLength(List<AudioInputStream> streams) {
-            long totalLength = 0;
-            for (AudioInputStream stream : streams) {
-                long frameLength = stream.getFrameLength();
-                if (frameLength != AudioSystem.NOT_SPECIFIED) {
-                    totalLength += frameLength;
-                } else {
-                    return AudioSystem.NOT_SPECIFIED;
-                }
-            }
-            return totalLength;
-        }
+        return new AudioInputStream(new SequenceInputStream(Collections.enumeration(inputStreams)), audioFormat, -1);
     }
+
+    private SpeakingSubmit createSpeakingSubmit(String musicId, Member member, 
+            WhisperTranscriptionResponse transcriptionResponse, GradingResult gradingResult) {
+        return SpeakingSubmit.builder()
+                .musicId(musicId)
+                .member(member)
+                .markedText(gradingResult.answerSheet())
+                .submit(transcriptionResponse.getText())
+                .score(100.0 - (gradingResult.wrongTokenSize() / gradingResult.allTokenSize() * 100.0))
+                .build();
+    }
+
+    private record GradingResult(double allTokenSize, double wrongTokenSize, String answerSheet) {}
 }

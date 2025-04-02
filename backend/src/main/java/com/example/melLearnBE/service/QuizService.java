@@ -10,12 +10,11 @@ import com.example.melLearnBE.dto.request.QuizSubmitRequest;
 import com.example.melLearnBE.enums.QuizType;
 import com.example.melLearnBE.error.CustomException;
 import com.example.melLearnBE.error.ErrorCode;
-import com.example.melLearnBE.jwt.JwtTokenProvider;
 import com.example.melLearnBE.model.*;
 import com.example.melLearnBE.repository.ListeningQuizRepository;
 import com.example.melLearnBE.repository.QuizListRepository;
 import com.example.melLearnBE.repository.querydsl.SubmitJpaRepository;
-import jakarta.servlet.http.HttpServletRequest;
+import com.example.melLearnBE.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,15 +35,14 @@ public class QuizService {
 
     private final QuizSubmitService quizSubmitService;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final JwtTokenProvider jwtTokenProvider;
     private final SubmitJpaRepository submitJpaRepository;
     private final QuizCreationService quizCreationService;
     private final QuizListRepository quizListRepository;
     private final ListeningQuizRepository listeningQuizRepository;
+    private final MemberRepository memberRepository;
 
-    public Page getSubmitList(QuizType quizType, int pageNo, HttpServletRequest request) {
-        Member member = jwtTokenProvider.getMember(request)
-                .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
+    public Page getSubmitList(QuizType quizType, int pageNo, String memberId) {
+        Member member = findMember(memberId);
 
         if (quizType.equals(QuizType.LISTENING)) {
             return submitJpaRepository.findListeningSubmitWithPaging(member.getId(), pageNo, 10);
@@ -59,10 +57,9 @@ public class QuizService {
 
     @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<QuizListDto> getQuizList(QuizRequest quizRequest, HttpServletRequest request) {
+    public CompletableFuture<QuizListDto> getQuizList(QuizRequest quizRequest, String memberId) {
         try {
-            Member member = jwtTokenProvider.getMember(request)
-                    .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
+            Member member = findMember(memberId);
             Optional optionalQuiz = fetchQuiz(quizRequest, member);
             String redisKey = getRedisKey(quizRequest, member);
 
@@ -90,10 +87,9 @@ public class QuizService {
 
     @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<ListeningQuizDto> getListeningQuiz(QuizRequest quizRequest, HttpServletRequest request) {
+    public CompletableFuture<ListeningQuizDto> getListeningQuiz(QuizRequest quizRequest, String memberId) {
         try {
-            Member member = jwtTokenProvider.getMember(request)
-                    .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
+            Member member = findMember(memberId);
             Optional optionalQuiz = fetchQuiz(quizRequest, member);
             String redisKey = getRedisKey(quizRequest, member);
 
@@ -121,10 +117,9 @@ public class QuizService {
 
     @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<QuizSubmitDto> submit(QuizSubmitRequest submitRequest, HttpServletRequest request) {
+    public CompletableFuture<QuizSubmitDto> submit(QuizSubmitRequest submitRequest, String memberId) {
         try {
-            Member member = jwtTokenProvider.getMember(request)
-                    .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
+            Member member = findMember(memberId);
             return CompletableFuture.completedFuture(quizSubmitService.submitQuiz(submitRequest, member));
         } catch (Exception e) {
             log.error("Error in submit: {}", e.getMessage());
@@ -134,15 +129,22 @@ public class QuizService {
 
     @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<ListeningSubmitDto> listeningSubmit(ListeningSubmitRequest submitRequest, HttpServletRequest request) {
+    public CompletableFuture<ListeningSubmitDto> listeningSubmit(ListeningSubmitRequest submitRequest, String memberId) {
         try {
-            Member member = jwtTokenProvider.getMember(request)
-                    .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
+            Member member = findMember(memberId);
             return CompletableFuture.completedFuture(quizSubmitService.submitListeningQuiz(submitRequest, member));
         } catch (Exception e) {
             log.error("Error in listeningSubmit: {}", e.getMessage());
             return CompletableFuture.failedFuture(e);
         }
+    }
+
+    private Member findMember(String memberId) {
+        return memberRepository.findByMemberId(memberId)
+                .orElseThrow(() -> {
+                    log.error("Member not found with id: {}", memberId);
+                    return new CustomException(ErrorCode.BAD_REQUEST);
+                });
     }
 
     public Optional fetchQuiz(QuizRequest quizRequest, Member member) {
