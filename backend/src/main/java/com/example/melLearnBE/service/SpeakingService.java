@@ -43,6 +43,7 @@ public class SpeakingService {
     private final MemberRepository memberRepository;
     private final SupportService supportService;
     private final OpenAIService openAIService;
+    private final StanfordCoreNLP stanfordCoreNLP;
     
     @Value("${ffmpeg.mpeg}")
     private String ffmpegPath;
@@ -116,35 +117,41 @@ public class SpeakingService {
     }
 
     private GradingResult calculateGradingResult(List<LrcLyric> answerLyrics, List<WhisperSegment> submitLyrics) {
-        Properties props = new Properties();
-        props.setProperty("annotators", "tokenize, ssplit");
-        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-        
         double allTokenSize = 0;
         double wrongTokenSize = 0;
         StringBuilder answerSheet = new StringBuilder();
 
-        for (int i = 0; i < answerLyrics.size(); i++) {
-            LrcLyric lrcLyricLine = answerLyrics.get(i);
-            Set<String> allTokens = getTokens(pipeline, lrcLyricLine.getText());
-            allTokenSize += allTokens.size();
-            
-            String lyricLineText = processLyricLine(lrcLyricLine, submitLyrics, i, pipeline);
-            answerSheet.append(lyricLineText).append("\n");
+        try {
+            for (int i = 0; i < answerLyrics.size(); i++) {
+                LrcLyric lrcLyricLine = answerLyrics.get(i);
+                Set<String> allTokens = getTokens(lrcLyricLine.getText());
+                allTokenSize += allTokens.size();
+                
+                String lyricLineText = processLyricLine(lrcLyricLine, submitLyrics, i);
+                answerSheet.append(lyricLineText).append("\n");
+            }
+        } catch (Exception e) {
+            log.error("Error in calculateGradingResult: ", e);
+            throw new CustomException(ErrorCode.SPEAKING_GRADING_ERROR);
         }
 
         return new GradingResult(allTokenSize, wrongTokenSize, answerSheet.toString());
     }
 
-    private Set<String> getTokens(StanfordCoreNLP pipeline, String text) {
-        CoreDocument doc = new CoreDocument(text);
-        pipeline.annotate(doc);
-        return doc.tokens().stream()
-                .map(token -> token.word())
-                .collect(Collectors.toSet());
+    private Set<String> getTokens(String text) {
+        try {
+            CoreDocument doc = new CoreDocument(text);
+            stanfordCoreNLP.annotate(doc);
+            return doc.tokens().stream()
+                    .map(token -> token.word())
+                    .collect(Collectors.toSet());
+        } catch (Exception e) {
+            log.error("Error in getTokens: ", e);
+            throw new CustomException(ErrorCode.SPEAKING_GRADING_ERROR);
+        }
     }
 
-    private String processLyricLine(LrcLyric lrcLyricLine, List<WhisperSegment> submitLyrics, int index, StanfordCoreNLP pipeline) {
+    private String processLyricLine(LrcLyric lrcLyricLine, List<WhisperSegment> submitLyrics, int index) {
         String lyricLineText = lrcLyricLine.getText();
         
         if (index < submitLyrics.size()) {
@@ -169,16 +176,17 @@ public class SpeakingService {
     }
 
     private List<String> gradeByLine(String answerTextLine, String submitTextLine) {
-        Properties props = new Properties();
-        props.setProperty("annotators", "tokenize, ssplit");
-        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+        try {
+            Set<String> answerWords = getTokens(answerTextLine);
+            Set<String> submitWords = getTokens(submitTextLine);
 
-        Set<String> answerWords = getTokens(pipeline, answerTextLine);
-        Set<String> submitWords = getTokens(pipeline, submitTextLine);
-
-        Set<String> difference = new HashSet<>(answerWords);
-        difference.removeAll(submitWords);
-        return new ArrayList<>(difference);
+            Set<String> difference = new HashSet<>(answerWords);
+            difference.removeAll(submitWords);
+            return new ArrayList<>(difference);
+        } catch (Exception e) {
+            log.error("Error in gradeByLine: ", e);
+            throw new CustomException(ErrorCode.SPEAKING_GRADING_ERROR);
+        }
     }
 
     private File audioPreprocess(SpeakingSubmitRequest submitRequest) {
