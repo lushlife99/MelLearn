@@ -93,7 +93,17 @@ public class QuizCreationService {
         String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
         List<ListeningAnswer> answerContext = parseListeningAnswers(jsonContent);
         
-        ListeningQuiz listeningQuiz = createListeningQuiz(quizRequest, member.getLevel(), answerContext);
+        List<String> answerList = answerContext.stream()
+                .map(ListeningAnswer::getAnswerWord)
+                .toList();
+        
+        ListeningQuiz listeningQuiz = ListeningQuiz.create(
+                quizRequest.getLyric(),
+                quizRequest.getMusicId(),
+                member.getLevel(),
+                answerList
+        );
+        
         listeningQuizRepository.save(listeningQuiz);
         
         return new ListeningQuizDto(listeningQuiz);
@@ -105,17 +115,6 @@ public class QuizCreationService {
         
         Type listType = new TypeToken<List<ListeningAnswer>>() {}.getType();
         return gson.fromJson(probListJsonArray, listType);
-    }
-
-    private ListeningQuiz createListeningQuiz(QuizRequest quizRequest, LearningLevel level, List<ListeningAnswer> answerContext) {
-        return ListeningQuiz.builder()
-                .blankedText(quizRequest.getLyric())
-                .musicId(quizRequest.getMusicId())
-                .level(level)
-                .answerList(answerContext.stream()
-                        .map(ListeningAnswer::getAnswerWord)
-                        .toList())
-                .build();
     }
 
     private String getPrompt(QuizType quizType, Member member) {
@@ -180,8 +179,14 @@ public class QuizCreationService {
         String jsonContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
         List<Quiz> quizzes = parseQuizzes(jsonContent);
         
-        QuizList quizList = createAndSaveQuizList(quizzes, quizRequest, member);
-        return new QuizListDto(quizList);
+        QuizList quizList = QuizList.create(
+                quizRequest.getQuizType(),
+                quizzes,
+                member.getLevel(),
+                quizRequest.getMusicId()
+        );
+        
+        return new QuizListDto(quizListRepository.save(quizList));
     }
 
     private ChatGPTResponse getChatGPTResponse(ChatRequest chatRequest, QuizRequest quizRequest, Member member) {
@@ -198,16 +203,5 @@ public class QuizCreationService {
         
         Type listType = new TypeToken<List<Quiz>>() {}.getType();
         return gson.fromJson(probListJsonArray, listType);
-    }
-
-    private QuizList createAndSaveQuizList(List<Quiz> quizzes, QuizRequest quizRequest, Member member) {
-        QuizList quizList = QuizList.builder()
-                .quizType(quizRequest.getQuizType())
-                .quizzes(quizzes)
-                .level(member.getLevel())
-                .musicId(quizRequest.getMusicId())
-                .build();
-        
-        return quizListRepository.save(quizList);
     }
 }

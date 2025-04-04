@@ -110,7 +110,14 @@ public class SpeakingService {
         List<WhisperSegment> submitLyrics = transcriptionResponse.getSegments();
         GradingResult gradingResult = calculateGradingResult(answerLyrics, submitLyrics);
         
-        SpeakingSubmit speakingSubmit = createSpeakingSubmit(musicId, member, transcriptionResponse, gradingResult);
+        SpeakingSubmit speakingSubmit = SpeakingSubmit.create(
+            musicId,
+            member,
+            gradingResult.answerSheet(),
+            transcriptionResponse.getText(),
+            100.0 - (gradingResult.wrongTokenSize() / gradingResult.allTokenSize() * 100.0)
+        );
+        
         speakingSubmitRepository.save(speakingSubmit);
         
         return new SpeakingSubmitDto(speakingSubmit);
@@ -261,17 +268,6 @@ public class SpeakingService {
             inputStreams.add(stream);
         }
         return new AudioInputStream(new SequenceInputStream(Collections.enumeration(inputStreams)), audioFormat, -1);
-    }
-
-    private SpeakingSubmit createSpeakingSubmit(String musicId, Member member, 
-            WhisperTranscriptionResponse transcriptionResponse, GradingResult gradingResult) {
-        return SpeakingSubmit.builder()
-                .musicId(musicId)
-                .member(member)
-                .markedText(gradingResult.answerSheet())
-                .submit(transcriptionResponse.getText())
-                .score(100.0 - (gradingResult.wrongTokenSize() / gradingResult.allTokenSize() * 100.0))
-                .build();
     }
 
     private record GradingResult(double allTokenSize, double wrongTokenSize, String answerSheet) {}

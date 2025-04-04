@@ -68,14 +68,14 @@ public class QuizService {
                     throw new CustomException(ErrorCode.CREATING_OTHER_REQUEST);
                 } else {
                     redisTemplate.opsForValue().set(redisKey, "true", 1, TimeUnit.MINUTES);
-                    CompletableFuture<QuizListDto> quizListFuture = quizCreationService.createQuizList(quizRequest, member);
-                    quizListFuture.whenComplete((result, exception) -> {
+                    CompletableFuture<QuizListDto> quizList = quizCreationService.createQuizList(quizRequest, member);
+                    quizList.whenComplete((result, exception) -> {
                         redisTemplate.delete(redisKey);
                         if (exception != null) {
                             log.error("Error creating quiz list: {}", exception.getMessage());
                         }
                     });
-                    return quizListFuture;
+                    return quizList;
                 }
             }
             return CompletableFuture.completedFuture(new QuizListDto((QuizList) optionalQuiz.get()));
@@ -147,7 +147,7 @@ public class QuizService {
                 });
     }
 
-    public Optional fetchQuiz(QuizRequest quizRequest, Member member) {
+    private Optional fetchQuiz(QuizRequest quizRequest, Member member) {
         if (quizRequest.getQuizType().equals(QuizType.LISTENING)) {
             return listeningQuizRepository.findByMusicIdAndLevel(quizRequest.getMusicId(), member.getLevel());
         } else {
@@ -156,27 +156,25 @@ public class QuizService {
     }
 
     private String getRedisKey(QuizRequest quizRequest, Member member) {
-        return String.join(":",
-                quizRequest.getMusicId(),
-                quizRequest.getQuizType().toString(),
-                String.valueOf(member.getLevel())
-        );
+        return quizRequest.getQuizType() + ":" + quizRequest.getMusicId() + ":" + member.getLevel();
     }
 
     private double calCorrectRate(QuizSubmitRequest submitRequest, QuizList quizList) {
         List<Integer> submitAnswers = submitRequest.getAnswers();
         List<Quiz> quizzes = quizList.getQuizzes();
         int totalCorrectCount = 0;
+        
         for (int i = 0; i < 4; i++) {
             Quiz quiz = quizzes.get(i);
-            quiz.setSubmitCount(quiz.getSubmitCount() + 1);
+            quiz.incrementSubmitCount();
+            
             if (quiz.getAnswer() == submitAnswers.get(i)) {
-                quiz.setCorrectCount(quiz.getCorrectCount() + 1);
+                quiz.incrementCorrectCount();
                 totalCorrectCount++;
             }
         }
 
-        return totalCorrectCount * 100 / quizList.getQuizzes().size();
+        return totalCorrectCount * 100.0 / quizList.getQuizzes().size();
     }
 
 }

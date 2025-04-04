@@ -115,9 +115,9 @@ public class QuizSubmitService {
     }
 
     private void updateQuizStats(Quiz quiz, int submittedAnswer) {
-        quiz.setSubmitCount(quiz.getSubmitCount() + 1);
+        quiz.incrementSubmitCount();
         if (quiz.getAnswer() == submittedAnswer) {
-            quiz.setCorrectCount(quiz.getCorrectCount() + 1);
+            quiz.incrementCorrectCount();
         }
     }
 
@@ -126,7 +126,7 @@ public class QuizSubmitService {
                 .quizList(quizList)
                 .submitAnswerList(submitAnswers)
                 .member(member)
-                .score(score)
+                .score(Integer.parseInt(String.format("%.2f", score)))
                 .build();
     }
 
