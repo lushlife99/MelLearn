@@ -2,14 +2,12 @@ package com.example.melLearnBE.dto.model;
 
 import com.example.melLearnBE.model.SpeakingSubmit;
 import com.querydsl.core.annotations.QueryProjection;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
-
 
 @Data
 @NoArgsConstructor
@@ -29,6 +27,7 @@ public class SpeakingSubmitDto {
         this.submit = speakingSubmit.getSubmit();
         this.markedText = speakingSubmit.getMarkedText();
         this.score = speakingSubmit.getScore();
+        this.createdTime = speakingSubmit.getCreatedTime();
     }
 
     @QueryProjection

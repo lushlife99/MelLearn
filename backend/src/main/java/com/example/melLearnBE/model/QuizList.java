@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -28,9 +29,9 @@ public class QuizList {
     @Enumerated(value = EnumType.ORDINAL)
     private LearningLevel level;
     @OneToMany(mappedBy = "quizList", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Quiz> quizzes;
+    private List<Quiz> quizzes = new ArrayList<>();
     @OneToMany(mappedBy = "quizList", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<QuizSubmit> submitList;
+    private List<QuizSubmit> submitList = new ArrayList<>();
     private String musicId;
     @CreationTimestamp
     private LocalDateTime createdTime;

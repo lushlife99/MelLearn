@@ -60,7 +60,7 @@ public class QuizService {
     public CompletableFuture<QuizListDto> getQuizList(QuizRequest quizRequest, String memberId) {
         try {
             Member member = findMember(memberId);
-            Optional optionalQuiz = fetchQuiz(quizRequest, member);
+            Optional<QuizList> optionalQuiz = fetchQuiz(quizRequest, member);
             String redisKey = getRedisKey(quizRequest, member);
 
             if (optionalQuiz.isEmpty()) {
@@ -78,7 +78,7 @@ public class QuizService {
                     return quizListFuture;
                 }
             }
-            return CompletableFuture.completedFuture(new QuizListDto((QuizList) optionalQuiz.get()));
+            return CompletableFuture.completedFuture(new QuizListDto(optionalQuiz.get()));
         } catch (Exception e) {
             log.error("Error in getQuizList: {}", e.getMessage());
             return CompletableFuture.failedFuture(e);
@@ -90,7 +90,7 @@ public class QuizService {
     public CompletableFuture<ListeningQuizDto> getListeningQuiz(QuizRequest quizRequest, String memberId) {
         try {
             Member member = findMember(memberId);
-            Optional optionalQuiz = fetchQuiz(quizRequest, member);
+            Optional<ListeningQuiz> optionalQuiz = fetchListeningQuiz(quizRequest, member);
             String redisKey = getRedisKey(quizRequest, member);
 
             if (optionalQuiz.isEmpty()) {
@@ -98,17 +98,17 @@ public class QuizService {
                     throw new CustomException(ErrorCode.CREATING_OTHER_REQUEST);
                 } else {
                     redisTemplate.opsForValue().set(redisKey, "true", 1, TimeUnit.MINUTES);
-                    CompletableFuture<ListeningQuizDto> listeningQuiz = quizCreationService.createListeningQuiz(quizRequest, member);
-                    listeningQuiz.whenComplete((result, exception) -> {
+                    CompletableFuture<ListeningQuizDto> listeningQuizFuture = quizCreationService.createListeningQuiz(quizRequest, member);
+                    listeningQuizFuture.whenComplete((result, exception) -> {
                         redisTemplate.delete(redisKey);
                         if (exception != null) {
                             log.error("Error creating listening quiz: {}", exception.getMessage());
                         }
                     });
-                    return listeningQuiz;
+                    return listeningQuizFuture;
                 }
             }
-            return CompletableFuture.completedFuture(new ListeningQuizDto((ListeningQuiz) optionalQuiz.get()));
+            return CompletableFuture.completedFuture(new ListeningQuizDto(optionalQuiz.get()));
         } catch (Exception e) {
             log.error("Error in getListeningQuiz: {}", e.getMessage());
             return CompletableFuture.failedFuture(e);
@@ -139,28 +139,43 @@ public class QuizService {
         }
     }
 
-    private Member findMember(String memberId) {
-        return memberRepository.findByMemberId(memberId)
-                .orElseThrow(() -> {
-                    log.error("Member not found with id: {}", memberId);
-                    return new CustomException(ErrorCode.BAD_REQUEST);
-                });
+    private Optional<QuizList> fetchQuiz(QuizRequest quizRequest, Member member) {
+        return quizListRepository.findByMusicIdAndQuizTypeAndLevel(
+                quizRequest.getMusicId(),
+                quizRequest.getQuizType(),
+                member.getLevel()
+        );
     }
 
-    public Optional fetchQuiz(QuizRequest quizRequest, Member member) {
-        if (quizRequest.getQuizType().equals(QuizType.LISTENING)) {
-            return listeningQuizRepository.findByMusicIdAndLevel(quizRequest.getMusicId(), member.getLevel());
-        } else {
-            return quizListRepository.findByMusicIdAndQuizTypeAndLevel(quizRequest.getMusicId(), quizRequest.getQuizType(), member.getLevel());
-        }
+    private Optional<ListeningQuiz> fetchListeningQuiz(QuizRequest quizRequest, Member member) {
+        return listeningQuizRepository.findByMusicIdAndLevel(
+                quizRequest.getMusicId(),
+                member.getLevel()
+        );
     }
 
     private String getRedisKey(QuizRequest quizRequest, Member member) {
-        return String.join(":",
+        return String.format("%s:%s:%s:%s",
                 quizRequest.getMusicId(),
-                quizRequest.getQuizType().toString(),
-                String.valueOf(member.getLevel())
+                quizRequest.getQuizType(),
+                member.getLevel(),
+                member.getMemberId()
         );
+    }
+
+    private Member findMember(String memberId) {
+        return memberRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
+    }
+
+    public QuizSubmitDto submitQuiz(QuizSubmitRequest submitRequest, String memberId) {
+        Member member = findMember(memberId);
+        return quizSubmitService.submitQuiz(submitRequest, member);
+    }
+
+    public ListeningSubmitDto submitListeningQuiz(ListeningSubmitRequest submitRequest, String memberId) {
+        Member member = findMember(memberId);
+        return quizSubmitService.submitListeningQuiz(submitRequest, member);
     }
 
     private double calCorrectRate(QuizSubmitRequest submitRequest, QuizList quizList) {
@@ -178,5 +193,4 @@ public class QuizService {
 
         return totalCorrectCount * 100 / quizList.getQuizzes().size();
     }
-
 }

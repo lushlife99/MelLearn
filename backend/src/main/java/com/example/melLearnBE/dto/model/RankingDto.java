@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Data
@@ -14,7 +15,7 @@ public class RankingDto {
 
     private Long id;
     private String musicId;
-    private Map<String, Double> score_list;
+    private Map<String, Double> score_list = new HashMap<>();
 
     public RankingDto(Ranking ranking) {
         this.id = ranking.getId();
