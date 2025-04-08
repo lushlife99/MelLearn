@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,8 +29,8 @@ public class SupportController {
 
     @PostMapping("/quiz/category/{musicId}")
     @Operation(summary = "특정 노래가 지원하는 문제 카테고리 조회", description = "서버에서 지원하는 5가지 카테고리의 문제 유형의 지원을 boolean 형식으로 리턴")
-    public MusicDto getSupportQuizCategory(@RequestBody List<LrcLyric> lyric, @PathVariable String musicId, HttpServletRequest request) {
-        return supportService.getSupportQuizCategory(musicId, lyric, request);
+    public MusicDto getSupportQuizCategory(@RequestBody List<LrcLyric> lyric, @PathVariable String musicId, Authentication authentication) {
+        return supportService.getSupportQuizCategory(musicId, lyric, authentication.getName());
     }
 
 }
