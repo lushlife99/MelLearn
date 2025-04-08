@@ -28,4 +28,19 @@ public class Music {
     private boolean listening;
     private boolean reading;
     private boolean vocabulary;
+
+    public static Music create(String musicId, Language language, boolean checkCategoryAvailable) {
+        return Music.builder()
+                .musicId(musicId)
+                .language(language)
+                .checkCategoryAvailable(checkCategoryAvailable)
+                .liked(0)
+                .disLike(0)
+                .speaking(false)
+                .grammar(false)
+                .listening(false)
+                .reading(false)
+                .vocabulary(false)
+                .build();
+    }
 }

@@ -2,33 +2,55 @@ package com.example.melLearnBE.model;
 
 import com.example.melLearnBE.enums.LearningLevel;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+import lombok.AccessLevel;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
-@Builder
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "listening_quiz", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"music_id", "level"})
 })
 public class ListeningQuiz {
 
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String musicId;
-    @Enumerated(value = EnumType.ORDINAL)
-    private LearningLevel level;
-    @Column(columnDefinition="LONGTEXT")
+
     private String blankedText;
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    @Builder.Default
-    private List<String> answerList = new ArrayList<>();
+    private String musicId;
+
+    @Enumerated(EnumType.STRING)
+    private LearningLevel level;
+
+    @ElementCollection
+    @CollectionTable(name = "listening_quiz_answer", joinColumns = @JoinColumn(name = "listening_quiz_id"))
+    @Column(name = "answer")
+    private List<String> answerList;
+
+    private LocalDateTime createdTime;
+
+    @Builder
+    public ListeningQuiz(String blankedText, String musicId, LearningLevel level, List<String> answerList) {
+        this.blankedText = blankedText;
+        this.musicId = musicId;
+        this.level = level;
+        this.answerList = answerList;
+        this.createdTime = LocalDateTime.now();
+    }
+
+    public static ListeningQuiz create(String blankedText, String musicId, LearningLevel level, List<String> answerList) {
+        return ListeningQuiz.builder()
+                .blankedText(blankedText)
+                .musicId(musicId)
+                .level(level)
+                .answerList(answerList)
+                .build();
+    }
 }

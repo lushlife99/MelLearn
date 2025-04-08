@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,5 +31,4 @@ public class SupportController {
     public MusicDto getSupportQuizCategory(@RequestBody List<LrcLyric> lyric, @PathVariable String musicId, Authentication authentication) {
         return supportService.getSupportQuizCategory(musicId, lyric, authentication.getName());
     }
-
 }

@@ -32,6 +32,7 @@ public enum ErrorCode {
     /* 500 INTERNAL_SERVER_ERROR : 서버오류 */
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류"),
     AUDIO_PRE_PROCESSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "오디오 전처리 에러"),
+    SPEAKING_GRADING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "말하기 채점 에러"),
     ;
 
     private final HttpStatus httpStatus;

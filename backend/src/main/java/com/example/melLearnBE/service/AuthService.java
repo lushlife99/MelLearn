@@ -32,24 +32,36 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
 
     public void join(AuthRequest joinRequest) {
-
-        Optional<Member> user= memberRepository.findByMemberId(joinRequest.getMemberId());
+        Optional<Member> user = memberRepository.findByMemberId(joinRequest.getMemberId());
         if(user.isPresent()) {
             throw new CustomException(ErrorCode.ALREADY_EXIST_USERID);
         }
 
-        Member joinMember = Member.builder().memberId(joinRequest.getMemberId()).level(LearningLevel.Beginner).langType(Language.ENGLISH)
-                .roles(Collections.singletonList("ROLE_USER")).name(joinRequest.getName()).password(encoder.encode(joinRequest.getPassword())).build();
+        Member joinMember = Member.create(
+            joinRequest.getMemberId(),
+            encoder.encode(joinRequest.getPassword()),
+            joinRequest.getName(),
+            LearningLevel.Beginner,
+            Language.ENGLISH,
+            Collections.singletonList("ROLE_USER")
+        );
+        
         memberRepository.save(joinMember);
     }
 
     public TokenInfo login(AuthRequest loginRequest, HttpServletResponse response) {
-
-        Member member = memberRepository.findByMemberId(loginRequest.getMemberId()).orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED));
+        Member member = memberRepository.findByMemberId(loginRequest.getMemberId())
+            .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED));
+            
         if(!encoder.matches(loginRequest.getPassword(), member.getPassword())){
             throw new CustomException(ErrorCode.MISMATCHED_PASSWORD);
         }
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getMemberId(), loginRequest.getPassword());
+        
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+            loginRequest.getMemberId(), 
+            loginRequest.getPassword()
+        );
+        
         Authentication authentication = authenticationManagerBuilder.authenticate(authenticationToken);
         return jwtTokenProvider.generateToken(authentication, response);
     }

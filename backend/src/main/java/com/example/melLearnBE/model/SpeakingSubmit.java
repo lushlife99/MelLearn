@@ -29,4 +29,13 @@ public class SpeakingSubmit {
     @CreationTimestamp
     private LocalDateTime createdTime;
 
+    public static SpeakingSubmit create(String musicId, Member member, String markedText, String submit, double score) {
+        return SpeakingSubmit.builder()
+                .musicId(musicId)
+                .member(member)
+                .markedText(markedText)
+                .submit(submit)
+                .score(score)
+                .build();
+    }
 }

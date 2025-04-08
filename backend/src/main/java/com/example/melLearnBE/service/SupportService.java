@@ -65,11 +65,11 @@ public class SupportService {
 
     private Music findOrCreateMusic(String musicId, Member member) {
         return musicRepository.findByMusicId(musicId)
-                .orElseGet(() -> Music.builder()
-                        .musicId(musicId)
-                        .language(member.getLangType())
-                        .checkCategoryAvailable(false)
-                        .build());
+                .orElseGet(() -> Music.create(
+                    musicId,
+                    member.getLangType(),
+                    false
+                ));
     }
 
     private QuizCategory determineQuizCategory(List<LrcLyric> lrcLyrics, Member member) {
