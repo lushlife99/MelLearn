@@ -1,13 +1,14 @@
 package com.example.melLearnBE.service;
 
-import com.example.melLearnBE.dto.model.RankingDto;
+import com.example.melLearnBE.domain.quiz.ranking.dto.RankingDto;
+import com.example.melLearnBE.domain.quiz.ranking.service.RankingService;
 import com.example.melLearnBE.error.CustomException;
-import com.example.melLearnBE.model.Member;
-import com.example.melLearnBE.model.Ranking;
-import com.example.melLearnBE.model.SpeakingSubmit;
-import com.example.melLearnBE.repository.MemberRepository;
-import com.example.melLearnBE.repository.RankingRepository;
-import com.example.melLearnBE.repository.SpeakingSubmitRepository;
+import com.example.melLearnBE.domain.member.entity.Member;
+import com.example.melLearnBE.domain.quiz.ranking.entity.Ranking;
+import com.example.melLearnBE.domain.quiz.speaking.entity.SpeakingSubmit;
+import com.example.melLearnBE.domain.member.repository.MemberRepository;
+import com.example.melLearnBE.domain.quiz.ranking.repository.RankingRepository;
+import com.example.melLearnBE.domain.quiz.speaking.repository.SpeakingSubmitRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

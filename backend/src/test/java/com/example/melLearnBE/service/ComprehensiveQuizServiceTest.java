@@ -1,19 +1,29 @@
 package com.example.melLearnBE.service;
 
+import com.example.melLearnBE.domain.quiz.comprehensive.dto.ComprehensiveQuizSubmitRequest;
+import com.example.melLearnBE.domain.quiz.comprehensive.service.ComprehensiveQuizService;
+import com.example.melLearnBE.domain.listening.quiz.dto.ListeningQuizDto;
+import com.example.melLearnBE.domain.listening.submit.dto.ListeningSubmitDto;
+import com.example.melLearnBE.domain.listening.quiz.entity.ListeningQuiz;
+import com.example.melLearnBE.domain.member.entity.Member;
+import com.example.melLearnBE.domain.music.dto.LrcLyric;
+import com.example.melLearnBE.domain.quiz.choice.quiz.entity.Quiz;
+import com.example.melLearnBE.domain.quiz.choice.quiz.entity.QuizList;
+import com.example.melLearnBE.domain.quiz.choice.quiz.service.QuizService;
+import com.example.melLearnBE.domain.quiz.speaking.entity.SpeakingSubmit;
+import com.example.melLearnBE.domain.quiz.speaking.service.SpeakingService;
 import com.example.melLearnBE.dto.model.*;
 import com.example.melLearnBE.dto.request.*;
-import com.example.melLearnBE.dto.response.ComprehensiveQuizDto;
-import com.example.melLearnBE.dto.response.ComprehensiveQuizSubmitDto;
-import com.example.melLearnBE.enums.LearningLevel;
+import com.example.melLearnBE.domain.quiz.comprehensive.dto.ComprehensiveQuizDto;
+import com.example.melLearnBE.domain.quiz.comprehensive.dto.ComprehensiveQuizSubmitDto;
+import com.example.melLearnBE.domain.member.enums.LearningLevel;
 import com.example.melLearnBE.enums.QuizType;
 import com.example.melLearnBE.error.CustomException;
-import com.example.melLearnBE.model.*;
-import com.example.melLearnBE.repository.ListeningQuizRepository;
-import com.example.melLearnBE.repository.ListeningSubmitRepository;
-import com.example.melLearnBE.repository.MemberRepository;
-import com.example.melLearnBE.repository.QuizListRepository;
-import com.example.melLearnBE.repository.QuizSubmitRepository;
-import org.checkerframework.checker.units.qual.A;
+import com.example.melLearnBE.domain.listening.quiz.repository.ListeningQuizRepository;
+import com.example.melLearnBE.domain.listening.submit.repository.ListeningSubmitRepository;
+import com.example.melLearnBE.domain.member.repository.MemberRepository;
+import com.example.melLearnBE.domain.quiz.choice.quiz.repository.QuizListRepository;
+import com.example.melLearnBE.domain.quiz.choice.submit.repository.QuizSubmitRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,7 +46,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)

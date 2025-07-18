@@ -1,14 +1,18 @@
 package com.example.melLearnBE.service;
 
-import com.example.melLearnBE.dto.model.ListeningQuizDto;
-import com.example.melLearnBE.dto.model.QuizListDto;
-import com.example.melLearnBE.dto.request.QuizRequest;
-import com.example.melLearnBE.enums.LearningLevel;
+import com.example.melLearnBE.domain.listening.quiz.entity.ListeningQuiz;
+import com.example.melLearnBE.domain.listening.quiz.dto.ListeningQuizDto;
+import com.example.melLearnBE.domain.member.entity.Member;
+import com.example.melLearnBE.domain.quiz.choice.quiz.entity.QuizList;
+import com.example.melLearnBE.domain.quiz.choice.quiz.service.QuizCreationService;
+import com.example.melLearnBE.domain.quiz.choice.quiz.service.QuizService;
+import com.example.melLearnBE.domain.quiz.choice.quiz.dto.QuizListDto;
+import com.example.melLearnBE.domain.quiz.choice.quiz.dto.QuizRequest;
+import com.example.melLearnBE.domain.member.enums.LearningLevel;
 import com.example.melLearnBE.enums.QuizType;
-import com.example.melLearnBE.model.*;
-import com.example.melLearnBE.repository.ListeningQuizRepository;
-import com.example.melLearnBE.repository.MemberRepository;
-import com.example.melLearnBE.repository.QuizListRepository;
+import com.example.melLearnBE.domain.listening.quiz.repository.ListeningQuizRepository;
+import com.example.melLearnBE.domain.member.repository.MemberRepository;
+import com.example.melLearnBE.domain.quiz.choice.quiz.repository.QuizListRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

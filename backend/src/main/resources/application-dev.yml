@@ -32,3 +32,4 @@ server:
 logging:
   level:
     web: info
+

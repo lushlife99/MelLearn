@@ -1,12 +1,13 @@
 package com.example.melLearnBE.service;
 
+import com.example.melLearnBE.domain.member.service.MemberService;
 import com.example.melLearnBE.dto.model.MemberDto;
-import com.example.melLearnBE.enums.Language;
-import com.example.melLearnBE.enums.LearningLevel;
+import com.example.melLearnBE.domain.member.enums.Language;
+import com.example.melLearnBE.domain.member.enums.LearningLevel;
 import com.example.melLearnBE.error.CustomException;
-import com.example.melLearnBE.jwt.JwtTokenProvider;
-import com.example.melLearnBE.model.Member;
-import com.example.melLearnBE.repository.MemberRepository;
+import com.example.melLearnBE.global.auth.jwt.service.JwtTokenProvider;
+import com.example.melLearnBE.domain.member.entity.Member;
+import com.example.melLearnBE.domain.member.repository.MemberRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

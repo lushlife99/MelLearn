@@ -1,15 +1,16 @@
 package com.example.melLearnBE.service;
 
-import com.example.melLearnBE.dto.model.MusicDto;
-import com.example.melLearnBE.dto.request.LrcLyric;
-import com.example.melLearnBE.dto.response.naverCloud.DetectLang;
-import com.example.melLearnBE.enums.Language;
+import com.example.melLearnBE.domain.music.dto.MusicDto;
+import com.example.melLearnBE.domain.music.dto.LrcLyric;
+import com.example.melLearnBE.domain.support.service.SupportService;
+import com.example.melLearnBE.api.feign.naver.cloud.dto.DetectLang;
+import com.example.melLearnBE.domain.member.enums.Language;
 import com.example.melLearnBE.error.CustomException;
-import com.example.melLearnBE.model.Member;
-import com.example.melLearnBE.model.Music;
-import com.example.melLearnBE.openFeign.naverCloudClient.NaverCloudClient;
-import com.example.melLearnBE.repository.MemberRepository;
-import com.example.melLearnBE.repository.MusicRepository;
+import com.example.melLearnBE.domain.member.entity.Member;
+import com.example.melLearnBE.domain.music.entity.Music;
+import com.example.melLearnBE.api.feign.naver.cloud.NaverCloudClient;
+import com.example.melLearnBE.domain.member.repository.MemberRepository;
+import com.example.melLearnBE.domain.music.repository.MusicRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,13 +1,14 @@
 package com.example.melLearnBE.service;
 
-import com.example.melLearnBE.dto.request.AuthRequest;
-import com.example.melLearnBE.dto.model.TokenInfo;
-import com.example.melLearnBE.enums.Language;
-import com.example.melLearnBE.enums.LearningLevel;
+import com.example.melLearnBE.global.auth.service.AuthService;
+import com.example.melLearnBE.global.auth.dto.AuthRequest;
+import com.example.melLearnBE.global.auth.jwt.dto.TokenInfo;
+import com.example.melLearnBE.domain.member.enums.Language;
+import com.example.melLearnBE.domain.member.enums.LearningLevel;
 import com.example.melLearnBE.error.CustomException;
-import com.example.melLearnBE.jwt.JwtTokenProvider;
-import com.example.melLearnBE.model.Member;
-import com.example.melLearnBE.repository.MemberRepository;
+import com.example.melLearnBE.global.auth.jwt.service.JwtTokenProvider;
+import com.example.melLearnBE.domain.member.entity.Member;
+import com.example.melLearnBE.domain.member.repository.MemberRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,7 +28,6 @@ import java.util.Collections;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.setMaxElementsForPrinting;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
