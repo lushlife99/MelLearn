@@ -4,30 +4,30 @@ import com.example.melLearnBE.domain.music.dto.MusicDto;
 import com.example.melLearnBE.domain.music.dto.LrcLyric;
 import com.example.melLearnBE.api.feign.naver.cloud.dto.DetectLang;
 import com.example.melLearnBE.domain.member.enums.Language;
+import com.example.melLearnBE.global.auth.jwt.service.JwtTokenProvider;
 import com.example.melLearnBE.global.error.CustomException;
 import com.example.melLearnBE.global.error.enums.ErrorCode;
 import com.example.melLearnBE.domain.member.entity.Member;
 import com.example.melLearnBE.domain.music.entity.Music;
 import com.example.melLearnBE.api.feign.naver.cloud.NaverCloudClient;
 import com.example.melLearnBE.domain.music.repository.MusicRepository;
-import com.example.melLearnBE.domain.member.repository.MemberRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class SupportService {
 
     private final NaverCloudClient naverCloudClient;
+    private final JwtTokenProvider jwtTokenProvider;
     private final MusicRepository musicRepository;
-    private final MemberRepository memberRepository;
     private static final int MAX_CHAR_SIZE = 100;
 
     public List<String> getSupportLang() {
@@ -40,83 +40,87 @@ public class SupportService {
         return isoList;
     }
 
-    public MusicDto getSupportQuizCategory(String musicId, List<LrcLyric> lrcLyrics, String memberId) {
-        Member member = findMember(memberId);
-        Music music = findOrCreateMusic(musicId, member);
-        
-        if (music.isCheckCategoryAvailable()) {
-            return new MusicDto(music);
+    public MusicDto getSupportQuizCategory(String musicId, List<LrcLyric> lrcLyrics, HttpServletRequest request) {
+        Member member = jwtTokenProvider.getMember(request).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
+        Music music = new Music();
+        Optional<Music> optionalMusic = musicRepository.findByMusicId(musicId);
+        if (optionalMusic.isPresent()) {
+            music = optionalMusic.get();
+            if(music.isCheckCategoryAvailable()) {
+                return new MusicDto(optionalMusic.get());
+            }
         }
 
-        QuizCategory category = determineQuizCategory(lrcLyrics, member);
-        updateMusicCategory(music, category);
-        
+        boolean listening = false;
+        boolean speaking = false;
+        boolean reading = false;
+        boolean grammar = false;
+        boolean vocabulary = false;
+
+        String pureLyric = getPureLyric(lrcLyrics);
+
+        if(StringUtils.hasText(pureLyric)) {
+            String truncateLyric = truncateLyricByCharLimit(pureLyric);
+            DetectLang language = naverCloudClient.detectLanguage(truncateLyric);
+            if (member.getLangType().getIso639Value().equals(language.getLangCode())) {
+                listening = true;
+                reading = true;
+                grammar = true;
+                vocabulary = true;
+                // lrc 포맷인지 체크
+                if (lrcLyrics.size() != 0) {
+                    LrcLyric lrcLyric = lrcLyrics.get(0);
+                    if (lrcLyric.getDurMs() != 0) {
+                        speaking = true;
+                    }
+                }
+            }
+        }
+
+        if(optionalMusic.isPresent()) {
+            music.setCheckCategoryAvailable(true);
+            music.setListening(listening);
+            music.setGrammar(grammar);
+            music.setSpeaking(speaking);
+            music.setReading(reading);
+            music.setVocabulary(vocabulary);
+        }
+
+        else {
+            music = Music.builder()
+                    .musicId(musicId)
+                    .grammar(grammar)
+                    .language(member.getLangType())
+                    .speaking(speaking)
+                    .listening(listening)
+                    .vocabulary(vocabulary)
+                    .reading(reading)
+                    .checkCategoryAvailable(true)
+                    .build();
+        }
+
+
         return new MusicDto(musicRepository.save(music));
     }
 
-    private Member findMember(String memberId) {
-        return memberRepository.findByMemberId(memberId)
-                .orElseThrow(() -> {
-                    log.error("Member not found with id: {}", memberId);
-                    return new CustomException(ErrorCode.BAD_REQUEST);
-                });
-    }
-
-    private Music findOrCreateMusic(String musicId, Member member) {
-        return musicRepository.findByMusicId(musicId)
-                .orElseGet(() -> Music.create(
-                    musicId,
-                    member.getLangType(),
-                    false
-                ));
-    }
-
-    private QuizCategory determineQuizCategory(List<LrcLyric> lrcLyrics, Member member) {
-        boolean basicCategories = false;
-        boolean speaking = false;
-        
-        String pureLyric = getPureLyric(lrcLyrics);
-
-        if (StringUtils.hasText(pureLyric)) {
-            String truncateLyric = truncateLyricByCharLimit(pureLyric);
-            DetectLang language = naverCloudClient.detectLanguage(truncateLyric);
-            
-            if (member.getLangType().getIso639Value().equals(language.getLangCode())) {
-                basicCategories = true;
-            }
-
-            if (isLrcFormat(lrcLyrics)) {
-                speaking = true;
-            }
-        }
-
-        return new QuizCategory(basicCategories, speaking);
-    }
-
-    private boolean isLrcFormat(List<LrcLyric> lrcLyrics) {
-        return !lrcLyrics.isEmpty() && lrcLyrics.get(0).getDurMs() != 0;
-    }
-
-    private void updateMusicCategory(Music music, QuizCategory category) {
-        music.setCheckCategoryAvailable(true);
-        music.setListening(category.basicCategories());
-        music.setGrammar(category.basicCategories());
-        music.setSpeaking(category.speaking());
-        music.setReading(category.basicCategories());
-        music.setVocabulary(category.basicCategories());
-    }
-
     private String truncateLyricByCharLimit(String lyric) {
-        return lyric.length() > MAX_CHAR_SIZE ? 
-               lyric.substring(0, MAX_CHAR_SIZE) : 
-               lyric;
+        int charCount = lyric.length();
+
+        if (charCount > MAX_CHAR_SIZE) {
+            return lyric.substring(0, MAX_CHAR_SIZE);
+        }
+        return lyric;
     }
+
 
     private String getPureLyric(List<LrcLyric> lrcLyrics) {
-        return lrcLyrics.stream()
-                .map(LrcLyric::getText)
-                .reduce("", String::concat);
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (LrcLyric lrcLyric : lrcLyrics) {
+            stringBuilder.append(lrcLyric.getText());
+        }
+
+        return stringBuilder.toString();
     }
 
-    private record QuizCategory(boolean basicCategories, boolean speaking) {}
 }
