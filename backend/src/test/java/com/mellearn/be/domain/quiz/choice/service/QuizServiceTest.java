@@ -1,18 +1,18 @@
 package com.mellearn.be.domain.quiz.choice.service;
 
-import com.mellearn.be.domain.listening.quiz.dto.ListeningQuizDto;
-import com.mellearn.be.domain.listening.quiz.entity.ListeningQuiz;
-import com.mellearn.be.domain.listening.quiz.repository.ListeningQuizRepository;
+import com.mellearn.be.domain.quiz.listening.quiz.dto.ListeningQuizDto;
+import com.mellearn.be.domain.quiz.listening.quiz.entity.ListeningQuiz;
+import com.mellearn.be.domain.quiz.listening.quiz.repository.ListeningQuizRepository;
 import com.mellearn.be.domain.member.entity.Member;
 import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.member.repository.MemberRepository;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.QuizListDto;
-import com.mellearn.be.domain.quiz.choice.quiz.dto.QuizRequest;
+import com.mellearn.be.domain.quiz.choice.quiz.dto.request.QuizRequest;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.QuizList;
 import com.mellearn.be.domain.quiz.choice.quiz.repository.QuizListRepository;
-import com.mellearn.be.domain.quiz.choice.quiz.service.QuizCreationService;
+import com.mellearn.be.domain.quiz.choice.quiz.service.QuizCreateService;
 import com.mellearn.be.domain.quiz.choice.quiz.service.QuizService;
-import com.mellearn.be.global.prompt.QuizType;
+import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,7 +52,7 @@ class QuizServiceTest {
     private ValueOperations<String, Object> valueOperations;
 
     @Mock
-    private QuizCreationService quizCreationService;
+    private QuizCreateService quizCreateService;
 
     @InjectMocks
     private QuizService quizService;
@@ -159,7 +159,7 @@ class QuizServiceTest {
         )).thenReturn(Optional.empty());
         when(redisTemplate.hasKey(anyString())).thenReturn(false);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(quizCreationService.createQuizList(eq(quizRequest), eq(member)))
+        when(quizCreateService.createQuizList(eq(quizRequest), eq(member)))
                 .thenReturn(CompletableFuture.completedFuture(expectedDto));
 
         // when
@@ -171,7 +171,7 @@ class QuizServiceTest {
         assertNotNull(quizListDto);
         assertEquals(expectedDto.getId(), quizListDto.getId());
         verify(valueOperations).set(anyString(), eq("true"), eq(1L), eq(TimeUnit.MINUTES));
-        verify(quizCreationService).createQuizList(eq(quizRequest), eq(member));
+        verify(quizCreateService).createQuizList(eq(quizRequest), eq(member));
     }
 
     @Test
@@ -187,7 +187,7 @@ class QuizServiceTest {
         )).thenReturn(Optional.empty());
         when(redisTemplate.hasKey(anyString())).thenReturn(false);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(quizCreationService.createListeningQuiz(eq(quizRequest), eq(member)))
+        when(quizCreateService.createListeningQuiz(eq(quizRequest), eq(member)))
                 .thenReturn(CompletableFuture.completedFuture(expectedDto));
 
         // when
@@ -199,6 +199,6 @@ class QuizServiceTest {
         assertNotNull(listeningQuizDto);
         assertEquals(expectedDto.getId(), listeningQuizDto.getId());
         verify(valueOperations).set(anyString(), eq("true"), eq(1L), eq(TimeUnit.MINUTES));
-        verify(quizCreationService).createListeningQuiz(eq(quizRequest), eq(member));
+        verify(quizCreateService).createListeningQuiz(eq(quizRequest), eq(member));
     }
 } 

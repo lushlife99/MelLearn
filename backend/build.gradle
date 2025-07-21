@@ -4,7 +4,7 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.4'
 }
 
-group = 'com.example'
+group = 'com.mellearn'
 version = '0.0.1-SNAPSHOT'
 
 java {
@@ -17,44 +17,74 @@ configurations {
 	}
 }
 
+ext {
+	set('springAiVersion', "1.0.0")
+	set('springCloudVersion', "2023.0.2")
+}
+
 repositories {
 	mavenCentral()
 }
 
 dependencies {
+	// Spring Boot Starter
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
-	implementation 'io.jsonwebtoken:jjwt-api:0.11.1'
-	implementation 'com.google.code.gson:gson:2.8.8'
-	implementation "net.bramp.ffmpeg:ffmpeg:0.7.0"
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.1.1'
-	implementation group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '4.0.0'
-	implementation group: 'org.apache.commons', name: 'commons-text', version: '1.10.0'
-	//Querydsl 추가
-	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'com.mysql:mysql-connector-j:8.0.32'
+
+	// Swagger
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+
+	// Gson
+	implementation 'com.google.code.gson:gson:2.8.8'
+
+	// JWT
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.1'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.1'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.1'
+
+	// Open Feign
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.1.1'
+
+	// FFmpeg
+	implementation 'net.bramp.ffmpeg:ffmpeg:0.7.0'
+
+	// Stanford Core NLP
+	implementation group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '4.0.0'
+
+	// Apache Commons 문자열 처리
+	implementation group: 'org.apache.commons', name: 'commons-text', version: '1.10.0'
+
+	// QueryDSL
+	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
 	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+	// Spring AI
+	implementation platform("org.springframework.ai:spring-ai-bom:${springAiVersion}")
+
+	// OpenAI 모듈용 starter 의존성
+	implementation 'org.springframework.ai:spring-ai-starter-model-openai:1.0.0'
+
+	// MySQL
+	runtimeOnly 'com.mysql:mysql-connector-j:8.0.32'
+
+	// lombok
+	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
+	// Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 }
 
+
 tasks.named('test') {
 	useJUnitPlatform()
 	jvmArgs '-Xshare:off'
-}
-
-ext {
-	set('springCloudVersion', "2023.0.0")
 }
 
 tasks.named('bootJar') {
@@ -63,6 +93,7 @@ tasks.named('bootJar') {
 
 dependencyManagement {
 	imports {
+		mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
 	}
 }

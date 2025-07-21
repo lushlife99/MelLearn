@@ -1,8 +1,10 @@
 package com.mellearn.be.domain.quiz.choice.quiz.entity;
 
 import com.mellearn.be.domain.member.enums.LearningLevel;
+import com.mellearn.be.domain.quiz.choice.quiz.dto.response.chatmodel.QuizListResponseDto;
+import com.mellearn.be.domain.quiz.choice.quiz.dto.response.chatmodel.QuizResponseDto;
 import com.mellearn.be.domain.quiz.choice.submit.entity.QuizSubmit;
-import com.mellearn.be.global.prompt.QuizType;
+import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -46,7 +48,30 @@ public class QuizList {
         this.id = id;
     }
 
+    public static QuizList create(QuizType quizType, QuizListResponseDto quizListDto, LearningLevel level, String musicId) {
+
+        List<Quiz> quizList = new ArrayList<>();
+
+        for (QuizResponseDto quizResponseDto : quizListDto.quizzes()) {
+            Quiz q = Quiz.builder()
+                    .answer(quizResponseDto.answer())
+                    .comment(quizResponseDto.comment())
+                    .optionList(quizResponseDto.optionList())
+                    .question(quizResponseDto.question())
+                    .build();
+            quizList.add(q);
+        }
+
+        return QuizList.builder()
+                .quizType(quizType)
+                .quizzes(quizList)
+                .level(level)
+                .musicId(musicId)
+                .build();
+    }
+
     public static QuizList create(QuizType quizType, List<Quiz> quizzes, LearningLevel level, String musicId) {
+
         return QuizList.builder()
                 .quizType(quizType)
                 .quizzes(quizzes)

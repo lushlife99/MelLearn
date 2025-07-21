@@ -1,6 +1,6 @@
-package com.mellearn.be.domain.listening.quiz.repository;
+package com.mellearn.be.domain.quiz.listening.quiz.repository;
 
-import com.mellearn.be.domain.listening.quiz.entity.ListeningQuiz;
+import com.mellearn.be.domain.quiz.listening.quiz.entity.ListeningQuiz;
 import com.mellearn.be.domain.member.enums.LearningLevel;
 import org.springframework.data.jpa.repository.JpaRepository;
 

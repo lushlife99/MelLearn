@@ -16,6 +16,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+
+/**
+ * OpenAIService - OpenAI API 호출
+ *
+ * 25.07.20
+ * Spring AI 도입으로 더이상 사용하지 않음
+ */
+
 @Service
 @RequiredArgsConstructor
 public class OpenAIService {
@@ -74,7 +82,6 @@ public class OpenAIService {
                 .role(ROLE_USER)
                 .content(chatRequest.getUserInput())
                 .build();
-
 
         ChatGPTRequest chatGPTRequest = ChatGPTRequest.builder()
                 .model(openAIClientConfig.getModel())

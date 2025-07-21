@@ -21,8 +21,6 @@ public class Quiz {
     @Column(columnDefinition="LONGTEXT")
     private String question;
 
-    private String word;
-
     @ElementCollection
     @CollectionTable(name = "quiz_option", joinColumns = @JoinColumn(name = "quiz_id"))
     @Column(name = "option_text")
@@ -42,9 +40,8 @@ public class Quiz {
     private int correctCount;
 
     @Builder
-    public Quiz(String question, String word, List<String> optionList, int answer, String comment, Long id) {
+    public Quiz(String question, List<String> optionList, int answer, String comment, Long id) {
         this.question = question;
-        this.word = word;
         this.optionList = optionList;
         this.answer = answer;
         this.comment = comment;
@@ -53,10 +50,9 @@ public class Quiz {
         this.id = id;
     }
 
-    public static Quiz create(String question, String word, List<String> optionList, int answer, String comment) {
+    public static Quiz create(String question, List<String> optionList, int answer, String comment) {
         return Quiz.builder()
                 .question(question)
-                .word(word)
                 .optionList(optionList)
                 .answer(answer)
                 .comment(comment)

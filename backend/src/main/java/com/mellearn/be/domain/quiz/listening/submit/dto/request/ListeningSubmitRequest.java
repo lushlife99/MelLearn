@@ -1,4 +1,4 @@
-package com.mellearn.be.domain.listening.submit.dto.request;
+package com.mellearn.be.domain.quiz.listening.submit.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

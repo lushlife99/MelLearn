@@ -1,6 +1,6 @@
 package com.mellearn.be.domain.member.entity;
 
-import com.mellearn.be.domain.listening.submit.entity.ListeningSubmit;
+import com.mellearn.be.domain.quiz.listening.submit.entity.ListeningSubmit;
 import com.mellearn.be.domain.member.enums.Language;
 import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.quiz.choice.submit.entity.QuizSubmit;

@@ -1,14 +1,14 @@
 package com.mellearn.be.domain.quiz.choice.quiz.service;
 
-import com.mellearn.be.domain.listening.quiz.dto.ListeningQuizDto;
-import com.mellearn.be.domain.listening.quiz.entity.ListeningQuiz;
-import com.mellearn.be.domain.listening.quiz.repository.ListeningQuizRepository;
-import com.mellearn.be.domain.listening.submit.dto.ListeningSubmitDto;
-import com.mellearn.be.domain.listening.submit.dto.request.ListeningSubmitRequest;
+import com.mellearn.be.domain.quiz.listening.quiz.dto.ListeningQuizDto;
+import com.mellearn.be.domain.quiz.listening.quiz.entity.ListeningQuiz;
+import com.mellearn.be.domain.quiz.listening.quiz.repository.ListeningQuizRepository;
+import com.mellearn.be.domain.quiz.listening.submit.dto.ListeningSubmitDto;
+import com.mellearn.be.domain.quiz.listening.submit.dto.request.ListeningSubmitRequest;
 import com.mellearn.be.domain.member.entity.Member;
 import com.mellearn.be.domain.member.repository.MemberRepository;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.QuizListDto;
-import com.mellearn.be.domain.quiz.choice.quiz.dto.QuizRequest;
+import com.mellearn.be.domain.quiz.choice.quiz.dto.request.QuizRequest;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.Quiz;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.QuizList;
 import com.mellearn.be.domain.quiz.choice.quiz.repository.QuizListRepository;
@@ -18,7 +18,7 @@ import com.mellearn.be.domain.quiz.choice.submit.repository.querydsl.SubmitJpaRe
 import com.mellearn.be.domain.quiz.choice.submit.service.QuizSubmitService;
 import com.mellearn.be.global.error.CustomException;
 import com.mellearn.be.global.error.enums.ErrorCode;
-import com.mellearn.be.global.prompt.QuizType;
+import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +40,7 @@ public class QuizService {
     private final QuizSubmitService quizSubmitService;
     private final RedisTemplate<String, Object> redisTemplate;
     private final SubmitJpaRepository submitJpaRepository;
-    private final QuizCreationService quizCreationService;
+    private final QuizCreateService quizCreateService;
     private final QuizListRepository quizListRepository;
     private final ListeningQuizRepository listeningQuizRepository;
     private final MemberRepository memberRepository;
@@ -60,27 +60,26 @@ public class QuizService {
     }
 
     @Async("taskExecutor")
-    @Transactional
     public CompletableFuture<QuizListDto> getQuizList(QuizRequest quizRequest, String memberId) {
         try {
             Member member = findMember(memberId);
             Optional<QuizList> optionalQuiz = fetchQuiz(quizRequest, member);
             String redisKey = getRedisKey(quizRequest, member);
 
+            if (redisTemplate.hasKey(redisKey)) {
+                throw new CustomException(ErrorCode.CREATING_OTHER_REQUEST);
+            }
+
             if (optionalQuiz.isEmpty()) {
-                if (redisTemplate.hasKey(redisKey)) {
-                    throw new CustomException(ErrorCode.CREATING_OTHER_REQUEST);
-                } else {
-                    redisTemplate.opsForValue().set(redisKey, "true", 1, TimeUnit.MINUTES);
-                    CompletableFuture<QuizListDto> quizList = quizCreationService.createQuizList(quizRequest, member);
-                    quizList.whenComplete((result, exception) -> {
+                redisTemplate.opsForValue().set(redisKey, "true", 1, TimeUnit.MINUTES);
+
+                return CompletableFuture.supplyAsync(() -> {
+                    try {
+                        return quizCreateService.createChoiceQuiz(quizRequest, member);
+                    } finally {
                         redisTemplate.delete(redisKey);
-                        if (exception != null) {
-                            log.error("Error creating quiz list: {}", exception.getMessage());
-                        }
-                    });
-                    return quizList;
-                }
+                    }
+                });
             }
             return CompletableFuture.completedFuture(new QuizListDto(optionalQuiz.get()));
         } catch (Exception e) {
@@ -90,27 +89,26 @@ public class QuizService {
     }
 
     @Async("taskExecutor")
-    @Transactional
     public CompletableFuture<ListeningQuizDto> getListeningQuiz(QuizRequest quizRequest, String memberId) {
         try {
             Member member = findMember(memberId);
             Optional<ListeningQuiz> optionalQuiz = fetchListeningQuiz(quizRequest, member);
             String redisKey = getRedisKey(quizRequest, member);
 
+            if (redisTemplate.hasKey(redisKey)) {
+                throw new CustomException(ErrorCode.CREATING_OTHER_REQUEST);
+            }
+
             if (optionalQuiz.isEmpty()) {
-                if (redisTemplate.hasKey(redisKey)) {
-                    throw new CustomException(ErrorCode.CREATING_OTHER_REQUEST);
-                } else {
-                    redisTemplate.opsForValue().set(redisKey, "true", 1, TimeUnit.MINUTES);
-                    CompletableFuture<ListeningQuizDto> listeningQuizFuture = quizCreationService.createListeningQuiz(quizRequest, member);
-                    listeningQuizFuture.whenComplete((result, exception) -> {
+                redisTemplate.opsForValue().set(redisKey, "true", 1, TimeUnit.MINUTES);
+
+                return CompletableFuture.supplyAsync(() -> {
+                    try {
+                        return quizCreateService.createListeningQuiz(quizRequest, member);
+                    } finally {
                         redisTemplate.delete(redisKey);
-                        if (exception != null) {
-                            log.error("Error creating listening quiz: {}", exception.getMessage());
-                        }
-                    });
-                    return listeningQuizFuture;
-                }
+                    }
+                });
             }
             return CompletableFuture.completedFuture(new ListeningQuizDto(optionalQuiz.get()));
         } catch (Exception e) {
@@ -186,11 +184,11 @@ public class QuizService {
         List<Integer> submitAnswers = submitRequest.getAnswers();
         List<Quiz> quizzes = quizList.getQuizzes();
         int totalCorrectCount = 0;
-        
+
         for (int i = 0; i < 4; i++) {
             Quiz quiz = quizzes.get(i);
             quiz.incrementSubmitCount();
-            
+
             if (quiz.getAnswer() == submitAnswers.get(i)) {
                 quiz.incrementCorrectCount();
                 totalCorrectCount++;

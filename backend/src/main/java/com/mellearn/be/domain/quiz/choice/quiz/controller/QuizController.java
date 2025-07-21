@@ -1,8 +1,8 @@
 package com.mellearn.be.domain.quiz.choice.quiz.controller;
 
-import com.mellearn.be.domain.listening.quiz.dto.ListeningQuizDto;
+import com.mellearn.be.domain.quiz.listening.quiz.dto.ListeningQuizDto;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.QuizListDto;
-import com.mellearn.be.domain.quiz.choice.quiz.dto.QuizRequest;
+import com.mellearn.be.domain.quiz.choice.quiz.dto.request.QuizRequest;
 import com.mellearn.be.domain.quiz.choice.quiz.service.QuizService;
 import com.mellearn.be.global.error.CustomException;
 import com.mellearn.be.global.error.enums.ErrorCode;

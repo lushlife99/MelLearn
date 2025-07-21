@@ -1,11 +1,11 @@
 package com.mellearn.be.domain.quiz.choice.submit.service;
 
-import com.mellearn.be.domain.listening.quiz.entity.ListeningQuiz;
-import com.mellearn.be.domain.listening.quiz.repository.ListeningQuizRepository;
-import com.mellearn.be.domain.listening.submit.dto.ListeningSubmitDto;
-import com.mellearn.be.domain.listening.submit.dto.request.ListeningSubmitRequest;
-import com.mellearn.be.domain.listening.submit.entity.ListeningSubmit;
-import com.mellearn.be.domain.listening.submit.repository.ListeningSubmitRepository;
+import com.mellearn.be.domain.quiz.listening.quiz.entity.ListeningQuiz;
+import com.mellearn.be.domain.quiz.listening.quiz.repository.ListeningQuizRepository;
+import com.mellearn.be.domain.quiz.listening.submit.dto.ListeningSubmitDto;
+import com.mellearn.be.domain.quiz.listening.submit.dto.request.ListeningSubmitRequest;
+import com.mellearn.be.domain.quiz.listening.submit.entity.ListeningSubmit;
+import com.mellearn.be.domain.quiz.listening.submit.repository.ListeningSubmitRepository;
 import com.mellearn.be.domain.member.entity.Member;
 import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.Quiz;
@@ -17,7 +17,7 @@ import com.mellearn.be.domain.quiz.choice.submit.entity.QuizSubmit;
 import com.mellearn.be.domain.quiz.choice.submit.repository.QuizSubmitRepository;
 import com.mellearn.be.global.error.CustomException;
 import com.mellearn.be.global.error.enums.ErrorCode;
-import com.mellearn.be.global.prompt.QuizType;
+import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,8 +1,8 @@
-package com.mellearn.be.domain.listening.submit.dto.request;
+package com.mellearn.be.domain.quiz.listening.submit.dto.request;
 
 
-import com.mellearn.be.domain.listening.quiz.entity.ListeningQuiz;
-import com.mellearn.be.domain.listening.submit.entity.ListeningQuizSubmit;
+import com.mellearn.be.domain.quiz.listening.quiz.entity.ListeningQuiz;
+import com.mellearn.be.domain.quiz.listening.submit.entity.ListeningQuizSubmit;
 import com.mellearn.be.domain.member.entity.Member;
 import lombok.Getter;
 
