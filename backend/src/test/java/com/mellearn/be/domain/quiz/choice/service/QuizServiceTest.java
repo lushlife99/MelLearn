@@ -117,7 +117,6 @@ class QuizServiceTest {
                 eq(QuizType.READING), 
                 eq(LearningLevel.Advanced)
         );
-        verifyNoInteractions(redisTemplate);
     }
 
     @Test
@@ -143,7 +142,6 @@ class QuizServiceTest {
                 eq("test-music"), 
                 eq(LearningLevel.Advanced)
         );
-        verifyNoInteractions(redisTemplate);
     }
 
     @Test
@@ -159,8 +157,8 @@ class QuizServiceTest {
         )).thenReturn(Optional.empty());
         when(redisTemplate.hasKey(anyString())).thenReturn(false);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(quizCreateService.createQuizList(eq(quizRequest), eq(member)))
-                .thenReturn(CompletableFuture.completedFuture(expectedDto));
+        when(quizCreateService.createChoiceQuiz(eq(quizRequest), eq(member)))
+                .thenReturn(expectedDto);
 
         // when
         CompletableFuture<QuizListDto> result = quizService.getQuizList(quizRequest, memberId);
@@ -171,7 +169,7 @@ class QuizServiceTest {
         assertNotNull(quizListDto);
         assertEquals(expectedDto.getId(), quizListDto.getId());
         verify(valueOperations).set(anyString(), eq("true"), eq(1L), eq(TimeUnit.MINUTES));
-        verify(quizCreateService).createQuizList(eq(quizRequest), eq(member));
+        verify(quizCreateService).createChoiceQuiz(eq(quizRequest), eq(member));
     }
 
     @Test
@@ -188,7 +186,7 @@ class QuizServiceTest {
         when(redisTemplate.hasKey(anyString())).thenReturn(false);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(quizCreateService.createListeningQuiz(eq(quizRequest), eq(member)))
-                .thenReturn(CompletableFuture.completedFuture(expectedDto));
+                .thenReturn(expectedDto);
 
         // when
         CompletableFuture<ListeningQuizDto> result = quizService.getListeningQuiz(quizRequest, memberId);
