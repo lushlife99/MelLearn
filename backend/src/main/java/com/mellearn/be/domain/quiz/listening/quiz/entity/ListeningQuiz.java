@@ -1,4 +1,4 @@
-package com.mellearn.be.domain.listening.quiz.entity;
+package com.mellearn.be.domain.quiz.listening.quiz.entity;
 
 import com.mellearn.be.domain.member.enums.LearningLevel;
 import jakarta.persistence.*;

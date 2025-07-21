@@ -1,6 +1,6 @@
-package com.mellearn.be.domain.listening.submit.entity;
+package com.mellearn.be.domain.quiz.listening.submit.entity;
 
-import com.mellearn.be.domain.listening.quiz.entity.ListeningQuiz;
+import com.mellearn.be.domain.quiz.listening.quiz.entity.ListeningQuiz;
 import com.mellearn.be.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

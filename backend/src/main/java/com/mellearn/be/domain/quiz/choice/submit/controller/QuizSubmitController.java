@@ -1,11 +1,11 @@
 package com.mellearn.be.domain.quiz.choice.submit.controller;
 
-import com.mellearn.be.domain.listening.submit.dto.ListeningSubmitDto;
-import com.mellearn.be.domain.listening.submit.dto.request.ListeningSubmitRequest;
+import com.mellearn.be.domain.quiz.listening.submit.dto.ListeningSubmitDto;
+import com.mellearn.be.domain.quiz.listening.submit.dto.request.ListeningSubmitRequest;
 import com.mellearn.be.domain.quiz.choice.quiz.service.QuizService;
 import com.mellearn.be.domain.quiz.choice.submit.dto.QuizSubmitDto;
 import com.mellearn.be.domain.quiz.choice.submit.dto.QuizSubmitRequest;
-import com.mellearn.be.global.prompt.QuizType;
+import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

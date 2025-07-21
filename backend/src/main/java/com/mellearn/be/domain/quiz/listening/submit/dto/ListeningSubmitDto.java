@@ -1,7 +1,7 @@
-package com.mellearn.be.domain.listening.submit.dto;
+package com.mellearn.be.domain.quiz.listening.submit.dto;
 
-import com.mellearn.be.domain.listening.quiz.dto.ListeningQuizDto;
-import com.mellearn.be.domain.listening.submit.entity.ListeningSubmit;
+import com.mellearn.be.domain.quiz.listening.quiz.dto.ListeningQuizDto;
+import com.mellearn.be.domain.quiz.listening.submit.entity.ListeningSubmit;
 import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;

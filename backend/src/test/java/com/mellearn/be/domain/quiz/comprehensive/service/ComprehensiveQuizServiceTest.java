@@ -1,16 +1,16 @@
 package com.mellearn.be.domain.quiz.comprehensive.service;
 
-import com.mellearn.be.domain.listening.quiz.dto.ListeningQuizDto;
-import com.mellearn.be.domain.listening.quiz.entity.ListeningQuiz;
-import com.mellearn.be.domain.listening.quiz.repository.ListeningQuizRepository;
-import com.mellearn.be.domain.listening.submit.dto.ListeningSubmitDto;
-import com.mellearn.be.domain.listening.submit.repository.ListeningSubmitRepository;
+import com.mellearn.be.domain.quiz.listening.quiz.dto.ListeningQuizDto;
+import com.mellearn.be.domain.quiz.listening.quiz.entity.ListeningQuiz;
+import com.mellearn.be.domain.quiz.listening.quiz.repository.ListeningQuizRepository;
+import com.mellearn.be.domain.quiz.listening.submit.dto.ListeningSubmitDto;
+import com.mellearn.be.domain.quiz.listening.submit.repository.ListeningSubmitRepository;
 import com.mellearn.be.domain.member.entity.Member;
 import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.member.repository.MemberRepository;
 import com.mellearn.be.domain.music.dto.LrcLyric;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.QuizListDto;
-import com.mellearn.be.domain.quiz.choice.quiz.dto.QuizRequest;
+import com.mellearn.be.domain.quiz.choice.quiz.dto.request.QuizRequest;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.Quiz;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.QuizList;
 import com.mellearn.be.domain.quiz.choice.quiz.repository.QuizListRepository;
@@ -22,9 +22,9 @@ import com.mellearn.be.domain.quiz.comprehensive.dto.ComprehensiveQuizSubmitDto;
 import com.mellearn.be.domain.quiz.comprehensive.dto.ComprehensiveQuizSubmitRequest;
 import com.mellearn.be.domain.quiz.speaking.dto.SpeakingSubmitDto;
 import com.mellearn.be.domain.quiz.speaking.entity.SpeakingSubmit;
-import com.mellearn.be.domain.quiz.speaking.service.SpeakingService;
+import com.mellearn.be.domain.quiz.speaking.service.SpeakingServiceV1;
 import com.mellearn.be.global.error.CustomException;
-import com.mellearn.be.global.prompt.QuizType;
+import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,7 +47,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class ComprehensiveQuizServiceTest {
@@ -56,7 +55,7 @@ class ComprehensiveQuizServiceTest {
     private QuizService quizService;
 
     @Mock
-    private SpeakingService speakingService;
+    private SpeakingServiceV1 speakingServiceV1;
 
     @Mock
     private MemberRepository memberRepository;
@@ -179,7 +178,7 @@ class ComprehensiveQuizServiceTest {
                 testListeningAnswers, 80.0, LocalDateTime.now()
         );
 
-        when(speakingService.submit(any(), anyString(), anyString()))
+        when(speakingServiceV1.submit(any(), anyString(), anyString()))
                 .thenReturn(CompletableFuture.completedFuture(speakingSubmitDto));
         when(quizService.submit(any(), anyString()))
                 .thenReturn(CompletableFuture.completedFuture(grammarSubmitDto))

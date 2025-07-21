@@ -1,6 +1,6 @@
 package com.mellearn.be.domain.quiz.comprehensive.controller;
 
-import com.mellearn.be.domain.quiz.choice.quiz.dto.QuizRequest;
+import com.mellearn.be.domain.quiz.choice.quiz.dto.request.QuizRequest;
 import com.mellearn.be.domain.quiz.comprehensive.dto.ComprehensiveQuizDto;
 import com.mellearn.be.domain.quiz.comprehensive.dto.ComprehensiveQuizSubmitDto;
 import com.mellearn.be.domain.quiz.comprehensive.dto.ComprehensiveQuizSubmitRequest;

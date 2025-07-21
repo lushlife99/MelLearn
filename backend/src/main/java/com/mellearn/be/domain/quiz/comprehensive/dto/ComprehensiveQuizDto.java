@@ -1,6 +1,6 @@
 package com.mellearn.be.domain.quiz.comprehensive.dto;
 
-import com.mellearn.be.domain.listening.quiz.dto.ListeningQuizDto;
+import com.mellearn.be.domain.quiz.listening.quiz.dto.ListeningQuizDto;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.QuizListDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

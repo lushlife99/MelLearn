@@ -1,6 +1,6 @@
-package com.mellearn.be.domain.listening.quiz.dto;
+package com.mellearn.be.domain.quiz.listening.quiz.dto;
 
-import com.mellearn.be.domain.listening.quiz.entity.ListeningQuiz;
+import com.mellearn.be.domain.quiz.listening.quiz.entity.ListeningQuiz;
 import lombok.Data;
 
 import java.util.List;

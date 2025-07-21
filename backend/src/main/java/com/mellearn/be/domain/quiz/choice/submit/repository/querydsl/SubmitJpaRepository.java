@@ -1,11 +1,12 @@
 package com.mellearn.be.domain.quiz.choice.submit.repository.querydsl;
 
-import com.mellearn.be.domain.listening.quiz.dto.ListeningQuizDto;
-import com.mellearn.be.domain.listening.submit.dto.ListeningSubmitDto;
+import com.mellearn.be.domain.quiz.listening.quiz.dto.ListeningQuizDto;
+import com.mellearn.be.domain.quiz.listening.submit.dto.ListeningSubmitDto;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.QuizListDto;
 import com.mellearn.be.domain.quiz.choice.submit.dto.QuizSubmitDto;
+import com.mellearn.be.domain.quiz.listening.submit.entity.QListeningSubmit;
 import com.mellearn.be.domain.quiz.speaking.dto.SpeakingSubmitDto;
-import com.mellearn.be.global.prompt.QuizType;
+import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -15,10 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.mellearn.be.domain.listening.quiz.entity.QListeningQuiz.listeningQuiz;
-import static com.mellearn.be.domain.listening.submit.entity.QListeningSubmit.listeningSubmit;
 import static com.mellearn.be.domain.quiz.choice.quiz.entity.QQuizList.quizList;
 import static com.mellearn.be.domain.quiz.choice.submit.entity.QQuizSubmit.quizSubmit;
+import static com.mellearn.be.domain.quiz.listening.quiz.entity.QListeningQuiz.listeningQuiz;
+import static com.mellearn.be.domain.quiz.listening.submit.entity.QListeningSubmit.listeningSubmit;
 import static com.mellearn.be.domain.quiz.speaking.entity.QSpeakingSubmit.speakingSubmit;
 
 
