@@ -1,0 +1,85 @@
+version: "3.8"
+
+services:
+  spring-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROFILES: dev
+    ports:
+      - "8080:8080"
+    networks:
+      - monitoring
+    depends_on:
+      - apm-server
+    environment:
+      - JAVA_TOOL_OPTIONS=-XX:+UseContainerSupport
+      - management.endpoints.web.exposure.include=*
+      - management.endpoint.prometheus.enabled=true
+      - PROFILES=dev
+      - SPRING_DATA_REDIS_HOST=host.docker.internal
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/melLearn?serverTimezone=Asia/Seoul&useSSL=false
+      - ELASTIC_APM_SERVER_URL=http://apm-server:8200
+      - ELASTIC_APM_SECRET_TOKEN=${APM_SECRET_TOKEN}
+      - ELASTIC_APM_SERVICE_NAME=spring-app
+      - ELASTIC_APM_ENVIRONMENT=dev
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false  # 보안 끄려면 false
+    ports:
+      - "9200:9200"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    networks:
+      - monitoring
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.9
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - monitoring
+
+  apm-server:
+    image: docker.elastic.co/apm/apm-server:7.17.9
+    environment:
+      - apm-server.host=0.0.0.0:8200
+      - output.elasticsearch.hosts=["http://elasticsearch:9200"]
+    ports:
+      - "8200:8200"
+    depends_on:
+      - elasticsearch
+    networks:
+      - monitoring
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - monitoring
+
+volumes:
+  es-data:
+
+networks:
+  monitoring:
+    driver: bridge

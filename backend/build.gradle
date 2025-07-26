@@ -75,6 +75,9 @@ dependencies {
 	// OpenAI 모듈용 starter 의존성
 	implementation 'org.springframework.ai:spring-ai-starter-model-openai:1.0.0'
 
+	// Prometheus
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
 	// MySQL
 	runtimeOnly 'com.mysql:mysql-connector-j:8.0.32'
 
