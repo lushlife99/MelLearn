@@ -1,17 +1,24 @@
 package com.mellearn.be.domain.quiz.choice.submit.dto;
 
+import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.QuizListDto;
+import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import com.mellearn.be.domain.quiz.choice.submit.entity.QuizSubmit;
 import com.querydsl.core.annotations.QueryProjection;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class QuizSubmitDto {
 
@@ -31,13 +38,17 @@ public class QuizSubmitDto {
     }
 
     @QueryProjection
-    public QuizSubmitDto(Long id, QuizListDto quizList, List<Integer> submitAnswerList, double score, LocalDateTime createdTime) {
+    public QuizSubmitDto(Long id, Long quizListId, QuizType quizType, LearningLevel level, String musicId,
+                         String submitAnswerList, Integer score, LocalDateTime createdTime) {
         this.id = id;
-        this.quizList = quizList;
-        if (submitAnswerList != null) {
-            this.submitAnswerList = List.copyOf(submitAnswerList);
-        }
-        this.score = score;
+        this.quizList = new QuizListDto(quizListId, quizType, level, musicId);
+        this.submitAnswerList = submitAnswerList == null ? new java.util.ArrayList<>() :
+                java.util.Arrays.stream(submitAnswerList.split(","))
+                        .filter(s -> !s.isEmpty())
+                        .map(Integer::parseInt)
+                        .collect(java.util.stream.Collectors.toList());
+        this.score = score != null ? score : 0;
         this.createdTime = createdTime;
     }
+
 }

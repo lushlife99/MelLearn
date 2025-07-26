@@ -25,14 +25,14 @@ public class MemberController {
         return memberService.getMemberProfile(principal.getName());
     }
 
-    @PostMapping("/spotifyAccount")
+    @PostMapping("/account/spotify")
     @Operation(summary = "스포티파이 계정 id 등록", description = "스포티파이 계정 id 등록")
     public ResponseEntity updateSpotifyId(@RequestParam String accountId, Principal principal) {
         memberService.updateSpotifyAccount(accountId, principal.getName());
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @PutMapping("/info")
+    @PatchMapping("/info")
     @Operation(summary = "멤버 정보 변경", description = "비밀번호, userId를 제외한 정보를 변경")
     public MemberDto updateMemberInfo(@RequestBody MemberDto memberDto, Principal principal) {
         System.out.println(memberDto);

@@ -16,10 +16,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.security.Key;
@@ -66,19 +64,23 @@ public class JwtTokenProvider {
     public TokenInfo generateToken(Authentication authentication, HttpServletResponse response) {
         String accessToken = generateAccessToken(authentication);
         String refreshToken = generateRefreshToken(authentication);
+        String username = authentication.getName();
+        String authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
+        // refreshToken 쿠키 설정
         Cookie cookie = new Cookie("refreshToken", refreshToken);
         cookie.setMaxAge(refreshExpirationTime);
         cookie.setPath("/");
-        //cookie.setSecure(true); //로컬환경에서는 Secure 설정을 꺼놔야 함. secure 켜지면 https 환경에서만 쿠키가 전달됨.
         cookie.setHttpOnly(true);
         response.addCookie(cookie);
 
-        redisTemplate.opsForValue().set(
-                authentication.getName(),
-                refreshToken,
-                refreshExpirationTime,
-                TimeUnit.MILLISECONDS
-        );
+        // Redis 저장
+        String redisKey = "refresh:" + username;
+        redisTemplate.opsForHash().put(redisKey, "token", refreshToken);
+        redisTemplate.opsForHash().put(redisKey, "auth", authorities);
+        redisTemplate.expire(redisKey, refreshExpirationTime, TimeUnit.MILLISECONDS);
 
         return TokenInfo.builder()
                 .grantType("Bearer")
@@ -86,6 +88,7 @@ public class JwtTokenProvider {
                 .refreshToken("httpOnly")
                 .build();
     }
+
 
 
     private String generateAccessToken(Authentication authentication) {
@@ -143,39 +146,52 @@ public class JwtTokenProvider {
     }
 
     // 토큰 정보를 검증하는 메서드
-
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+        } catch (SecurityException e) {
+            log.warn("Invalid JWT signature: {}", e.getMessage());
+        } catch (MalformedJwtException e) {
+            log.warn("Invalid JWT token: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
+            log.warn("JWT token is expired: {}", e.getMessage());
         } catch (UnsupportedJwtException e) {
+            log.warn("JWT token is unsupported: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
+            log.warn("JWT claims string is empty: {}", e.getMessage());
         }
         return false;
     }
-    @Transactional
-    public TokenInfo reissueToken(String reqRefreshToken, HttpServletResponse response) throws RuntimeException{
-        Claims claims = parseClaims(reqRefreshToken);
 
-        String refreshToken = redisTemplate.opsForValue().get(claims.getSubject()).toString();
+    public TokenInfo reissueToken(String reqRefreshToken, HttpServletResponse response) {
+        Claims claims = parseClaims(reqRefreshToken);
+        String username = claims.getSubject();
+        String redisKey = "refresh:" + username;
+
+        // Redis에서 token, 권한 조회
+        Object storedToken = redisTemplate.opsForHash().get(redisKey, "token");
+        Object storedAuth = redisTemplate.opsForHash().get(redisKey, "auth");
+
+        if (storedToken == null || !storedToken.equals(reqRefreshToken)) {
+            throw new RuntimeException("유효하지 않은 리프레시 토큰입니다.");
+        }
+
+        if (storedAuth == null) {
+            throw new RuntimeException("권한 정보가 존재하지 않습니다.");
+        }
 
         Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+                Arrays.stream(storedAuth.toString().split(","))
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
-        UserDetails principal = new org.springframework.security.core.userdetails.User(claims.getSubject(), "", authorities);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(principal, null, authorities);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        if(refreshToken.equals(reqRefreshToken)){
-            return generateToken(authentication, response);
-        }
-        else {
-            return null;
-        }
+        UserDetails principal = new org.springframework.security.core.userdetails.User(username, "", authorities);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(principal, null, authorities);
+
+        return generateToken(authentication, response);
     }
+
     private Claims parseClaims(String token) {
         try {
             return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();

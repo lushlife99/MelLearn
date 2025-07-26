@@ -16,6 +16,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -46,48 +47,44 @@ public class PromptFetchService {
     @Value("classpath:/prompt/VOCABULARY/user/vocabulary-user-message.st")
     private Resource vocabularyUserMessageTemplate;
 
-    public Prompt fetch(QuizRequest request, Member member) {
+    public Prompt fetch(QuizRequest request, Member member, String responseFormat) {
         LearningLevel level = member.getLevel();
         Language langType = member.getLangType();
+        Resource userPrompt = null;
         SystemPromptTemplate systemPrompt = null;
 
         if (request.getQuizType().equals(QuizType.VOCABULARY)) {
-            systemPrompt = getVocabularySystemPrompt(request, level);
-        }
-
-        else if (request.getQuizType().equals(QuizType.GRAMMAR)) {
+            systemPrompt = getVocabularySystemPrompt(level);
+            userPrompt = vocabularyUserMessageTemplate;
+        } else if (request.getQuizType().equals(QuizType.GRAMMAR)) {
             systemPrompt = getGrammarSystemPrompt();
-        }
-
-        else if (request.getQuizType().equals(QuizType.READING)) {
+            userPrompt = grammarUserMessageTemplate;
+        } else if (request.getQuizType().equals(QuizType.READING)) {
             systemPrompt = getReadingSystemPrompt();
+            userPrompt = readingUserMessageTemplate;
         }
 
         // listening
-        else systemPrompt = getListeningSystemPrompt();
+        else {
+            systemPrompt = getListeningSystemPrompt();
+            userPrompt = listeningUserMessageTemplate;
+        }
 
-        PromptTemplate promptTemplate = PromptTemplate.builder()
-                .renderer(StTemplateRenderer.builder().startDelimiterToken('<').endDelimiterToken('>').build())
-                .resource(readingUserMessageTemplate)
-                .build();
-
-        String renderedMessage = promptTemplate.render();
+        String renderedMessage = render(userPrompt, request, level, langType, responseFormat);
         UserMessage userMessage = new UserMessage(renderedMessage);
 
         return new Prompt(List.of(systemPrompt.createMessage(), userMessage));
 
     }
 
-    private SystemPromptTemplate getVocabularySystemPrompt(QuizRequest quizRequest, LearningLevel level) {
+    private SystemPromptTemplate getVocabularySystemPrompt(LearningLevel level) {
         if (level.equals(LearningLevel.Beginner)) {
             return new SystemPromptTemplate(vocabularyBeginnerSystemMessageTemplate);
         }
 
         if (level.equals(LearningLevel.Intermediate)) {
             return new SystemPromptTemplate(vocabularyIntermediateSystemMessageTemplate);
-        }
-
-        else return new SystemPromptTemplate(vocabularyAdvancedSystemMessageTemplate);
+        } else return new SystemPromptTemplate(vocabularyAdvancedSystemMessageTemplate);
     }
 
     private SystemPromptTemplate getReadingSystemPrompt() {
@@ -100,5 +97,25 @@ public class PromptFetchService {
 
     private SystemPromptTemplate getGrammarSystemPrompt() {
         return new SystemPromptTemplate(grammarSystemMessageTemplate);
+    }
+
+    private String render(Resource resource, QuizRequest request, LearningLevel level, Language language, String responseFormat) {
+        PromptTemplate promptTemplate = PromptTemplate.builder()
+                .renderer(StTemplateRenderer.builder().startDelimiterToken('{').endDelimiterToken('}').build())
+                .resource(resource)
+                .build();
+
+        if (request.getQuizType().equals(QuizType.VOCABULARY)) {
+            return promptTemplate.render(Map.of(
+                    "lang", language.getIso639Value(),
+                    "text", request.getLyric(),
+                    "format", responseFormat));
+        }
+
+        return promptTemplate.render(Map.of(
+                "level", level.getValue(),
+                "lang", language.getIso639Value(),
+                "text", request.getLyric(),
+                "format", responseFormat));
     }
 }

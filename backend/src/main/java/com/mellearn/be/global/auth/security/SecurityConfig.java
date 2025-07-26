@@ -42,12 +42,13 @@ public class SecurityConfig  {
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .csrf((csrfConfig) -> csrfConfig.disable())
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exHandling -> exHandling.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authorizeRequests) ->
                         authorizeRequests
-                                .requestMatchers("/join", "/login", "/test/**", "/v3/**", "/swagger-ui/**", "/hc", "/env").permitAll()
                                 .requestMatchers("/api/**").authenticated()
+                                .anyRequest().permitAll()
                 );
 
         return http.build();
@@ -65,6 +66,11 @@ public class SecurityConfig  {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(jwtTokenProvider);
     }
 
 

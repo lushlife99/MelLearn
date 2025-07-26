@@ -60,6 +60,7 @@ public class QuizService {
     }
 
     @Async("taskExecutor")
+    @Transactional
     public CompletableFuture<QuizListDto> getQuizList(QuizRequest quizRequest, String memberId) {
         try {
             Member member = findMember(memberId);
@@ -89,6 +90,7 @@ public class QuizService {
     }
 
     @Async("taskExecutor")
+    @Transactional
     public CompletableFuture<ListeningQuizDto> getListeningQuiz(QuizRequest quizRequest, String memberId) {
         try {
             Member member = findMember(memberId);
