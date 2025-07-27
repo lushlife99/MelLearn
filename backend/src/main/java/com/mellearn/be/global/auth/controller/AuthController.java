@@ -35,7 +35,7 @@ public class AuthController {
         return authService.login(authRequest, response);
     }
 
-    @GetMapping("/reIssueJwt")
+    @GetMapping("/jwt")
     @Operation(summary = "jwt 재발급", description = "jwt - access, refresh 토큰 재발급")
     public TokenInfo reIssueJwt(HttpServletRequest request, HttpServletResponse response) {
         return authService.reIssueToken(request, response);

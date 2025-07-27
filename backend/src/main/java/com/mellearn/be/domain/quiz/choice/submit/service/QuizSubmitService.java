@@ -130,7 +130,7 @@ public class QuizSubmitService {
                 .quizList(quizList)
                 .submitAnswerList(submitAnswers)
                 .member(member)
-                .score(Integer.parseInt(String.format("%.2f", score)))
+                .score((int) score)
                 .build();
     }
 

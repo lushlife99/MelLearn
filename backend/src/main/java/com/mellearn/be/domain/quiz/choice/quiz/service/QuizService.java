@@ -60,6 +60,7 @@ public class QuizService {
     }
 
     @Async("taskExecutor")
+    @Transactional
     public CompletableFuture<QuizListDto> getQuizList(QuizRequest quizRequest, String memberId) {
         try {
             Member member = findMember(memberId);
@@ -89,6 +90,7 @@ public class QuizService {
     }
 
     @Async("taskExecutor")
+    @Transactional
     public CompletableFuture<ListeningQuizDto> getListeningQuiz(QuizRequest quizRequest, String memberId) {
         try {
             Member member = findMember(memberId);
@@ -120,25 +122,15 @@ public class QuizService {
     @Async("taskExecutor")
     @Transactional
     public CompletableFuture<QuizSubmitDto> submit(QuizSubmitRequest submitRequest, String memberId) {
-        try {
-            Member member = findMember(memberId);
-            return CompletableFuture.completedFuture(quizSubmitService.submitQuiz(submitRequest, member));
-        } catch (Exception e) {
-            log.error("Error in submit: {}", e.getMessage());
-            return CompletableFuture.failedFuture(e);
-        }
+        Member member = findMember(memberId);
+        return CompletableFuture.supplyAsync(() -> quizSubmitService.submitQuiz(submitRequest, member));
     }
 
     @Async("taskExecutor")
     @Transactional
     public CompletableFuture<ListeningSubmitDto> listeningSubmit(ListeningSubmitRequest submitRequest, String memberId) {
-        try {
-            Member member = findMember(memberId);
-            return CompletableFuture.completedFuture(quizSubmitService.submitListeningQuiz(submitRequest, member));
-        } catch (Exception e) {
-            log.error("Error in listeningSubmit: {}", e.getMessage());
-            return CompletableFuture.failedFuture(e);
-        }
+        Member member = findMember(memberId);
+        return CompletableFuture.supplyAsync(() -> quizSubmitService.submitListeningQuiz(submitRequest, member));
     }
 
     private Optional<QuizList> fetchQuiz(QuizRequest quizRequest, Member member) {

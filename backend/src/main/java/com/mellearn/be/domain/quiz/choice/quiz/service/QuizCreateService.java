@@ -1,5 +1,7 @@
 package com.mellearn.be.domain.quiz.choice.quiz.service;
 
+import com.mellearn.be.domain.quiz.choice.quiz.entity.Quiz;
+import com.mellearn.be.domain.quiz.choice.quiz.repository.QuizRepository;
 import com.mellearn.be.domain.quiz.listening.quiz.dto.ListeningQuizDto;
 import com.mellearn.be.domain.quiz.listening.quiz.dto.response.chatmodel.ListeningQuizResponseDto;
 import com.mellearn.be.domain.quiz.listening.quiz.entity.ListeningQuiz;
@@ -29,6 +31,7 @@ public class QuizCreateService {
 
     private final ChatModel chatModel;
     private final QuizListRepository quizListRepository;
+    private final QuizRepository quizRepository;
     private final ListeningQuizRepository listeningQuizRepository;
     private final PromptFetchService promptFetchService;
 
@@ -36,7 +39,7 @@ public class QuizCreateService {
     @Transactional
     public ListeningQuizDto createListeningQuiz(QuizRequest request, Member member) {
         BeanOutputConverter<ListeningQuizResponseDto> converter = new BeanOutputConverter<>(ListeningQuizResponseDto.class);
-        Prompt prompt = promptFetchService.fetch(request, member);
+        Prompt prompt = promptFetchService.fetch(request, member, converter.getFormat());
         Generation result = chatModel.call(prompt).getResult();
         ListeningQuizResponseDto listeningQuizResponseDto = converter.convert(Objects.requireNonNull(result.getOutput().getText()));
 
@@ -50,11 +53,11 @@ public class QuizCreateService {
     @Transactional
     public QuizListDto createChoiceQuiz(QuizRequest request, Member member) {
         BeanOutputConverter<QuizListResponseDto> converter = new BeanOutputConverter<>(QuizListResponseDto.class);
-        Prompt prompt = promptFetchService.fetch(request, member);
+        Prompt prompt = promptFetchService.fetch(request, member, converter.getFormat());
         Generation result = chatModel.call(prompt).getResult();
         QuizListResponseDto quizListDto = converter.convert(Objects.requireNonNull(result.getOutput().getText()));
-
         QuizList quizList = QuizList.create(request.getQuizType(), quizListDto, member.getLevel(), request.getMusicId());
+
         quizListRepository.save(quizList);
         return new QuizListDto(quizList);
     }

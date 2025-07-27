@@ -38,11 +38,77 @@ public class ComprehensiveQuizService {
     private final SpeakingService speakingService;
     private final MemberRepository memberRepository;
 
+    /**
+     * Speaking 제외한 모의고사 제출
+     */
+    public ComprehensiveQuizSubmitDto submit(ComprehensiveQuizSubmitRequest quizSubmitRequest, String memberId) throws ExecutionException, InterruptedException {
+        try {
+            Member member = findMember(memberId);
+
+            CompletableFuture<QuizSubmitDto> grammarSubmit = quizService.submit(
+                    QuizSubmitRequest.builder()
+                            .quizType(QuizType.GRAMMAR)
+                            .answers(quizSubmitRequest.getGrammarSubmit())
+                            .musicId(quizSubmitRequest.getMusicId())
+                            .build(), memberId);
+
+            CompletableFuture<QuizSubmitDto> vocaSubmit = quizService.submit(
+                    QuizSubmitRequest.builder()
+                            .quizType(QuizType.VOCABULARY)
+                            .answers(quizSubmitRequest.getVocabularySubmit())
+                            .musicId(quizSubmitRequest.getMusicId())
+                            .build(), memberId);
+
+            CompletableFuture<QuizSubmitDto> readingSubmit = quizService.submit(
+                    QuizSubmitRequest.builder()
+                            .quizType(QuizType.READING)
+                            .answers(quizSubmitRequest.getReadingSubmit())
+                            .musicId(quizSubmitRequest.getMusicId())
+                            .build(), memberId);
+
+            CompletableFuture<ListeningSubmitDto> listeningSubmit = quizService.listeningSubmit(
+                    ListeningSubmitRequest.builder()
+                            .submitWordList(quizSubmitRequest.getListeningSubmit())
+                            .musicId(quizSubmitRequest.getMusicId())
+                            .build(), memberId);
+
+            // 모든 작업이 완료될 때까지 대기
+            CompletableFuture.allOf(grammarSubmit, vocaSubmit, readingSubmit, listeningSubmit)
+                    .exceptionally(throwable -> {
+                        log.error("Error in comprehensive submit: {}", throwable.getMessage());
+                        throw new CompletionException(throwable);
+                    })
+                    .join();
+
+            // 결과 수집
+            QuizSubmitDto grammarSubmitDto = grammarSubmit.get();
+            QuizSubmitDto vocaSubmitDto = vocaSubmit.get();
+            QuizSubmitDto readingSubmitDto = readingSubmit.get();
+            ListeningSubmitDto listeningSubmitDto = listeningSubmit.get();
+
+            return new ComprehensiveQuizSubmitDto(
+                    quizSubmitRequest.getMusicId(), member.getLevel(),
+                    ComprehensiveQuizAnswerDto.builder()
+                            .vocabularySubmit(vocaSubmitDto)
+                            .readingSubmit(readingSubmitDto)
+                            .grammarSubmit(grammarSubmitDto)
+                            .listeningSubmit(listeningSubmitDto)
+                            .build()
+            );
+        } catch (Exception e) {
+            log.error("Error in comprehensive submit: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Speaking 포함한 모의고사 제출
+     */
+
     public ComprehensiveQuizSubmitDto submit(ComprehensiveQuizSubmitRequest quizSubmitRequest, MultipartFile speakingSubmitFile, String memberId) throws ExecutionException, InterruptedException {
         try {
             Member member = findMember(memberId);
 
-            // 모든 비동기 작업을 병렬로 실행
             CompletableFuture<SpeakingSubmitDto> speakingSubmit = speakingService.submit(
                     SpeakingSubmitRequest.builder()
                             .file(speakingSubmitFile)

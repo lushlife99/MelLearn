@@ -9,6 +9,7 @@ import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -42,8 +43,8 @@ public class QuizSubmitController {
     public ResponseEntity getSubmitList(@RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
                                         @RequestParam QuizType quizType,
                                         Authentication authentication) {
-
-        return new ResponseEntity(quizService.getSubmitList(quizType, pageNo, authentication.getName()), HttpStatus.OK);
+        Page submitList = quizService.getSubmitList(quizType, pageNo, authentication.getName());
+        return new ResponseEntity(submitList, HttpStatus.OK);
     }
 
 }

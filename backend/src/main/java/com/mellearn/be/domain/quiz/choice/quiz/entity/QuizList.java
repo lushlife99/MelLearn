@@ -32,8 +32,11 @@ public class QuizList {
     private List<Quiz> quizzes = new ArrayList<>();
     @Enumerated(EnumType.STRING)
     private LearningLevel level;
+
     @OneToMany(mappedBy = "quizList", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<QuizSubmit> submitList = new ArrayList<>();
+
+
     private String musicId;
     @CreationTimestamp
     private LocalDateTime createdTime;
@@ -41,7 +44,11 @@ public class QuizList {
     @Builder
     public QuizList(QuizType quizType, List<Quiz> quizzes, LearningLevel level, String musicId, Long id) {
         this.quizType = quizType;
-        this.quizzes = quizzes;
+        if (quizzes == null) {
+            quizzes = new ArrayList<>();
+        } else {
+            this.quizzes = quizzes;
+        }
         this.level = level;
         this.musicId = musicId;
         this.createdTime = LocalDateTime.now();
@@ -49,25 +56,23 @@ public class QuizList {
     }
 
     public static QuizList create(QuizType quizType, QuizListResponseDto quizListDto, LearningLevel level, String musicId) {
-
-        List<Quiz> quizList = new ArrayList<>();
-
-        for (QuizResponseDto quizResponseDto : quizListDto.quizzes()) {
-            Quiz q = Quiz.builder()
-                    .answer(quizResponseDto.answer())
-                    .comment(quizResponseDto.comment())
-                    .optionList(quizResponseDto.optionList())
-                    .question(quizResponseDto.question())
-                    .build();
-            quizList.add(q);
-        }
-
-        return QuizList.builder()
+        QuizList quizList = QuizList.builder()
                 .quizType(quizType)
-                .quizzes(quizList)
                 .level(level)
                 .musicId(musicId)
                 .build();
+
+        for (QuizResponseDto dto : quizListDto.quizzes()) {
+            Quiz q = Quiz.builder()
+                    .answer(dto.answer())
+                    .comment(dto.comment())
+                    .optionList(dto.optionList())
+                    .question(dto.question())
+                    .build();
+            quizList.addQuiz(q);
+        }
+
+        return quizList;
     }
 
     public static QuizList create(QuizType quizType, List<Quiz> quizzes, LearningLevel level, String musicId) {

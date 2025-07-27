@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -33,6 +34,7 @@ public class QuizSubmit {
     @ElementCollection
     @CollectionTable(name = "quiz_submit_answer", joinColumns = @JoinColumn(name = "quiz_submit_id"))
     @Column(name = "answer")
+    @BatchSize(size = 5)
     private List<Integer> submitAnswerList;
 
     private int score;

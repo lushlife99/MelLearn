@@ -22,6 +22,7 @@ public class ListeningQuiz {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(columnDefinition = "TEXT")
     private String blankedText;
 
     private String musicId;

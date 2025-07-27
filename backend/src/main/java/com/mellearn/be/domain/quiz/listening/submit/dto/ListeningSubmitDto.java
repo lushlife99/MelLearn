@@ -19,7 +19,7 @@ public class ListeningSubmitDto {
     private ListeningQuizDto listeningQuiz;
     private LearningLevel level;
     private List<String> submitAnswerList = new ArrayList<>();
-    private double score;
+    private Double score;
     private LocalDateTime createdTime;
 
     public ListeningSubmitDto(ListeningSubmit listeningSubmit) {
@@ -32,7 +32,7 @@ public class ListeningSubmitDto {
     }
 
     @QueryProjection
-    public ListeningSubmitDto(Long id, ListeningQuizDto listeningQuiz, LearningLevel level, List<String> submitAnswerList, double score, LocalDateTime createdTime) {
+    public ListeningSubmitDto(Long id, ListeningQuizDto listeningQuiz, LearningLevel level, List<String> submitAnswerList, Double score, LocalDateTime createdTime) {
         this.id = id;
         this.listeningQuiz = listeningQuiz;
         this.level = level;

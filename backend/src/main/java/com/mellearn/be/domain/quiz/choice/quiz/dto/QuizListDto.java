@@ -1,11 +1,15 @@
 package com.mellearn.be.domain.quiz.choice.quiz.dto;
 
+import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.Quiz;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.QuizList;
+import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
+import com.querydsl.core.annotations.QueryProjection;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.checkerframework.checker.units.qual.A;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,6 +21,7 @@ import java.util.List;
 public class QuizListDto {
 
     private Long id;
+    private QuizType quizType;
     private List<QuizDto> quizzes;
     @Column(unique = true)
     private String musicId;
@@ -32,5 +37,14 @@ public class QuizListDto {
         this.musicId = quizList.getMusicId();
         this.level = quizList.getLevel().getValue();
         this.createdTime = quizList.getCreatedTime();
+    }
+
+    @QueryProjection
+    public QuizListDto(Long id, QuizType quizType, LearningLevel level, String musicId) {
+        this.id = id;
+        this.quizType = quizType;
+        this.level = level.getValue();
+        this.musicId = musicId;
+        this.quizzes = new ArrayList<>();
     }
 }

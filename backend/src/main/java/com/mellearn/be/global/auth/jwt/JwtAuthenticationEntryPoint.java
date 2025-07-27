@@ -11,12 +11,12 @@ import java.io.IOException;
 
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
-        if(authException instanceof BadCredentialsException)
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "권한이 없습니다");
+        String message = authException.getMessage();
 
-        else response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "ReIssueToken");
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, message);
     }
 }
