@@ -16,7 +16,7 @@ export default function InputField({
   error,
 }: Props) {
   return (
-    <>
+    <div className='w-full'>
       <label htmlFor={id} className='sr-only'>
         {placeholder}
       </label>
@@ -25,13 +25,13 @@ export default function InputField({
         type={type}
         placeholder={placeholder}
         {...register}
-        className='bg-white rounded-2xl h-12 shadow px-4 focus:ring-2 focus:ring-primary border-none text-base'
+        className='w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-transparent transition-all duration-300 hover:bg-white/15'
       />
       {error && (
-        <span className='text-center text-red-500 font-bold text-sm'>
+        <p className='mt-2 text-red-400 text-sm font-medium'>
           {error.message || `${placeholder}를 입력해주세요`}
-        </span>
+        </p>
       )}
-    </>
+    </div>
   );
 }

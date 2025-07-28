@@ -7,5 +7,8 @@ export const ROUTES = {
   SPOTIFY_LOGIN: '/spotify-login',
 
   ARTISTS: '/artists',
-  CHARTS: '/charts',
+  TRACKS: '/tracks',
+
+  ARTIST_DETAIL: (id: string) => `/artists/${id}`,
+  TRACK_DETAIL: (id: string) => `/tracks/${id}`,
 };

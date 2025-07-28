@@ -1,20 +1,18 @@
 import type { Artist, Track } from '../types/home';
 import CustomCarousel from './CustomCarousel';
 
-export default function CardList({
-  items,
-  type,
-  onClick,
-}: {
+interface Props {
   items: Artist[] | Track[];
-  type: 'artist' | 'track';
+  type: 'track' | 'artist';
   onClick: (item: Artist | Track) => void;
-}) {
+}
+
+export default function CardList({ items, type, onClick }: Props) {
   return (
     <CustomCarousel>
-      {items.map((item, index) => (
+      {items.map((item) => (
         <div
-          key={index}
+          key={item.id}
           onClick={() => onClick(item)}
           className='flex-shrink-0 bg-black rounded-lg hover:opacity-70 cursor-pointer'
         >

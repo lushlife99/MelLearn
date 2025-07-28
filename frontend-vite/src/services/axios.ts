@@ -17,6 +17,12 @@ export const apiSpotify = axios.create({
   },
 });
 
+export const apiLrc = axios.create({
+  baseURL: 'https://lrclib.net/api',
+});
+
+// apiLrc 인터셉터 만들기
+
 const handleRequestInterceptor = (
   config: InternalAxiosRequestConfig
 ): InternalAxiosRequestConfig => {
@@ -65,8 +71,9 @@ const handleSpotifyResponseInterceptor = async (
     // 나중에 토큰 재발급 로직 구현
     window.location.href = '/login';
   } else if (status === 403) {
-    alert('프리미엄 계정 유저가 아닙니다.');
-    window.location.href = '/';
+    console.error(error);
+    // alert('프리미엄 계정 유저가 아닙니다.');
+    //window.location.href = '/';
   } else if (status === 404) {
     //alert('연결된 장치가 존재하지 않습니다. 다시 로그인 해주세요.');
     //window.location.href = '/';

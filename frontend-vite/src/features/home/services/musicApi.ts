@@ -63,5 +63,3 @@ export async function fetchTopArtists(): Promise<Artist[]> {
 
   return artists;
 }
-
-export async function fetchRecommend() {}

@@ -1,8 +1,8 @@
 import { useForm } from 'react-hook-form';
 import type { SignupFormValues } from '@/features/auth/types';
-import AuthLayout from '@/features/components/AuthLayout';
+import AuthLayout from '@/features/auth/components/AuthLayout';
 import useAuth from '@/features/auth/hooks/useAuth';
-import SignupForm from '@/features/components/SignupForm';
+import SignupForm from '@/features/auth/components/SignupForm';
 
 export default function SignupPage() {
   const {

@@ -1,43 +1,16 @@
 import { useNavigate } from 'react-router-dom';
 import { TrendingUp, Users } from 'lucide-react';
-import useHomeMusicData from '@/features/home/hooks/useHomeMusicData';
-import { useSpotifyAccount } from '@/features/spotify/hooks/useSpotifyAccount';
-import useSpotifyPlayer from '@/features/spotify/hooks/useSpotifyPlayer';
 import CardList from '@/features/home/components/CardList';
 import Header from '@/features/home/components/Header';
 import SearchBar from '@/features/home/components/SearchBar';
 import WelcomeSection from '@/features/home/components/WelcomeSection';
 import SectionHeader from '@/features/home/components/SectionHeader';
-import { useMemo } from 'react';
 import { ROUTES } from '@/services/router';
+import useHomeData from '@/features/home/hooks/useHomeData';
 
 export default function HomePage() {
-  const spotify_access_token = localStorage.getItem('spotify_access_token');
-  const { player } = useSpotifyPlayer(spotify_access_token);
-  const { spotifyId } = useSpotifyAccount(!!spotify_access_token);
-  const { artists, charts, error, isLoading } = useHomeMusicData();
+  const { artists, charts, error, isLoading } = useHomeData();
   const navigate = useNavigate();
-  const sections = useMemo(
-    () => [
-      {
-        title: '인기 차트',
-        description: '지금 가장 인기 있는 음악들',
-        icon: TrendingUp,
-        items: charts || [],
-        type: 'track' as const,
-        onClick: () => navigate(ROUTES.CHARTS),
-      },
-      {
-        title: '인기 가수',
-        description: '팬들이 사랑하는 아티스트들',
-        icon: Users,
-        items: artists || [],
-        type: 'artist' as const,
-        onClick: () => navigate(ROUTES.ARTISTS),
-      },
-    ],
-    [charts, artists, navigate]
-  );
 
   const SkeletonLoader = () => (
     <div className='min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900'>
@@ -54,7 +27,7 @@ export default function HomePage() {
     </div>
   );
 
-  if (isLoading || !player || !spotifyId) return <SkeletonLoader />;
+  if (isLoading) return <SkeletonLoader />;
 
   if (error)
     return (
@@ -85,24 +58,32 @@ export default function HomePage() {
           <WelcomeSection />
 
           <div className='space-y-12'>
-            {sections.map((section, index) => (
-              <div
-                key={index}
-                className='bg-white/5 backdrop-blur-lg rounded-2xl p-6 sm:p-8 border border-white/10 hover:border-white/20 transition-all duration-300 group'
-              >
-                <SectionHeader
-                  Icon={section.icon}
-                  title={section.title}
-                  description={section.description}
-                  onClick={section.onClick}
-                />
-                <CardList
-                  items={section.items}
-                  type={section.type}
-                  onClick={(item) => console.log(item)}
-                />
-              </div>
-            ))}
+            <div className='bg-white/5 backdrop-blur-lg rounded-2xl p-6 sm:p-8 border border-white/10 hover:border-white/20 transition-all duration-300 group'>
+              <SectionHeader
+                Icon={TrendingUp}
+                title='인기 차트'
+                description='지금 가장 인기 있는 음악들'
+                onClick={() => navigate(ROUTES.TRACKS)}
+              />
+              <CardList
+                items={charts || []}
+                type='track'
+                onClick={(item) => navigate(ROUTES.TRACK_DETAIL(item.id))}
+              />
+            </div>
+            <div className='bg-white/5 backdrop-blur-lg rounded-2xl p-6 sm:p-8 border border-white/10 hover:border-white/20 transition-all duration-300 group'>
+              <SectionHeader
+                Icon={Users}
+                title='인기 가수'
+                description='팬들이 사랑하는 아티스트들'
+                onClick={() => navigate(ROUTES.ARTISTS)}
+              />
+              <CardList
+                items={artists || []}
+                type='artist'
+                onClick={(item) => navigate(ROUTES.ARTIST_DETAIL(item.id))}
+              />
+            </div>
           </div>
         </main>
       </div>

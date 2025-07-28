@@ -4,6 +4,8 @@ interface Image {
   width: number;
 }
 
+export type Type = 'artist' | 'track';
+
 export interface Artist {
   id: string;
   name: string;
@@ -13,6 +15,9 @@ export interface Artist {
   popularity: number;
   uri: string;
   type: 'artist';
+  external_urls: {
+    spotify: string;
+  };
 }
 
 export interface Track {
@@ -23,7 +28,14 @@ export interface Track {
   is_playable: boolean;
   album: {
     images: Image[];
+    name: string;
+    release_date: string;
+    total_tracks: number;
+  };
+  external_urls: {
+    spotify: string;
   };
   popularity: number;
   type: 'track';
+  track_number: number;
 }

@@ -40,3 +40,29 @@ export async function fetchSpotifyProfile() {
   const { data } = await apiSpotify.get('/me');
   return data;
 }
+
+export async function fetchPlaybackState(deviceId: string) {
+  return await apiSpotify.put('/me/player', {
+    device_ids: [deviceId],
+    play: false,
+  });
+}
+
+export async function startPlayback(deviceId: string, trackId: string) {
+  return await apiSpotify.put('/me/player/play', {
+    device_id: deviceId,
+    uris: [`spotify:track:${trackId}`],
+  });
+}
+
+export async function resumePlayback(deviceId: string) {
+  return await apiSpotify.put('/me/player/play', {
+    device_id: deviceId,
+  });
+}
+
+export async function pausePlayback(deviceId: string) {
+  return await apiSpotify.put('/me/player/pause', {
+    device_id: deviceId,
+  });
+}

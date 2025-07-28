@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchTopArtists, fetchTopCharts } from '../services/musicApi';
 
-export default function useHomeMusicData(lang: string = 'United%20States') {
+export default function useHomeData(lang: string = 'United%20States') {
   const {
     data: artists,
     isLoading: isArtistsLoading,
-    error: isArtistsError,
+    error: artistsError,
   } = useQuery({
     queryKey: ['topArtists'],
     queryFn: fetchTopArtists,
@@ -28,6 +28,6 @@ export default function useHomeMusicData(lang: string = 'United%20States') {
     retry: false,
   });
   const isLoading = isArtistsLoading || isChartsLoading;
-  const error = isArtistsError || chartsError;
+  const error = artistsError || chartsError;
   return { artists, charts, isLoading, error };
 }

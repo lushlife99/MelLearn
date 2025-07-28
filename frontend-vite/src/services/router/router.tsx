@@ -8,7 +8,9 @@ import SpotifyLoginPage from '@/features/spotify/SpotifyLoginPage';
 import NotFound from '@/pages/NotFound';
 import HomePage from '@/pages/HomePage';
 import ArtistListPage from '@/pages/artist/ArtistListPage';
-import ChartListPage from '@/pages/chart/ChartListPage';
+import ArtistDetailPage from '@/pages/artist/ArtistDetailPage';
+import TrackListPage from '@/pages/track/TrackListPage';
+import TrackDetailPage from '@/pages/track/TrackDetailPage';
 
 export const router = createBrowserRouter([
   {
@@ -41,8 +43,16 @@ export const router = createBrowserRouter([
         element: <ArtistListPage />,
       },
       {
-        path: ROUTES.CHARTS,
-        element: <ChartListPage />,
+        path: ROUTES.ARTIST_DETAIL(':id'),
+        element: <ArtistDetailPage />,
+      },
+      {
+        path: ROUTES.TRACKS,
+        element: <TrackListPage />,
+      },
+      {
+        path: ROUTES.TRACK_DETAIL(':id'),
+        element: <TrackDetailPage />,
       },
       {
         path: '*',

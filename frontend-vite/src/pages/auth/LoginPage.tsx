@@ -1,8 +1,8 @@
 import useAuth from '@/features/auth/hooks/useAuth';
 import type { LoginFormValues } from '@/features/auth/types';
-import AuthLayout from '@/features/components/AuthLayout';
-import LoginFooter from '@/features/components/LoginFooter';
-import LoginForm from '@/features/components/LoginForm';
+import AuthLayout from '@/features/auth/components/AuthLayout';
+import LoginFooter from '@/features/auth/components/LoginFooter';
+import LoginForm from '@/features/auth/components/LoginForm';
 import { useForm } from 'react-hook-form';
 
 export default function LoginPage() {

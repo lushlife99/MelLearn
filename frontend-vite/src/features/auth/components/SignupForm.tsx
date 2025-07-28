@@ -3,7 +3,7 @@ import type {
   UseFormRegister,
   UseFormWatch,
 } from 'react-hook-form';
-import type { SignupFormValues } from '../auth/types';
+import type { SignupFormValues } from '../types';
 import FormButton from './FormButton';
 import InputField from './InputField';
 
