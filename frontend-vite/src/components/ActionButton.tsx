@@ -1,11 +1,8 @@
 import type { Type } from '@/features/home/types/home';
-import useSpotifyPlayer from '@/features/spotify/hooks/useSpotifyPlayer';
-import MusicPlayerModal from '@/features/track/components/MusicPlayerModal';
-import useTrack from '@/features/track/hooks/useTrack';
 import { useSpotifyStore } from '@/store/useSpotifyStore';
 import { ExternalLink, Heart, Pause, Play, Share2 } from 'lucide-react';
-import { useState } from 'react';
 import TrackActionButton from '../features/track/components/TrackActionButton';
+import useSpotifyPlayer from '@/features/spotify/hooks/useSpotifyPlayer';
 
 interface Props {
   spotify: string;
@@ -14,57 +11,34 @@ interface Props {
 }
 
 export default function ActionButton({ spotify, trackId, type }: Props) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const [isStarted, setIsStarted] = useState(false);
-
-  const [isPlaying, setIsPlaying] = useState(false);
+  const isPlaying = useSpotifyStore((state) => state.isPlaying);
+  const currentTrackId = useSpotifyStore((state) => state.currentTrackId);
 
   const deviceId = useSpotifyStore((state) => state.deviceId);
-  const { play, resume, pause } = useSpotifyPlayer();
-  const { track } = useTrack(trackId || '');
+  const isThisPlaying = currentTrackId === trackId && isPlaying;
 
-  const handlePlay = async () => {
-    if (!deviceId || !trackId) return;
-    if (isStarted) {
-      resume(deviceId, {
-        onSuccess: () => setIsPlaying(true),
-      });
-      return;
-    }
-    play(
-      { deviceId, trackId },
-      {
-        onSuccess: () => {
-          setIsStarted(true);
-
-          setIsPlaying(true);
-          setIsModalOpen(true);
-        },
-      }
-    );
-  };
-
-  const handlePause = async () => {
-    if (!deviceId) return;
-
-    pause(deviceId, {
-      onSuccess: () => setIsPlaying(false),
-    });
-  };
+  const { play, pause } = useSpotifyPlayer();
 
   if (!deviceId) return <div>로딩중</div>;
   return (
     <div className='flex flex-wrap justify-center lg:justify-start gap-4'>
       {type === 'track' ? (
-        isPlaying ? (
+        isThisPlaying ? (
           <TrackActionButton
-            onClick={handlePause}
+            onClick={pause}
             Icon={Pause}
             label='일시정지'
+            buttonClass='space-x-2 px-6 py-3 rounded-xl'
+            iconClass='w-5 h-5'
           />
         ) : (
-          <TrackActionButton onClick={handlePlay} Icon={Play} label='재생' />
+          <TrackActionButton
+            onClick={() => play(trackId || '')}
+            Icon={Play}
+            label='재생'
+            buttonClass='space-x-2 px-6 py-3 rounded-xl'
+            iconClass='w-5 h-5'
+          />
         )
       ) : null}
 
@@ -86,16 +60,6 @@ export default function ActionButton({ spotify, trackId, type }: Props) {
           <ExternalLink className='w-5 h-5' />
           <span>Spotify</span>
         </button>
-      )}
-      {isModalOpen && track && (
-        <MusicPlayerModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          track={track}
-          onPlay={handlePlay}
-          onPause={handlePause}
-          isPlaying={isPlaying}
-        />
       )}
     </div>
   );

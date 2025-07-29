@@ -1,44 +1,44 @@
-import { useMutation } from '@tanstack/react-query';
-import {
-  pausePlayback,
-  resumePlayback,
-  startPlayback,
-} from '../services/spotifyApi';
-import toast from 'react-hot-toast';
+import useSpotifyApi from './useSpotifyApi';
+import { useSpotifyStore } from '@/store/useSpotifyStore';
 
 export default function useSpotifyPlayer() {
-  const { mutate: play } = useMutation({
-    mutationFn: ({
-      deviceId,
-      trackId,
-    }: {
-      deviceId: string;
-      trackId: string;
-    }) => startPlayback(deviceId, trackId),
-    onSuccess: () => {},
-    onError: () => {
-      toast.error('재생에 실패했습니다.');
-    },
-  });
+  const { startPlayback, resumePlayback, pausePlayback } = useSpotifyApi();
 
-  const { mutate: resume } = useMutation({
-    mutationFn: (deviceId: string) => resumePlayback(deviceId),
-    onSuccess: () => {},
-    onError: () => {
-      toast.error('재생에 실패했습니다.');
-    },
-  });
+  const deviceId = useSpotifyStore((state) => state.deviceId);
+  const isStarted = useSpotifyStore((state) => state.isStarted);
+  const currentTrackId = useSpotifyStore((state) => state.currentTrackId);
+  const setIsPlaying = useSpotifyStore((state) => state.setIsPlaying);
+  const setIsStarted = useSpotifyStore((state) => state.setIsStarted);
+  const setIsPlayerOpen = useSpotifyStore((state) => state.setIsPlayerOpen);
+  const setCurrentTrackId = useSpotifyStore((state) => state.setCurrentTrackId);
 
-  const { mutate: pause } = useMutation({
-    mutationFn: (deviceId: string) => pausePlayback(deviceId),
-    onSuccess: () => {},
-    onError: () => {
-      toast.error('일시정지가 실패했습니다.');
-    },
-  });
-  return {
-    play,
-    resume,
-    pause,
+  const play = (trackId: string) => {
+    if (!deviceId) return;
+    const isSameTrack = currentTrackId === trackId;
+
+    if (isStarted && isSameTrack) {
+      resumePlayback(deviceId, {
+        onSuccess: () => setIsPlaying(true),
+      });
+    } else {
+      startPlayback(
+        { deviceId, trackId },
+        {
+          onSuccess: () => {
+            setIsStarted(true);
+            setIsPlayerOpen(true);
+            setIsPlaying(true);
+            setCurrentTrackId(trackId);
+          },
+        }
+      );
+    }
   };
+  const pause = () => {
+    if (!deviceId) return;
+    pausePlayback(deviceId, {
+      onSuccess: () => setIsPlaying(false),
+    });
+  };
+  return { play, pause };
 }

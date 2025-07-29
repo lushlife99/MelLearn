@@ -1,12 +1,13 @@
 import { apiLrc } from '@/services/axios';
 import type { Lyric } from '../types/track';
+import parseLyrics from '../utils/parseLyrics';
 
 export async function fetchLrcByTrack(
   artist_name?: string,
   track_name?: string,
   album_name?: string,
   duration?: number
-): Promise<Lyric> {
+): Promise<Lyric[]> {
   const { data } = await apiLrc.get(`/get`, {
     params: {
       artist_name,
@@ -15,5 +16,5 @@ export async function fetchLrcByTrack(
       duration,
     },
   });
-  return data;
+  return parseLyrics(data.syncedLyrics);
 }

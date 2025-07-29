@@ -6,8 +6,8 @@ export default function useLyric(track?: Track) {
   const { id, artists, album, name, duration_ms } = track ?? {};
   const duration = duration_ms ? Math.floor(duration_ms / 1000) : 0;
 
-  const { data: lyric } = useQuery({
-    queryKey: ['lyric', id],
+  const { data: lyrics } = useQuery({
+    queryKey: ['lyrics', id],
     queryFn: () =>
       fetchLrcByTrack(artists?.[0].name, name, album?.name, duration),
     enabled: !!track,
@@ -16,5 +16,5 @@ export default function useLyric(track?: Track) {
     refetchOnWindowFocus: false,
   });
 
-  return { lyric };
+  return { lyrics };
 }

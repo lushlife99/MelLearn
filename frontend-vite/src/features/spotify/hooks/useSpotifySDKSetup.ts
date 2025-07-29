@@ -15,6 +15,7 @@ export default function useSpotifySDKSetup(
 ) {
   const navigate = useNavigate();
   const setDeviceId = useSpotifyStore((state) => state.setDeviceId);
+  const setPlayer = useSpotifyStore((state) => state.setPlayer);
 
   useEffect(() => {
     if (!token || !enabled) return;
@@ -82,6 +83,7 @@ export default function useSpotifySDKSetup(
       getOAuthToken: (cb) => cb(token),
       volume: 0.5,
     });
+    setPlayer(playerInstance);
 
     playerInstance.addListener('ready', ({ device_id }) => {
       console.log('🎧 Spotify 플레이어 준비 완료:', device_id);

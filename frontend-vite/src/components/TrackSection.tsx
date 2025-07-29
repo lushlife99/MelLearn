@@ -1,6 +1,7 @@
 import type { Track } from '@/features/home/types/home';
-import { formatDuration } from '@/pages/track/utils/format';
+import { formatDuration } from '@/features/track/utils/format';
 import { ExternalLink, Play } from 'lucide-react';
+import SectionLayout from './SectionLayout';
 
 interface Props {
   title: string;
@@ -10,8 +11,7 @@ interface Props {
 
 export default function TrackSection({ title, tracks, onClick }: Props) {
   return (
-    <div className='bg-white/5 backdrop-blur-lg rounded-2xl p-6 sm:p-8 border border-white/10'>
-      <h2 className='text-2xl font-bold text-white mb-6'>{title}</h2>
+    <SectionLayout title={title}>
       <div className='space-y-4'>
         {tracks.slice(0, 10).map((track, index) => (
           <div
@@ -81,6 +81,6 @@ export default function TrackSection({ title, tracks, onClick }: Props) {
           </button>
         </div>
       )}
-    </div>
+    </SectionLayout>
   );
 }

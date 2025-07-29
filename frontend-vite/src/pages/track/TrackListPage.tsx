@@ -8,6 +8,7 @@ import ArtistTrackLayout from '@/components/ArtistTrackLayout';
 import TrackSection from '@/components/TrackSection';
 import ArtistTrackHeader from '@/components/ArtistTrackHeader';
 import SearchFilterBar from '@/components/SearchFilterBar';
+import SearchNotFound from '@/components/SearchNotFound';
 
 const sortOptions = [
   { value: 'popularity', label: '인기도순' },
@@ -26,9 +27,11 @@ export default function TrackListPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setQuery(e.target.value);
+
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
     setSortBy(e.target.value as 'name' | 'popularity' | 'duration');
 
+  //TODO: 정렬로직 util로 분리
   const filteredAndSortedCharts = useMemo(() => {
     if (!charts) return [];
 
@@ -70,17 +73,14 @@ export default function TrackListPage() {
         />
       </div>
 
-      {filteredAndSortedCharts && filteredAndSortedCharts.length > 0 ? (
+      {filteredAndSortedCharts.length === 0 ? (
+        <SearchNotFound Icon={TrendingUp} />
+      ) : (
         <TrackSection
           title={`전체 트랙 (${filteredAndSortedCharts.length})`}
           tracks={filteredAndSortedCharts}
           onClick={(id) => navigate(ROUTES.TRACK_DETAIL(id))}
         />
-      ) : (
-        <div className='text-center py-12'>
-          <TrendingUp className='w-16 h-16 text-white/30 mx-auto mb-4' />
-          <p className='text-white/50 text-lg'>검색 결과가 없습니다</p>
-        </div>
       )}
     </ArtistTrackLayout>
   );

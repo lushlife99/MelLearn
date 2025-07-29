@@ -20,18 +20,20 @@ export interface Artist {
   };
 }
 
+export interface Album {
+  images: Image[];
+  name: string;
+  release_date: string;
+  total_tracks: number;
+}
+
 export interface Track {
   id: string;
   name: string;
-  artists: Pick<Artist, 'id' | 'name' | 'uri'>[];
+  artists: Artist[];
   duration_ms: number;
   is_playable: boolean;
-  album: {
-    images: Image[];
-    name: string;
-    release_date: string;
-    total_tracks: number;
-  };
+  album: Album;
   external_urls: {
     spotify: string;
   };

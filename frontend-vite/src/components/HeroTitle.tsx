@@ -15,7 +15,7 @@ export default function HeroTitle({ Icon, title, name }: Props) {
         </div>
         <span className='text-white/70 text-lg'>{title}</span>
       </div>
-      <h1 className='text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4'>
+      <h1 className='text-4xl sm:text-2xl lg:text-3xl font-bold text-white mb-4'>
         {name}
       </h1>
     </>

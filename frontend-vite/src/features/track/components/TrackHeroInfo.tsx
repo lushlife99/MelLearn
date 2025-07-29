@@ -1,7 +1,7 @@
 import ActionButton from '@/components/ActionButton';
 import HeroTitle from '@/components/HeroTitle';
 import type { Track } from '@/features/home/types/home';
-import { formatDuration } from '@/pages/track/utils/format';
+import { formatDuration } from '@/features/track/utils/format';
 import { ROUTES } from '@/services/router';
 import { Music } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';

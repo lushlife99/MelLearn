@@ -48,20 +48,20 @@ export async function fetchPlaybackState(deviceId: string) {
   });
 }
 
-export async function startPlayback(deviceId: string, trackId: string) {
+export async function requestStartPlayback(deviceId: string, trackId: string) {
   return await apiSpotify.put('/me/player/play', {
     device_id: deviceId,
     uris: [`spotify:track:${trackId}`],
   });
 }
 
-export async function resumePlayback(deviceId: string) {
+export async function requestResumePlayback(deviceId: string) {
   return await apiSpotify.put('/me/player/play', {
     device_id: deviceId,
   });
 }
 
-export async function pausePlayback(deviceId: string) {
+export async function requestPausePlayback(deviceId: string) {
   return await apiSpotify.put('/me/player/pause', {
     device_id: deviceId,
   });

@@ -1,18 +1,29 @@
 import { type LucideIcon } from 'lucide-react';
 interface Props {
   onClick: () => void;
-  label: string;
+  label?: string;
   Icon: LucideIcon;
+  buttonClass: string;
+  iconClass: string;
 }
 
-export default function TrackActionButton({ onClick, label, Icon }: Props) {
+export default function TrackActionButton({
+  onClick,
+  label,
+  Icon,
+  buttonClass,
+  iconClass,
+}: Props) {
   return (
     <button
       onClick={onClick}
-      className='flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-violet-500 hover:from-pink-600 hover:to-violet-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105'
+      className={`flex items-center 
+      bg-gradient-to-r from-pink-500
+      to-violet-500 hover:from-pink-600 hover:to-violet-600 
+      text-white    transition-all hover:scale-105 ${buttonClass}`}
     >
-      <Icon className='w-5 h-5' />
-      <span>{label}</span>
+      <Icon className={iconClass} />
+      {label && <span className='font-semibold text-white'>{label}</span>}
     </button>
   );
 }

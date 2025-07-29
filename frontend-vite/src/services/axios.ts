@@ -5,6 +5,14 @@ import axios, {
 } from 'axios';
 import toast from 'react-hot-toast';
 
+interface SpotifyApiError {
+  error: {
+    status: number;
+    message: string;
+    reason?: string;
+  };
+}
+
 export const apiClient = axios.create({
   baseURL: 'http://localhost:8080', // 배포 시: "https://mel-learn.store/"
   withCredentials: true,
@@ -62,17 +70,23 @@ const handleSpotifyRequestInterceptor = (
 };
 
 const handleSpotifyResponseInterceptor = async (
-  error: AxiosError
+  error: AxiosError<SpotifyApiError>
 ): Promise<AxiosResponse> => {
   const status = error.response?.status;
+  const message = error.response?.data?.error?.message;
 
   if (status === 401) {
     toast.error('Spotify 인증이 만료되었습니다. 다시 로그인해주세요.');
     // 나중에 토큰 재발급 로직 구현
     window.location.href = '/login';
   } else if (status === 403) {
+    if (message === 'Player command failed: Restriction violated') {
+      toast.error('성인 인증이 필요한 곡입니다.');
+    } else {
+      toast.error('재생 권한이 없는 콘텐츠입니다.');
+    }
     console.error(error);
-    // alert('프리미엄 계정 유저가 아닙니다.');
+
     //window.location.href = '/';
   } else if (status === 404) {
     //alert('연결된 장치가 존재하지 않습니다. 다시 로그인 해주세요.');

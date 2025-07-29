@@ -37,6 +37,7 @@ export default function ArtistDetailPage() {
       <div className='mb-8'>
         <ArrowBack onClick={() => navigate(-1)} />
       </div>
+
       <HeroSection
         src={artist.images?.[0]?.url}
         alt={artist.name}
