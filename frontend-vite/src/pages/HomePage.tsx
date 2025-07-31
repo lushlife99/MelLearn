@@ -7,9 +7,12 @@ import WelcomeSection from '@/features/home/components/WelcomeSection';
 import SectionHeader from '@/features/home/components/SectionHeader';
 import { ROUTES } from '@/services/router';
 import useHomeData from '@/features/home/hooks/useHomeData';
+import { useState } from 'react';
+import SearchMusic from '@/features/home/components/SearchMusic';
 
 export default function HomePage() {
   const { artists, charts, error, isLoading } = useHomeData();
+  const [showSearch, setShowSearch] = useState(false);
   const navigate = useNavigate();
 
   const SkeletonLoader = () => (
@@ -46,12 +49,16 @@ export default function HomePage() {
       </div>
     );
 
+  if (showSearch) {
+    return <SearchMusic onClose={() => setShowSearch(false)} charts={charts} />;
+  }
+
   return (
     <div className='min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900'>
       <div className='relative z-10 md:ml-0 lg:ml-20 xl:ml-64 transition-all duration-300'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
           <Header onClick={() => navigate('/searchMusic')} />
-          <SearchBar onClick={() => navigate('/searchMusic')} />
+          <SearchBar onClick={() => setShowSearch(true)} />
         </div>
 
         <main className='pb-8 sm:pb-12'>

@@ -47,7 +47,6 @@ export default function ArtistListPage() {
     <ArtistTrackLayout>
       <div className='mb-8'>
         <ArtistTrackHeader
-          Icon={Users}
           title='인기 가수'
           description='팬들이 사랑하는 아티스트들을 만나보세요'
           onClick={() => navigate(-1)}

@@ -3,7 +3,6 @@ import HeroTitle from '@/components/HeroTitle';
 import type { Track } from '@/features/home/types/home';
 import { formatDuration } from '@/features/track/utils/format';
 import { ROUTES } from '@/services/router';
-import { Music } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Props {
@@ -16,7 +15,7 @@ export default function TrackHeroInfo({ track }: Props) {
   return (
     <div className='flex-1 flex flex-col justify-center text-center lg:text-left'>
       <div className='mb-4'>
-        <HeroTitle Icon={Music} title='트랙' name={name} />
+        <HeroTitle name={name} />
 
         <div className='mb-6'>
           <div className='flex flex-wrap justify-center lg:justify-start gap-2'>

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Home, ArrowLeft, Search, AlertTriangle } from 'lucide-react';
+import { Home, ArrowLeft, AlertTriangle } from 'lucide-react';
 import { ROUTES } from '@/services/router';
 
 export default function NotFound() {
@@ -46,21 +46,6 @@ export default function NotFound() {
                 >
                   <Home className='w-5 h-5' />
                   <span>홈으로 가기</span>
-                </button>
-              </div>
-
-              <div className='border-t border-white/10 pt-6'>
-                <div className='flex items-center justify-center space-x-3 mb-3'>
-                  <Search className='w-5 h-5 text-white/50' />
-                  <span className='text-white/70 text-sm'>
-                    원하는 음악을 찾아보세요
-                  </span>
-                </div>
-                <button
-                  onClick={() => navigate(ROUTES.HOME)}
-                  className='text-violet-400 hover:text-violet-300 font-medium transition-colors duration-300 text-sm'
-                >
-                  음악 검색하러 가기 →
                 </button>
               </div>
             </div>

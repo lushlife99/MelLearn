@@ -58,7 +58,6 @@ export default function TrackListPage() {
     <ArtistTrackLayout>
       <div className='mb-8'>
         <ArtistTrackHeader
-          Icon={TrendingUp}
           title='인기 차트'
           description='지금 가장 인기 있는 음악들을 만나보세요'
           onClick={() => navigate(-1)}

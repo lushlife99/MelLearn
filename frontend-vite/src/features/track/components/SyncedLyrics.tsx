@@ -4,9 +4,14 @@ import type { Lyric } from '../types/track';
 interface Props {
   lyrics?: Lyric[];
   getCurrentTime: () => number;
+  onLyricClick: (time: number) => void;
 }
 
-export default function SyncedLyrics({ lyrics = [], getCurrentTime }: Props) {
+export default function SyncedLyrics({
+  lyrics = [],
+  getCurrentTime,
+  onLyricClick,
+}: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const lineRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -49,7 +54,7 @@ export default function SyncedLyrics({ lyrics = [], getCurrentTime }: Props) {
   return (
     <div
       ref={containerRef}
-      className='flex-1 bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 max-h-72 overflow-y-auto'
+      className='flex-1 bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 overflow-y-auto h-auto lg:h-80'
     >
       <h3 className='text-xl font-semibold text-white mb-4'>가사</h3>
 
@@ -60,19 +65,20 @@ export default function SyncedLyrics({ lyrics = [], getCurrentTime }: Props) {
       ) : (
         <div className='text-white/80 leading-relaxed whitespace-pre-line'>
           {lyrics.map((lyric, i) => (
-            <div
+            <p
               key={i}
               ref={(el) => {
                 lineRefs.current[i] = el;
               }}
-              className={`transition-all  ${
+              onClick={() => onLyricClick(lyric.time)}
+              className={`transition-all cursor-pointer ${
                 i === currentIndex
                   ? 'text-blue-400 font-bold text-lg'
-                  : 'text-white/50'
+                  : 'text-white/50 hover:text-white/70'
               }`}
             >
               {lyric.text}
-            </div>
+            </p>
           ))}
         </div>
       )}

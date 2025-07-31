@@ -63,3 +63,11 @@ export async function fetchTopArtists(): Promise<Artist[]> {
 
   return artists;
 }
+
+export async function fetchMusicSearch(q: string) {
+  const { data } = await apiSpotify.get('/search', {
+    params: { q, type: 'track' },
+  });
+  console.log(data);
+  return data.tracks.items;
+}
