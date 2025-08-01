@@ -11,4 +11,7 @@ export const ROUTES = {
 
   ARTIST_DETAIL: (id: string) => `/artists/${id}`,
   TRACK_DETAIL: (id: string) => `/tracks/${id}`,
+
+  QUIZ: (id: string) => `/quiz/${id}`,
+  QUIZ_READING: (id: string) => `/quiz/reading/${id}`,
 };

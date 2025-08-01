@@ -11,6 +11,8 @@ import ArtistListPage from '@/pages/artist/ArtistListPage';
 import ArtistDetailPage from '@/pages/artist/ArtistDetailPage';
 import TrackListPage from '@/pages/track/TrackListPage';
 import TrackDetailPage from '@/pages/track/TrackDetailPage';
+import QuizPage from '@/pages/quiz/QuizPage';
+import ReadingQuizPage from '@/pages/quiz/ReadingQuizPage';
 
 export const router = createBrowserRouter([
   {
@@ -53,6 +55,14 @@ export const router = createBrowserRouter([
       {
         path: ROUTES.TRACK_DETAIL(':id'),
         element: <TrackDetailPage />,
+      },
+      {
+        path: ROUTES.QUIZ(':id'),
+        element: <QuizPage />,
+      },
+      {
+        path: ROUTES.QUIZ_READING(':id'),
+        element: <ReadingQuizPage />,
       },
       {
         path: '*',

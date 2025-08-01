@@ -50,7 +50,9 @@ export default function HomePage() {
     );
 
   if (showSearch) {
-    return <SearchMusic onClose={() => setShowSearch(false)} charts={charts} />;
+    return (
+      <SearchMusic onClose={() => setShowSearch(false)} charts={charts || []} />
+    );
   }
 
   return (

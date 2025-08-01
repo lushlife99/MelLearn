@@ -43,7 +43,7 @@ export default function TrackSection({ title, tracks, onClick }: Props) {
                 {track.name}
               </div>
               <div className='text-white/60 text-xs truncate mt-1'>
-                {track.album.name}
+                {track.artists.map((artist) => artist.name).join(', ')}
               </div>
             </div>
 
@@ -55,7 +55,6 @@ export default function TrackSection({ title, tracks, onClick }: Props) {
               </div>
             )}
 
-            {/* External Link */}
             {track.external_urls?.spotify && (
               <div className='flex-shrink-0 ml-4'>
                 <button
@@ -73,7 +72,6 @@ export default function TrackSection({ title, tracks, onClick }: Props) {
         ))}
       </div>
 
-      {/* Show More Button */}
       {tracks.length > 10 && (
         <div className='text-center mt-6'>
           <button className='text-violet-400 hover:text-violet-300 font-semibold transition-colors duration-300'>

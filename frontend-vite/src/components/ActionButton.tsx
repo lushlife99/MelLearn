@@ -1,8 +1,10 @@
 import type { Type } from '@/features/home/types/home';
 import { useSpotifyStore } from '@/store/useSpotifyStore';
-import { ExternalLink, Heart, Pause, Play, Share2 } from 'lucide-react';
+import { Book, ExternalLink, Pause, Play } from 'lucide-react';
 import TrackActionButton from '../features/track/components/TrackActionButton';
 import useSpotifyPlayer from '@/features/spotify/hooks/useSpotifyPlayer';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '@/services/router';
 
 interface Props {
   spotify: string;
@@ -42,15 +44,13 @@ export default function ActionButton({ spotify, trackId, type }: Props) {
         )
       ) : null}
 
-      <button className='flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 border border-white/20'>
-        <Heart className='w-5 h-5' />
-        <span>좋아요</span>
-      </button>
-
-      <button className='flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 border border-white/20'>
-        <Share2 className='w-5 h-5' />
-        <span>공유</span>
-      </button>
+      <Link
+        to={ROUTES.QUIZ(trackId || '')}
+        className='flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 border border-white/20'
+      >
+        <Book className='w-5 h-5' />
+        <span>학습</span>
+      </Link>
 
       {spotify && (
         <button

@@ -1,4 +1,4 @@
-import { Book, History, House, Settings } from 'lucide-react';
+import { Book, FileText, History, House, Settings } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 const navItems = [
@@ -8,8 +8,13 @@ const navItems = [
     path: '/',
   },
   {
-    label: '모의고사',
+    label: '학습',
     icon: Book,
+    path: '/quiz',
+  },
+  {
+    label: '모의고사',
+    icon: FileText,
     path: '/exam',
   },
   {
