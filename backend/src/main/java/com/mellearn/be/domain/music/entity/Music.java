@@ -17,7 +17,7 @@ public class Music {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String musicId;
-    @Enumerated(value = EnumType.ORDINAL)
+    @Enumerated(value = EnumType.STRING)
     private Language language;
     private int liked;
     private int disLike;

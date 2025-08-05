@@ -24,7 +24,7 @@ public class WordList {
     private List<Word> words = new ArrayList<>();
     @ManyToOne
     private Member member;
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private Language langType;
 
 }

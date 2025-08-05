@@ -24,7 +24,7 @@ public class ListeningSubmit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Enumerated(value = EnumType.ORDINAL)
+    @Enumerated(value = EnumType.STRING)
     private LearningLevel level;
 
     @ManyToOne
