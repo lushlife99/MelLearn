@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Music {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String musicId;
     @Enumerated(value = EnumType.ORDINAL)

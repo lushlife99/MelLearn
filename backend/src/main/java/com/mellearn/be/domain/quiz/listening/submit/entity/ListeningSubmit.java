@@ -22,7 +22,7 @@ import java.util.List;
 public class ListeningSubmit {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Enumerated(value = EnumType.ORDINAL)
     private LearningLevel level;
@@ -40,4 +40,25 @@ public class ListeningSubmit {
     private double score;
     @CreationTimestamp
     private LocalDateTime createdTime;
+
+    public static ListeningSubmit create(ListeningQuiz listeningQuiz, Member member, List<String> submitAnswerList) {
+        return ListeningSubmit.builder()
+                .listeningQuiz(listeningQuiz)
+                .member(member)
+                .level(member.getLevel())
+                .submitAnswerList(submitAnswerList)
+                .score(calculateScore(submitAnswerList, listeningQuiz.getAnswerList()))
+                .createdTime(LocalDateTime.now())
+                .build();
+    }
+
+    private static double calculateScore(List<String> submitAnswers, List<String> correctAnswers) {
+        double correctCount = 0;
+        for (int i = 0; i < submitAnswers.size(); i++) {
+            if (submitAnswers.get(i).equals(correctAnswers.get(i))) {
+                correctCount++;
+            }
+        }
+        return correctCount / correctAnswers.size() * 100;
+    }
 }
