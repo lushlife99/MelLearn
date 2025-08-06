@@ -6,6 +6,8 @@ import com.mellearn.be.domain.quiz.listening.quiz.dto.QListeningQuizDto;
 import com.mellearn.be.domain.quiz.listening.submit.dto.ListeningSubmitDto;
 import com.mellearn.be.domain.quiz.choice.submit.dto.QuizSubmitDto;
 import com.mellearn.be.domain.quiz.listening.submit.dto.QListeningSubmitDto;
+import com.mellearn.be.domain.quiz.listening.submit.entity.ListeningSubmit;
+import com.mellearn.be.domain.quiz.listening.submit.entity.QListeningSubmit;
 import com.mellearn.be.domain.quiz.speaking.dto.SpeakingSubmitDto;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import com.querydsl.core.group.GroupBy;
@@ -91,11 +93,27 @@ public class SubmitJpaRepository {
     public Page<ListeningSubmitDto> findListeningSubmitWithPaging(long memberId, int pageNumber, int pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
+        // Step 1. 페이징 대상 ID만 먼저 조회
+        List<Long> submitIds = queryFactory
+                .select(listeningSubmit.id)
+                .from(listeningSubmit)
+                .where(listeningSubmit.member.id.eq(memberId))
+                .orderBy(listeningSubmit.createdTime.desc()) // 정렬 조건 명확히
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        if (submitIds.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        // Step 2. 실제 데이터 fetch + GroupBy로 묶기
         StringPath submitAnswerList = Expressions.stringPath("submitAnswerList");
         StringPath answerListPath = Expressions.stringPath("answerList");
 
         List<ListeningSubmitDto> results = queryFactory
                 .selectFrom(listeningSubmit)
+                .where(listeningSubmit.id.in(submitIds))
                 .transform(GroupBy.groupBy(listeningSubmit.id)
                         .list(Projections.constructor(ListeningSubmitDto.class,
                                 listeningSubmit.id,
@@ -105,18 +123,16 @@ public class SubmitJpaRepository {
                                         Expressions.constant(Collections.emptyList()) // answerList 나중에 주입
                                 ),
                                 listeningSubmit.level,
-                                GroupBy.list(submitAnswerList), // submitAnswerList is @ElementCollection
+                                GroupBy.list(submitAnswerList),
                                 listeningSubmit.score,
                                 listeningSubmit.createdTime
                         )));
 
-        // 필요한 quizId들 수집
+        // Step 3. answerList 주입
         List<Long> quizIds = results.stream()
                 .map(dto -> dto.getListeningQuiz().getId())
                 .distinct()
                 .toList();
-
-        // 2차 쿼리: answerList 가져오기
 
         Map<Long, List<String>> answerListMap = queryFactory
                 .select(listeningQuiz.id, answerListPath)
@@ -124,17 +140,15 @@ public class SubmitJpaRepository {
                 .where(listeningQuiz.id.in(quizIds))
                 .transform(GroupBy.groupBy(listeningQuiz.id).as(GroupBy.list(answerListPath)));
 
-        // 주입
         for (ListeningSubmitDto dto : results) {
-            Long quizId = dto.getListeningQuiz().getId();
-            List<String> answerList = answerListMap.getOrDefault(quizId, Collections.emptyList());
+            List<String> answerList = answerListMap.getOrDefault(dto.getListeningQuiz().getId(), Collections.emptyList());
             dto.getListeningQuiz().setAnswerList(answerList);
         }
 
+        // Step 4. 전체 개수 조회
         Long total = queryFactory
                 .select(listeningSubmit.count())
                 .from(listeningSubmit)
-                .join(listeningSubmit.listeningQuiz, listeningQuiz)
                 .where(listeningSubmit.member.id.eq(memberId))
                 .fetchOne();
 
