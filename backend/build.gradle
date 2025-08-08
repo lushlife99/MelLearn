@@ -81,6 +81,9 @@ dependencies {
 	// MySQL
 	runtimeOnly 'com.mysql:mysql-connector-j:8.0.32'
 
+	// p6spy
+	implementation 'p6spy:p6spy'
+
 	// lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
