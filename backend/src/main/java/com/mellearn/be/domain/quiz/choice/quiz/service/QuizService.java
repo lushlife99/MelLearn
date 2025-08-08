@@ -1,5 +1,6 @@
 package com.mellearn.be.domain.quiz.choice.quiz.service;
 
+import com.mellearn.be.domain.quiz.choice.submit.repository.QuizSubmitRepository;
 import com.mellearn.be.domain.quiz.listening.quiz.dto.ListeningQuizDto;
 import com.mellearn.be.domain.quiz.listening.quiz.entity.ListeningQuiz;
 import com.mellearn.be.domain.quiz.listening.quiz.repository.ListeningQuizRepository;
@@ -14,7 +15,6 @@ import com.mellearn.be.domain.quiz.choice.quiz.entity.QuizList;
 import com.mellearn.be.domain.quiz.choice.quiz.repository.QuizListRepository;
 import com.mellearn.be.domain.quiz.choice.submit.dto.QuizSubmitDto;
 import com.mellearn.be.domain.quiz.choice.submit.dto.QuizSubmitRequest;
-import com.mellearn.be.domain.quiz.choice.submit.repository.querydsl.SubmitJpaRepository;
 import com.mellearn.be.domain.quiz.choice.submit.service.QuizSubmitService;
 import com.mellearn.be.global.error.CustomException;
 import com.mellearn.be.global.error.enums.ErrorCode;
@@ -39,7 +39,7 @@ public class QuizService {
 
     private final QuizSubmitService quizSubmitService;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final SubmitJpaRepository submitJpaRepository;
+    private final QuizSubmitRepository quizSubmitRepository;
     private final QuizCreateService quizCreateService;
     private final QuizListRepository quizListRepository;
     private final ListeningQuizRepository listeningQuizRepository;
@@ -49,11 +49,11 @@ public class QuizService {
         Member member = findMember(memberId);
 
         if (quizType.equals(QuizType.LISTENING)) {
-            return submitJpaRepository.findListeningSubmitWithPaging(member.getId(), pageNo, 10);
+            return quizSubmitRepository.findListeningSubmitWithPaging(member.getId(), pageNo, 10);
         } else if (quizType.equals(QuizType.READING) || quizType.equals(QuizType.VOCABULARY) || quizType.equals(QuizType.GRAMMAR)) {
-            return submitJpaRepository.findSubmitWithPaging(member.getId(), quizType, pageNo, 10);
+            return quizSubmitRepository.findSubmitWithPaging(member.getId(), quizType, pageNo, 10);
         } else if (quizType.equals(QuizType.SPEAKING)) {
-            return submitJpaRepository.findSpeakingSubmitWithPaging(member.getId(), pageNo, 10);
+            return quizSubmitRepository.findSpeakingSubmitWithPaging(member.getId(), pageNo, 10);
         }
 
         throw new CustomException(ErrorCode.BAD_REQUEST);

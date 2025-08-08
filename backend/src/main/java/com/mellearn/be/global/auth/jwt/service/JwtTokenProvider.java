@@ -21,10 +21,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.security.Key;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -32,15 +29,13 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenProvider {
 
+    private static final String AUTHORITIES_KEY = "auth";
+
     private final RedisTemplate<String, Object> redisTemplate;
     private final Key key;
-    private static final String AUTHORITIES_KEY = "auth";
     private final int accessExpirationTime;
-
     private final int refreshExpirationTime;
     private final MemberRepository memberRepository;
-
-
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey,
                             @Value("${jwt.access-expiration-time}") int accessExpirationTime,
@@ -78,8 +73,10 @@ public class JwtTokenProvider {
 
         // Redis 저장
         String redisKey = "refresh:" + username;
-        redisTemplate.opsForHash().put(redisKey, "token", refreshToken);
-        redisTemplate.opsForHash().put(redisKey, "auth", authorities);
+        Map<String, String> redisValue = new HashMap<>();
+        redisValue.put("token", refreshToken);
+        redisValue.put("auth", authorities);
+        redisTemplate.opsForHash().putAll(redisKey, redisValue);
         redisTemplate.expire(redisKey, refreshExpirationTime, TimeUnit.MILLISECONDS);
 
         return TokenInfo.builder()

@@ -29,11 +29,11 @@ public class AuthController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @PostMapping("/login")
-    @Operation(summary = "로그인", description = "비밀번호 불일치, memberId가 존재하지 않을 시 오류반환. 성공 시 jwt 반환.")
-    public TokenInfo login(@RequestBody AuthRequest authRequest, HttpServletResponse response) {
-        return authService.login(authRequest, response);
-    }
+//    @PostMapping("/login")
+//    @Operation(summary = "로그인", description = "비밀번호 불일치, memberId가 존재하지 않을 시 오류반환. 성공 시 jwt 반환.")
+//    public TokenInfo login(@RequestBody AuthRequest authRequest, HttpServletResponse response) {
+//        return authService.login(authRequest, response);
+//    }
 
     @GetMapping("/jwt")
     @Operation(summary = "jwt 재발급", description = "jwt - access, refresh 토큰 재발급")

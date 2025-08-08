@@ -4,6 +4,7 @@ import com.mellearn.be.domain.member.service.auth.MemberAuthenticationService;
 import com.mellearn.be.global.auth.jwt.JwtAuthenticationEntryPoint;
 import com.mellearn.be.global.auth.jwt.filter.JwtAuthenticationFilter;
 import com.mellearn.be.global.auth.jwt.service.JwtTokenProvider;
+import com.mellearn.be.global.auth.security.filter.LoginAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -30,21 +33,26 @@ public class SecurityConfig  {
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final MemberAuthenticationService memberAuthenticationService;
+
     @Bean
     public BCryptPasswordEncoder encodePwd() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           AuthenticationManager authenticationManager,
+                                           AuthenticationSuccessHandler successHandler,
+                                           AuthenticationFailureHandler failureHandler) throws Exception {
 
         http.cors(corsCustomizer -> corsCustomizer.configurationSource(corsConfigurationSource()))
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .csrf((csrfConfig) -> csrfConfig.disable())
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(loginAuthenticationFilter(authenticationManager, successHandler, failureHandler),
+                        UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exHandling -> exHandling.authenticationEntryPoint(jwtAuthenticationEntryPoint))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authorizeRequests) ->
                         authorizeRequests
                                 .requestMatchers("/api/**").authenticated()
@@ -53,6 +61,7 @@ public class SecurityConfig  {
 
         return http.build();
     }
+
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
@@ -80,5 +89,14 @@ public class SecurityConfig  {
         authProvider.setUserDetailsService(memberAuthenticationService);
         authProvider.setPasswordEncoder(encodePwd());
         return new ProviderManager(authProvider);
+    }
+
+    @Bean
+    public LoginAuthenticationFilter loginAuthenticationFilter(
+            AuthenticationManager authenticationManager,
+            AuthenticationSuccessHandler successHandler,
+            AuthenticationFailureHandler failureHandler) {
+
+        return new LoginAuthenticationFilter(authenticationManager, successHandler, failureHandler);
     }
 }

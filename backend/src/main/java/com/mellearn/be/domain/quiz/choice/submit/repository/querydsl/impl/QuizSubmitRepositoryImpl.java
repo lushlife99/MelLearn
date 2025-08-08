@@ -1,13 +1,10 @@
-package com.mellearn.be.domain.quiz.choice.submit.repository.querydsl;
+package com.mellearn.be.domain.quiz.choice.submit.repository.querydsl.impl;
 
 import com.mellearn.be.domain.quiz.choice.submit.entity.QuizSubmit;
+import com.mellearn.be.domain.quiz.choice.submit.repository.querydsl.QuizSubmitRepositoryCustom;
 import com.mellearn.be.domain.quiz.listening.quiz.dto.ListeningQuizDto;
-import com.mellearn.be.domain.quiz.listening.quiz.dto.QListeningQuizDto;
 import com.mellearn.be.domain.quiz.listening.submit.dto.ListeningSubmitDto;
 import com.mellearn.be.domain.quiz.choice.submit.dto.QuizSubmitDto;
-import com.mellearn.be.domain.quiz.listening.submit.dto.QListeningSubmitDto;
-import com.mellearn.be.domain.quiz.listening.submit.entity.ListeningSubmit;
-import com.mellearn.be.domain.quiz.listening.submit.entity.QListeningSubmit;
 import com.mellearn.be.domain.quiz.speaking.dto.SpeakingSubmitDto;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import com.querydsl.core.group.GroupBy;
@@ -32,11 +29,11 @@ import static com.mellearn.be.domain.quiz.listening.submit.entity.QListeningSubm
 import static com.mellearn.be.domain.quiz.speaking.entity.QSpeakingSubmit.speakingSubmit;
 
 @Repository
-public class SubmitJpaRepository {
+public class QuizSubmitRepositoryImpl implements QuizSubmitRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
-    public SubmitJpaRepository(EntityManager em) {
+    public QuizSubmitRepositoryImpl(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(JPQLTemplates.DEFAULT, em);
     }
 

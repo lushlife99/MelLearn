@@ -1,5 +1,6 @@
 package com.mellearn.be.domain.member.entity;
 
+import com.mellearn.be.domain.member.entity.role.MemberRole;
 import com.mellearn.be.domain.quiz.listening.submit.entity.ListeningSubmit;
 import com.mellearn.be.domain.member.enums.Language;
 import com.mellearn.be.domain.member.enums.LearningLevel;
@@ -8,6 +9,7 @@ import com.mellearn.be.domain.quiz.speaking.entity.SpeakingSubmit;
 import com.mellearn.be.domain.word.entity.WordList;
 import jakarta.persistence.*;
 import lombok.*;
+import org.checkerframework.common.aliasing.qual.Unique;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,6 +29,7 @@ public class Member implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, nullable = false)
     private String memberId;
 
     private String name;
@@ -56,16 +59,14 @@ public class Member implements UserDetails {
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<ListeningSubmit> listeningSubmitList = new ArrayList<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "member_roles", joinColumns = @JoinColumn(name = "member_id"))
-    @Column(name = "role")
-    private List<String> roles = new ArrayList<>();
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<MemberRole> roles = new ArrayList<>();
 
     private LocalDateTime createdTime;
 
     @Builder
     public Member(String memberId, String name, String password, Language langType, LearningLevel level,
-                  List<String> roles, String spotifyAccountId, Long id) {
+                  List<MemberRole> roles, String spotifyAccountId, Long id) {
         this.memberId = memberId;
         this.name = name;
         this.password = password;
@@ -80,7 +81,7 @@ public class Member implements UserDetails {
         this.id = id;
     }
 
-    public static Member create(String memberId, String password, String name, LearningLevel level, Language langType, List<String> roles) {
+    public static Member create(String memberId, String password, String name, LearningLevel level, Language langType, List<MemberRole> roles) {
         Member member = Member.builder()
                 .memberId(memberId)
                 .name(name)
@@ -92,7 +93,7 @@ public class Member implements UserDetails {
         return member;
     }
 
-    public void addRole(String role) {
+    public void addRole(MemberRole role) {
         this.roles.add(role);
     }
 
@@ -109,7 +110,7 @@ public class Member implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roles.stream()
-                .map(SimpleGrantedAuthority::new)
+                .map(role -> new SimpleGrantedAuthority(role.getId().getRole()))
                 .collect(Collectors.toList());
     }
 
