@@ -14,6 +14,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -128,48 +129,51 @@ class AuthServiceTest {
         );
     }
 
-//    @Test
-//    @DisplayName("로그인 테스트 - 성공")
-//    void login_Success() {
-//        // given
-//        when(memberRepository.findByMemberId(anyString())).thenReturn(Optional.of(testMember));
-//        when(encoder.matches(anyString(), anyString())).thenReturn(true);
-//        when(authenticationManagerBuilder.authenticate(any())).thenReturn(testAuthentication);
-//        when(jwtTokenProvider.generateToken(any(), any())).thenReturn(testTokenInfo);
-//
-//        // when
-//        TokenInfo result = authService.login(testAuthRequest, response);
-//
-//        // then
-//        assertThat(result).isNotNull();
-//        assertThat(result.getAccessToken()).isEqualTo("accessToken");
-//        assertThat(result.getRefreshToken()).isEqualTo("refreshToken");
-//    }
+    @Test
+    @Disabled
+    @DisplayName("로그인 테스트 - 성공")
+    void login_Success() {
+        // given
+        when(memberRepository.findByMemberId(anyString())).thenReturn(Optional.of(testMember));
+        when(encoder.matches(anyString(), anyString())).thenReturn(true);
+        when(authenticationManagerBuilder.authenticate(any())).thenReturn(testAuthentication);
+        when(jwtTokenProvider.generateToken(any(), any())).thenReturn(testTokenInfo);
 
-//    @Test
-//    @DisplayName("로그인 테스트 - 존재하지 않는 회원")
-//    void login_NonExistingMember_ShouldThrowException() {
-//        // given
-//        when(memberRepository.findByMemberId(anyString())).thenReturn(Optional.empty());
-//
-//        // when & then
-//        assertThrows(CustomException.class, () ->
-//                authService.login(testAuthRequest, response)
-//        );
-//    }
+        // when
+        TokenInfo result = authService.login(testAuthRequest, response);
 
-//    @Test
-//    @DisplayName("로그인 테스트 - 비밀번호 불일치")
-//    void login_MismatchedPassword_ShouldThrowException() {
-//        // given
-//        when(memberRepository.findByMemberId(anyString())).thenReturn(Optional.of(testMember));
-//        when(encoder.matches(anyString(), anyString())).thenReturn(false);
-//
-//        // when & then
-//        assertThrows(CustomException.class, () ->
-//                authService.login(testAuthRequest, response)
-//        );
-//    }
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getAccessToken()).isEqualTo("accessToken");
+        assertThat(result.getRefreshToken()).isEqualTo("refreshToken");
+    }
+
+    @Test
+    @Disabled
+    @DisplayName("로그인 테스트 - 존재하지 않는 회원")
+    void login_NonExistingMember_ShouldThrowException() {
+        // given
+        when(memberRepository.findByMemberId(anyString())).thenReturn(Optional.empty());
+
+        // when & then
+        assertThrows(CustomException.class, () ->
+                authService.login(testAuthRequest, response)
+        );
+    }
+
+    @Test
+    @Disabled
+    @DisplayName("로그인 테스트 - 비밀번호 불일치")
+    void login_MismatchedPassword_ShouldThrowException() {
+        // given
+        when(memberRepository.findByMemberId(anyString())).thenReturn(Optional.of(testMember));
+        when(encoder.matches(anyString(), anyString())).thenReturn(false);
+
+        // when & then
+        assertThrows(CustomException.class, () ->
+                authService.login(testAuthRequest, response)
+        );
+    }
 
     @Test
     @DisplayName("토큰 재발급 테스트 - 성공")
