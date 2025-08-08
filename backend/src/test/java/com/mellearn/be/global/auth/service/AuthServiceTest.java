@@ -1,6 +1,8 @@
 package com.mellearn.be.global.auth.service;
 
 import com.mellearn.be.domain.member.entity.Member;
+import com.mellearn.be.domain.member.entity.role.MemberRole;
+import com.mellearn.be.domain.member.entity.role.MemberRoleId;
 import com.mellearn.be.domain.member.enums.Language;
 import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.member.repository.MemberRepository;
@@ -31,6 +33,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+
+/**
+ * 25.08.08
+ * login 처리를 spring security 모듈에서 처리하도록 변경
+ * - 관련 테스트 주석처리
+ */
 
 @Transactional
 @ExtendWith(MockitoExtension.class)
@@ -70,13 +78,15 @@ class AuthServiceTest {
         testAuthRequest.setName("Test User");
 
         testMember = Member.builder()
+                .id(1L)
                 .memberId("testMemberId")
                 .name("Test User")
                 .password("encodedPassword")
                 .level(LearningLevel.Beginner)
                 .langType(Language.ENGLISH)
-                .roles(Collections.singletonList("ROLE_USER"))
                 .build();
+
+        testMember.addRole(new MemberRole(new MemberRoleId(1L, "ROLE_USER"), testMember));
 
         testTokenInfo = TokenInfo.builder()
                 .grantType("Bearer")
@@ -118,48 +128,48 @@ class AuthServiceTest {
         );
     }
 
-    @Test
-    @DisplayName("로그인 테스트 - 성공")
-    void login_Success() {
-        // given
-        when(memberRepository.findByMemberId(anyString())).thenReturn(Optional.of(testMember));
-        when(encoder.matches(anyString(), anyString())).thenReturn(true);
-        when(authenticationManagerBuilder.authenticate(any())).thenReturn(testAuthentication);
-        when(jwtTokenProvider.generateToken(any(), any())).thenReturn(testTokenInfo);
+//    @Test
+//    @DisplayName("로그인 테스트 - 성공")
+//    void login_Success() {
+//        // given
+//        when(memberRepository.findByMemberId(anyString())).thenReturn(Optional.of(testMember));
+//        when(encoder.matches(anyString(), anyString())).thenReturn(true);
+//        when(authenticationManagerBuilder.authenticate(any())).thenReturn(testAuthentication);
+//        when(jwtTokenProvider.generateToken(any(), any())).thenReturn(testTokenInfo);
+//
+//        // when
+//        TokenInfo result = authService.login(testAuthRequest, response);
+//
+//        // then
+//        assertThat(result).isNotNull();
+//        assertThat(result.getAccessToken()).isEqualTo("accessToken");
+//        assertThat(result.getRefreshToken()).isEqualTo("refreshToken");
+//    }
 
-        // when
-        TokenInfo result = authService.login(testAuthRequest, response);
+//    @Test
+//    @DisplayName("로그인 테스트 - 존재하지 않는 회원")
+//    void login_NonExistingMember_ShouldThrowException() {
+//        // given
+//        when(memberRepository.findByMemberId(anyString())).thenReturn(Optional.empty());
+//
+//        // when & then
+//        assertThrows(CustomException.class, () ->
+//                authService.login(testAuthRequest, response)
+//        );
+//    }
 
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getAccessToken()).isEqualTo("accessToken");
-        assertThat(result.getRefreshToken()).isEqualTo("refreshToken");
-    }
-
-    @Test
-    @DisplayName("로그인 테스트 - 존재하지 않는 회원")
-    void login_NonExistingMember_ShouldThrowException() {
-        // given
-        when(memberRepository.findByMemberId(anyString())).thenReturn(Optional.empty());
-
-        // when & then
-        assertThrows(CustomException.class, () ->
-                authService.login(testAuthRequest, response)
-        );
-    }
-
-    @Test
-    @DisplayName("로그인 테스트 - 비밀번호 불일치")
-    void login_MismatchedPassword_ShouldThrowException() {
-        // given
-        when(memberRepository.findByMemberId(anyString())).thenReturn(Optional.of(testMember));
-        when(encoder.matches(anyString(), anyString())).thenReturn(false);
-
-        // when & then
-        assertThrows(CustomException.class, () ->
-                authService.login(testAuthRequest, response)
-        );
-    }
+//    @Test
+//    @DisplayName("로그인 테스트 - 비밀번호 불일치")
+//    void login_MismatchedPassword_ShouldThrowException() {
+//        // given
+//        when(memberRepository.findByMemberId(anyString())).thenReturn(Optional.of(testMember));
+//        when(encoder.matches(anyString(), anyString())).thenReturn(false);
+//
+//        // when & then
+//        assertThrows(CustomException.class, () ->
+//                authService.login(testAuthRequest, response)
+//        );
+//    }
 
     @Test
     @DisplayName("토큰 재발급 테스트 - 성공")
