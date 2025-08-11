@@ -24,6 +24,8 @@ import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -39,6 +41,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class QuizService {
 
+    private final String QUIZ_LIST_CACHE_KEY = "quizListCache";
+
     private final QuizSubmitService quizSubmitService;
     private final RedisTemplate<String, Object> redisTemplate;
     private final QuizSubmitRepository quizSubmitRepository;
@@ -46,6 +50,8 @@ public class QuizService {
     private final QuizListRepository quizListRepository;
     private final ListeningQuizRepository listeningQuizRepository;
     private final MemberRepository memberRepository;
+
+    private final CacheManager cacheManager;
 
     public Page getSubmitList(QuizType quizType, int pageNo, String memberId) {
         Member member = findMember(memberId);
@@ -62,11 +68,20 @@ public class QuizService {
     }
 
     /**
-     * 동시성 제어 안됨. 수정하기
+     * redis - 이미 생성되고 있는 퀴즈를 확인하는 로직에서 동시성 제어 안됨.
      */
     @Async("taskExecutor")
     @Transactional
     public CompletableFuture<QuizListDto> getQuizList(QuizRequest quizRequest, LearningLevel learningLevel, Language language) {
+
+        // 캐시에서 값 조회
+        String key = quizRequest.getMusicId() + "_" + quizRequest.getQuizType().name() + "_" + learningLevel.name() + "_" + language.name();
+        Cache cache = cacheManager.getCache("quizListCache");
+
+        QuizListDto cachedDto = cache != null ? cache.get(key, QuizListDto.class) : null;
+        if (cachedDto != null) {
+            return CompletableFuture.completedFuture(cachedDto);
+        }
 
         Optional<QuizList> optionalQuiz = quizListRepository.findByMusicIdAndLevelAndQuizType(
                 quizRequest.getMusicId(),
@@ -97,6 +112,14 @@ public class QuizService {
     @Transactional
     public CompletableFuture<ListeningQuizDto> getListeningQuiz(QuizRequest quizRequest, LearningLevel learningLevel, Language language) {
         try {
+
+            String key = quizRequest.getMusicId() + "_" + quizRequest.getQuizType().name() + "_" + learningLevel.name() + "_" + language.name();
+            Cache cache = cacheManager.getCache("quizListCache");
+
+            ListeningQuizDto cachedDto = cache != null ? cache.get(key, ListeningQuizDto.class) : null;
+            if (cachedDto != null) {
+                return CompletableFuture.completedFuture(cachedDto);
+            }
 
             Optional<ListeningQuiz> optionalQuiz = fetchListeningQuiz(quizRequest, learningLevel);
             String redisKey = getRedisKey(quizRequest, learningLevel);
