@@ -1,5 +1,7 @@
 package com.mellearn.be.domain.quiz.choice.quiz.service;
 
+import com.mellearn.be.domain.member.enums.Language;
+import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.quiz.choice.submit.repository.QuizSubmitRepository;
 import com.mellearn.be.domain.quiz.listening.quiz.dto.ListeningQuizDto;
 import com.mellearn.be.domain.quiz.listening.quiz.entity.ListeningQuiz;
@@ -59,43 +61,45 @@ public class QuizService {
         throw new CustomException(ErrorCode.BAD_REQUEST);
     }
 
+    /**
+     * 동시성 제어 안됨. 수정하기
+     */
     @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<QuizListDto> getQuizList(QuizRequest quizRequest, String memberId) {
-        try {
-            Member member = findMember(memberId);
-            Optional<QuizList> optionalQuiz = fetchQuiz(quizRequest, member);
-            String redisKey = getRedisKey(quizRequest, member);
+    public CompletableFuture<QuizListDto> getQuizList(QuizRequest quizRequest, LearningLevel learningLevel, Language language) {
 
-            if (redisTemplate.hasKey(redisKey)) {
-                throw new CustomException(ErrorCode.CREATING_OTHER_REQUEST);
-            }
+        Optional<QuizList> optionalQuiz = quizListRepository.findByMusicIdAndLevelAndQuizType(
+                quizRequest.getMusicId(),
+                quizRequest.getQuizType(),
+                learningLevel
+        );
 
-            if (optionalQuiz.isEmpty()) {
-                redisTemplate.opsForValue().set(redisKey, "true", 1, TimeUnit.MINUTES);
-
-                return CompletableFuture.supplyAsync(() -> {
-                    try {
-                        return quizCreateService.createChoiceQuiz(quizRequest, member);
-                    } finally {
-                        redisTemplate.delete(redisKey);
-                    }
-                });
-            }
+        if (optionalQuiz.isPresent()) {
             return CompletableFuture.completedFuture(new QuizListDto(optionalQuiz.get()));
-        } catch (Exception e) {
-            log.error("Error in getQuizList: {}", e.getMessage());
-            return CompletableFuture.failedFuture(e);
         }
+
+        String redisKey = getRedisKey(quizRequest, learningLevel);
+        if (redisTemplate.hasKey(redisKey)) {
+            throw new CustomException(ErrorCode.CREATING_OTHER_REQUEST);
+        }
+
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                redisTemplate.opsForValue().set(redisKey, "true", 1, TimeUnit.MINUTES);
+                return quizCreateService.createChoiceQuiz(quizRequest, learningLevel, language);
+            } finally {
+                redisTemplate.delete(redisKey);
+            }
+        });
     }
 
     @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<ListeningQuizDto> getListeningQuiz(QuizRequest quizRequest, String memberId) {
+    public CompletableFuture<ListeningQuizDto> getListeningQuiz(QuizRequest quizRequest, LearningLevel learningLevel, Language language) {
         try {
-            Member member = findMember(memberId);
-            Optional<ListeningQuiz> optionalQuiz = fetchListeningQuiz(quizRequest, member);
-            String redisKey = getRedisKey(quizRequest, member);
+
+            Optional<ListeningQuiz> optionalQuiz = fetchListeningQuiz(quizRequest, learningLevel);
+            String redisKey = getRedisKey(quizRequest, learningLevel);
 
             if (redisTemplate.hasKey(redisKey)) {
                 throw new CustomException(ErrorCode.CREATING_OTHER_REQUEST);
@@ -106,7 +110,7 @@ public class QuizService {
 
                 return CompletableFuture.supplyAsync(() -> {
                     try {
-                        return quizCreateService.createListeningQuiz(quizRequest, member);
+                        return quizCreateService.createListeningQuiz(quizRequest, learningLevel, language);
                     } finally {
                         redisTemplate.delete(redisKey);
                     }
@@ -133,27 +137,18 @@ public class QuizService {
         return CompletableFuture.supplyAsync(() -> quizSubmitService.submitListeningQuiz(submitRequest, member));
     }
 
-    private Optional<QuizList> fetchQuiz(QuizRequest quizRequest, Member member) {
-        return quizListRepository.findByMusicIdAndQuizTypeAndLevel(
-                quizRequest.getMusicId(),
-                quizRequest.getQuizType(),
-                member.getLevel()
-        );
-    }
-
-    private Optional<ListeningQuiz> fetchListeningQuiz(QuizRequest quizRequest, Member member) {
+    private Optional<ListeningQuiz> fetchListeningQuiz(QuizRequest quizRequest, LearningLevel learningLevel) {
         return listeningQuizRepository.findByMusicIdAndLevel(
                 quizRequest.getMusicId(),
-                member.getLevel()
+                learningLevel
         );
     }
 
-    private String getRedisKey(QuizRequest quizRequest, Member member) {
-        return String.format("%s:%s:%s:%s",
+    private String getRedisKey(QuizRequest quizRequest, LearningLevel learningLevel) {
+        return String.format("%s:%s:%s",
                 quizRequest.getMusicId(),
                 quizRequest.getQuizType(),
-                member.getLevel(),
-                member.getMemberId()
+                learningLevel
         );
     }
 

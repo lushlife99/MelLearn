@@ -1,6 +1,5 @@
 package com.mellearn.be.global.prompt.service;
 
-import com.mellearn.be.domain.member.entity.Member;
 import com.mellearn.be.domain.member.enums.Language;
 import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.request.QuizRequest;
@@ -47,9 +46,8 @@ public class PromptFetchService {
     @Value("classpath:/prompt/VOCABULARY/user/vocabulary-user-message.st")
     private Resource vocabularyUserMessageTemplate;
 
-    public Prompt fetch(QuizRequest request, Member member, String responseFormat) {
-        LearningLevel level = member.getLevel();
-        Language langType = member.getLangType();
+    public Prompt fetch(QuizRequest request, LearningLevel level, Language language, String responseFormat) {
+
         Resource userPrompt = null;
         SystemPromptTemplate systemPrompt = null;
 
@@ -70,7 +68,7 @@ public class PromptFetchService {
             userPrompt = listeningUserMessageTemplate;
         }
 
-        String renderedMessage = render(userPrompt, request, level, langType, responseFormat);
+        String renderedMessage = render(userPrompt, request, level, language, responseFormat);
         UserMessage userMessage = new UserMessage(renderedMessage);
 
         return new Prompt(List.of(systemPrompt.createMessage(), userMessage));

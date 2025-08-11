@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ public class Quiz {
     @ElementCollection
     @CollectionTable(name = "quiz_option", joinColumns = @JoinColumn(name = "quiz_id"))
     @Column(name = "option_text")
+    @BatchSize(size = 5)
     private List<String> optionList = new ArrayList<>(4);
 
     private int answer;

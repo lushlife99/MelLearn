@@ -1,5 +1,7 @@
 package com.mellearn.be.domain.quiz.choice.quiz.service;
 
+import com.mellearn.be.domain.member.enums.Language;
+import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.Quiz;
 import com.mellearn.be.domain.quiz.choice.quiz.repository.QuizRepository;
 import com.mellearn.be.domain.quiz.listening.quiz.dto.ListeningQuizDto;
@@ -37,26 +39,26 @@ public class QuizCreateService {
 
 
     @Transactional
-    public ListeningQuizDto createListeningQuiz(QuizRequest request, Member member) {
+    public ListeningQuizDto createListeningQuiz(QuizRequest request, LearningLevel learningLevel, Language language) {
         BeanOutputConverter<ListeningQuizResponseDto> converter = new BeanOutputConverter<>(ListeningQuizResponseDto.class);
-        Prompt prompt = promptFetchService.fetch(request, member, converter.getFormat());
+        Prompt prompt = promptFetchService.fetch(request, learningLevel, language, converter.getFormat());
         Generation result = chatModel.call(prompt).getResult();
         ListeningQuizResponseDto listeningQuizResponseDto = converter.convert(Objects.requireNonNull(result.getOutput().getText()));
 
         ListeningQuiz listeningQuiz = ListeningQuiz.create(listeningQuizResponseDto.blankedText(),
-                request.getMusicId(), member.getLevel(),
+                request.getMusicId(), learningLevel,
                 listeningQuizResponseDto.answers());
 
         return new ListeningQuizDto(listeningQuizRepository.save(listeningQuiz));
     }
 
     @Transactional
-    public QuizListDto createChoiceQuiz(QuizRequest request, Member member) {
+    public QuizListDto createChoiceQuiz(QuizRequest request, LearningLevel learningLevel, Language language) {
         BeanOutputConverter<QuizListResponseDto> converter = new BeanOutputConverter<>(QuizListResponseDto.class);
-        Prompt prompt = promptFetchService.fetch(request, member, converter.getFormat());
+        Prompt prompt = promptFetchService.fetch(request, learningLevel, language, converter.getFormat());
         Generation result = chatModel.call(prompt).getResult();
         QuizListResponseDto quizListDto = converter.convert(Objects.requireNonNull(result.getOutput().getText()));
-        QuizList quizList = QuizList.create(request.getQuizType(), quizListDto, member.getLevel(), request.getMusicId());
+        QuizList quizList = QuizList.create(request.getQuizType(), quizListDto, learningLevel, request.getMusicId());
 
         quizListRepository.save(quizList);
         return new QuizListDto(quizList);

@@ -65,7 +65,7 @@ public class QuizSubmitService {
     }
 
     private QuizList findQuizList(String musicId, QuizType quizType, LearningLevel level) {
-        return quizListRepository.findByMusicIdAndQuizTypeAndLevel(musicId, quizType, level)
+        return quizListRepository.findByMusicIdAndLevelAndQuizType(musicId, quizType, level)
                 .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
     }
 
