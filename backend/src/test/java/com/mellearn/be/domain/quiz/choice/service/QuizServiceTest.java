@@ -1,5 +1,6 @@
 package com.mellearn.be.domain.quiz.choice.service;
 
+import com.mellearn.be.domain.member.enums.Language;
 import com.mellearn.be.domain.quiz.listening.quiz.dto.ListeningQuizDto;
 import com.mellearn.be.domain.quiz.listening.quiz.entity.ListeningQuiz;
 import com.mellearn.be.domain.quiz.listening.quiz.repository.ListeningQuizRepository;
@@ -43,9 +44,6 @@ class QuizServiceTest {
     private ListeningQuizRepository listeningQuizRepository;
 
     @Mock
-    private MemberRepository memberRepository;
-
-    @Mock
     private RedisTemplate<String, Object> redisTemplate;
 
     @Mock
@@ -68,7 +66,7 @@ class QuizServiceTest {
         quizRequest = new QuizRequest();
         quizRequest.setMusicId("test-music");
         quizRequest.setQuizType(QuizType.READING);
-        
+
         memberId = "test-member";
         member = Member.builder()
                 .id(1L)
@@ -97,15 +95,14 @@ class QuizServiceTest {
     @DisplayName("일반 퀴즈 목록 조회 테스트 - 기존 퀴즈")
     void getQuizList_ExistingQuiz() throws Exception {
         // given
-        when(memberRepository.findByMemberId(memberId)).thenReturn(Optional.of(member));
         when(quizListRepository.findByMusicIdAndQuizTypeAndLevel(
-                eq("test-music"), 
-                eq(QuizType.READING), 
+                eq("test-music"),
+                eq(QuizType.READING),
                 eq(LearningLevel.Advanced)
         )).thenReturn(Optional.of(quizList));
 
         // when
-        CompletableFuture<QuizListDto> result = quizService.getQuizList(quizRequest, memberId);
+        CompletableFuture<QuizListDto> result = quizService.getQuizList(quizRequest, LearningLevel.Advanced, Language.ENGLISH);
 
         // then
         assertNotNull(result);
@@ -113,8 +110,8 @@ class QuizServiceTest {
         assertNotNull(quizListDto);
         assertEquals(quizList.getId(), quizListDto.getId());
         verify(quizListRepository).findByMusicIdAndQuizTypeAndLevel(
-                eq("test-music"), 
-                eq(QuizType.READING), 
+                eq("test-music"),
+                eq(QuizType.READING),
                 eq(LearningLevel.Advanced)
         );
     }
@@ -124,14 +121,13 @@ class QuizServiceTest {
     void getListeningQuiz_ExistingQuiz() throws Exception {
         // given
         quizRequest.setQuizType(QuizType.LISTENING);
-        when(memberRepository.findByMemberId(memberId)).thenReturn(Optional.of(member));
         when(listeningQuizRepository.findByMusicIdAndLevel(
-                eq("test-music"), 
+                eq("test-music"),
                 eq(LearningLevel.Advanced)
         )).thenReturn(Optional.of(listeningQuiz));
 
         // when
-        CompletableFuture<ListeningQuizDto> result = quizService.getListeningQuiz(quizRequest, memberId);
+        CompletableFuture<ListeningQuizDto> result = quizService.getListeningQuiz(quizRequest, LearningLevel.Advanced, Language.ENGLISH);
 
         // then
         assertNotNull(result);
@@ -139,7 +135,7 @@ class QuizServiceTest {
         assertNotNull(listeningQuizDto);
         assertEquals(listeningQuiz.getId(), listeningQuizDto.getId());
         verify(listeningQuizRepository).findByMusicIdAndLevel(
-                eq("test-music"), 
+                eq("test-music"),
                 eq(LearningLevel.Advanced)
         );
     }
@@ -149,27 +145,26 @@ class QuizServiceTest {
     void getQuizList_CreateNewQuiz() throws Exception {
         // given
         QuizListDto expectedDto = new QuizListDto(quizList);
-        when(memberRepository.findByMemberId(memberId)).thenReturn(Optional.of(member));
         when(quizListRepository.findByMusicIdAndQuizTypeAndLevel(
-                eq("test-music"), 
-                eq(QuizType.READING), 
+                eq("test-music"),
+                eq(QuizType.READING),
                 eq(LearningLevel.Advanced)
         )).thenReturn(Optional.empty());
         when(redisTemplate.hasKey(anyString())).thenReturn(false);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(quizCreateService.createChoiceQuiz(eq(quizRequest), eq(member)))
+        when(quizCreateService.createChoiceQuiz(eq(quizRequest), eq(member.getLevel()), eq(Language.ENGLISH)))
                 .thenReturn(expectedDto);
 
         // when
-        CompletableFuture<QuizListDto> result = quizService.getQuizList(quizRequest, memberId);
-        
+        CompletableFuture<QuizListDto> result = quizService.getQuizList(quizRequest, LearningLevel.Advanced, Language.ENGLISH);
+
         // then
         assertNotNull(result);
         QuizListDto quizListDto = result.get();
         assertNotNull(quizListDto);
         assertEquals(expectedDto.getId(), quizListDto.getId());
         verify(valueOperations).set(anyString(), eq("true"), eq(1L), eq(TimeUnit.MINUTES));
-        verify(quizCreateService).createChoiceQuiz(eq(quizRequest), eq(member));
+        verify(quizCreateService).createChoiceQuiz(eq(quizRequest), eq(member.getLevel()), eq(Language.ENGLISH));
     }
 
     @Test
@@ -178,18 +173,17 @@ class QuizServiceTest {
         // given
         quizRequest.setQuizType(QuizType.LISTENING);
         ListeningQuizDto expectedDto = new ListeningQuizDto(listeningQuiz);
-        when(memberRepository.findByMemberId(memberId)).thenReturn(Optional.of(member));
         when(listeningQuizRepository.findByMusicIdAndLevel(
-                eq("test-music"), 
+                eq("test-music"),
                 eq(LearningLevel.Advanced)
         )).thenReturn(Optional.empty());
         when(redisTemplate.hasKey(anyString())).thenReturn(false);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(quizCreateService.createListeningQuiz(eq(quizRequest), eq(member)))
+        when(quizCreateService.createListeningQuiz(eq(quizRequest), eq(member.getLevel()), eq(Language.ENGLISH)))
                 .thenReturn(expectedDto);
 
         // when
-        CompletableFuture<ListeningQuizDto> result = quizService.getListeningQuiz(quizRequest, memberId);
+        CompletableFuture<ListeningQuizDto> result = quizService.getListeningQuiz(quizRequest, LearningLevel.Advanced, Language.ENGLISH);
 
         // then
         assertNotNull(result);
@@ -197,6 +191,6 @@ class QuizServiceTest {
         assertNotNull(listeningQuizDto);
         assertEquals(expectedDto.getId(), listeningQuizDto.getId());
         verify(valueOperations).set(anyString(), eq("true"), eq(1L), eq(TimeUnit.MINUTES));
-        verify(quizCreateService).createListeningQuiz(eq(quizRequest), eq(member));
+        verify(quizCreateService).createListeningQuiz(eq(quizRequest), eq(member.getLevel()), eq(Language.ENGLISH));
     }
-} 
+}
