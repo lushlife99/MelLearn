@@ -6,7 +6,6 @@ import com.mellearn.be.domain.quiz.listening.quiz.entity.ListeningQuiz;
 import com.mellearn.be.domain.quiz.listening.quiz.repository.ListeningQuizRepository;
 import com.mellearn.be.domain.member.entity.Member;
 import com.mellearn.be.domain.member.enums.LearningLevel;
-import com.mellearn.be.domain.member.repository.MemberRepository;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.QuizListDto;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.request.QuizRequest;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.QuizList;
@@ -95,7 +94,7 @@ class QuizServiceTest {
     @DisplayName("일반 퀴즈 목록 조회 테스트 - 기존 퀴즈")
     void getQuizList_ExistingQuiz() throws Exception {
         // given
-        when(quizListRepository.findByMusicIdAndQuizTypeAndLevel(
+        when(quizListRepository.findByMusicIdAndLevelAndQuizType(
                 eq("test-music"),
                 eq(QuizType.READING),
                 eq(LearningLevel.Advanced)
@@ -109,7 +108,7 @@ class QuizServiceTest {
         QuizListDto quizListDto = result.get();
         assertNotNull(quizListDto);
         assertEquals(quizList.getId(), quizListDto.getId());
-        verify(quizListRepository).findByMusicIdAndQuizTypeAndLevel(
+        verify(quizListRepository).findByMusicIdAndLevelAndQuizType(
                 eq("test-music"),
                 eq(QuizType.READING),
                 eq(LearningLevel.Advanced)
@@ -145,7 +144,7 @@ class QuizServiceTest {
     void getQuizList_CreateNewQuiz() throws Exception {
         // given
         QuizListDto expectedDto = new QuizListDto(quizList);
-        when(quizListRepository.findByMusicIdAndQuizTypeAndLevel(
+        when(quizListRepository.findByMusicIdAndLevelAndQuizType(
                 eq("test-music"),
                 eq(QuizType.READING),
                 eq(LearningLevel.Advanced)
