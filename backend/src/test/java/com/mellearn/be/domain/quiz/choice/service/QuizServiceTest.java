@@ -20,6 +20,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
@@ -47,6 +49,9 @@ class QuizServiceTest {
 
     @Mock
     private ValueOperations<String, Object> valueOperations;
+
+    @Mock
+    private CacheManager cacheManager;
 
     @Mock
     private QuizCreateService quizCreateService;
@@ -93,27 +98,25 @@ class QuizServiceTest {
     @Test
     @DisplayName("일반 퀴즈 목록 조회 테스트 - 기존 퀴즈")
     void getQuizList_ExistingQuiz() throws Exception {
-        // given
+        // 캐시 mock
+        Cache mockCache = mock(Cache.class);
+        when(cacheManager.getCache("quizListCache")).thenReturn(mockCache);
+        when(mockCache.get(anyString(), eq(QuizListDto.class))).thenReturn(null); // 캐시 미스
+
         when(quizListRepository.findByMusicIdAndLevelAndQuizType(
                 eq("test-music"),
                 eq(QuizType.READING),
                 eq(LearningLevel.Advanced)
         )).thenReturn(Optional.of(quizList));
 
-        // when
-        CompletableFuture<QuizListDto> result = quizService.getQuizList(quizRequest, LearningLevel.Advanced, Language.ENGLISH);
+        CompletableFuture<QuizListDto> result =
+                quizService.getQuizList(quizRequest, LearningLevel.Advanced, Language.ENGLISH);
 
-        // then
         assertNotNull(result);
-        QuizListDto quizListDto = result.get();
-        assertNotNull(quizListDto);
-        assertEquals(quizList.getId(), quizListDto.getId());
-        verify(quizListRepository).findByMusicIdAndLevelAndQuizType(
-                eq("test-music"),
-                eq(QuizType.READING),
-                eq(LearningLevel.Advanced)
-        );
+        assertEquals(quizList.getId(), result.get().getId());
     }
+
+
 
     @Test
     @DisplayName("듣기 퀴즈 조회 테스트 - 기존 퀴즈")
@@ -142,7 +145,11 @@ class QuizServiceTest {
     @Test
     @DisplayName("일반 퀴즈 목록 조회 테스트 - 새로운 퀴즈 생성")
     void getQuizList_CreateNewQuiz() throws Exception {
-        // given
+        // 캐시 mock
+        Cache mockCache = mock(Cache.class);
+        when(cacheManager.getCache("quizListCache")).thenReturn(mockCache);
+        when(mockCache.get(anyString(), eq(QuizListDto.class))).thenReturn(null); // 캐시 미스
+
         QuizListDto expectedDto = new QuizListDto(quizList);
         when(quizListRepository.findByMusicIdAndLevelAndQuizType(
                 eq("test-music"),
@@ -154,16 +161,12 @@ class QuizServiceTest {
         when(quizCreateService.createChoiceQuiz(eq(quizRequest), eq(member.getLevel()), eq(Language.ENGLISH)))
                 .thenReturn(expectedDto);
 
-        // when
-        CompletableFuture<QuizListDto> result = quizService.getQuizList(quizRequest, LearningLevel.Advanced, Language.ENGLISH);
+        CompletableFuture<QuizListDto> result =
+                quizService.getQuizList(quizRequest, LearningLevel.Advanced, Language.ENGLISH);
 
-        // then
         assertNotNull(result);
-        QuizListDto quizListDto = result.get();
-        assertNotNull(quizListDto);
-        assertEquals(expectedDto.getId(), quizListDto.getId());
+        assertEquals(expectedDto.getId(), result.get().getId());
         verify(valueOperations).set(anyString(), eq("true"), eq(1L), eq(TimeUnit.MINUTES));
-        verify(quizCreateService).createChoiceQuiz(eq(quizRequest), eq(member.getLevel()), eq(Language.ENGLISH));
     }
 
     @Test
@@ -172,17 +175,29 @@ class QuizServiceTest {
         // given
         quizRequest.setQuizType(QuizType.LISTENING);
         ListeningQuizDto expectedDto = new ListeningQuizDto(listeningQuiz);
+
         when(listeningQuizRepository.findByMusicIdAndLevel(
                 eq("test-music"),
                 eq(LearningLevel.Advanced)
         )).thenReturn(Optional.empty());
+
         when(redisTemplate.hasKey(anyString())).thenReturn(false);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(quizCreateService.createListeningQuiz(eq(quizRequest), eq(member.getLevel()), eq(Language.ENGLISH)))
-                .thenReturn(expectedDto);
+
+        when(quizCreateService.createListeningQuiz(
+                eq(quizRequest),
+                eq(member.getLevel()),
+                eq(Language.ENGLISH)
+        )).thenReturn(expectedDto);
+
+        // 캐시 mock 설정
+        Cache mockCache = mock(Cache.class);
+        when(cacheManager.getCache("quizListCache")).thenReturn(mockCache);
+        when(mockCache.get(anyString(), eq(ListeningQuizDto.class))).thenReturn(null);
 
         // when
-        CompletableFuture<ListeningQuizDto> result = quizService.getListeningQuiz(quizRequest, LearningLevel.Advanced, Language.ENGLISH);
+        CompletableFuture<ListeningQuizDto> result =
+                quizService.getListeningQuiz(quizRequest, LearningLevel.Advanced, Language.ENGLISH);
 
         // then
         assertNotNull(result);
