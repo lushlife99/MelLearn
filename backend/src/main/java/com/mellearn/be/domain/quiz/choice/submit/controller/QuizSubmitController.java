@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 
@@ -40,10 +41,10 @@ public class QuizSubmitController {
 
     @GetMapping
     @Operation(summary = "제출 답안지, 채점 조회", description = "제출 답안지, 채점 조회")
-    public ResponseEntity getSubmitList(@RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
+    public ResponseEntity getSubmitList(@RequestParam(required = false, value = "lastSeenId") Long lastSeenId,
                                         @RequestParam QuizType quizType,
                                         Authentication authentication) {
-        Page submitList = quizService.getSubmitList(quizType, pageNo, authentication.getName());
+        List submitList = quizService.getSubmitList(quizType, lastSeenId, authentication.getName());
         return new ResponseEntity(submitList, HttpStatus.OK);
     }
 

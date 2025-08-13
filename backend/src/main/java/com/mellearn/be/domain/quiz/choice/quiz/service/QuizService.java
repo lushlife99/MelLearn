@@ -41,7 +41,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class QuizService {
 
-    private final String QUIZ_LIST_CACHE_KEY = "quizListCache";
+    private static final String QUIZ_LIST_CACHE_KEY = "quizListCache";
+    private static final int PAGE_SIZE = 10;
 
     private final QuizSubmitService quizSubmitService;
     private final RedisTemplate<String, Object> redisTemplate;
@@ -53,18 +54,16 @@ public class QuizService {
 
     private final CacheManager cacheManager;
 
-    public Page getSubmitList(QuizType quizType, int pageNo, String memberId) {
+    public List<?> getSubmitList(QuizType quizType, Long lastSeenId, String memberId) {
         Member member = findMember(memberId);
 
         if (quizType.equals(QuizType.LISTENING)) {
-            return quizSubmitRepository.findListeningSubmitWithPaging(member.getId(), pageNo, 10);
-        } else if (quizType.equals(QuizType.READING) || quizType.equals(QuizType.VOCABULARY) || quizType.equals(QuizType.GRAMMAR)) {
-            return quizSubmitRepository.findSubmitWithPaging(member.getId(), quizType, pageNo, 10);
+            return quizSubmitRepository.findListeningSubmitWithPaging(member.getId(), lastSeenId, PAGE_SIZE);
         } else if (quizType.equals(QuizType.SPEAKING)) {
-            return quizSubmitRepository.findSpeakingSubmitWithPaging(member.getId(), pageNo, 10);
+            return quizSubmitRepository.findSpeakingSubmitWithPaging(member.getId(), lastSeenId, PAGE_SIZE);
+        } else {
+            return quizSubmitRepository.findSubmitWithPaging(member.getId(), quizType, lastSeenId, PAGE_SIZE);
         }
-
-        throw new CustomException(ErrorCode.BAD_REQUEST);
     }
 
     /**
@@ -76,7 +75,7 @@ public class QuizService {
 
         // 캐시에서 값 조회
         String key = quizRequest.getMusicId() + "_" + quizRequest.getQuizType().name() + "_" + learningLevel.name() + "_" + language.name();
-        Cache cache = cacheManager.getCache("quizListCache");
+        Cache cache = cacheManager.getCache(QUIZ_LIST_CACHE_KEY);
 
         QuizListDto cachedDto = cache != null ? cache.get(key, QuizListDto.class) : null;
         if (cachedDto != null) {
@@ -114,7 +113,7 @@ public class QuizService {
         try {
 
             String key = quizRequest.getMusicId() + "_" + quizRequest.getQuizType().name() + "_" + learningLevel.name() + "_" + language.name();
-            Cache cache = cacheManager.getCache("quizListCache");
+            Cache cache = cacheManager.getCache(QUIZ_LIST_CACHE_KEY);
 
             ListeningQuizDto cachedDto = cache != null ? cache.get(key, ListeningQuizDto.class) : null;
             if (cachedDto != null) {

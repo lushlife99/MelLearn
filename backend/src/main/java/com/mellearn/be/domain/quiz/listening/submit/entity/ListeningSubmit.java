@@ -27,10 +27,10 @@ public class ListeningSubmit {
     @Enumerated(value = EnumType.STRING)
     private LearningLevel level;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private ListeningQuiz listeningQuiz;
 
     @ElementCollection(fetch = FetchType.LAZY)

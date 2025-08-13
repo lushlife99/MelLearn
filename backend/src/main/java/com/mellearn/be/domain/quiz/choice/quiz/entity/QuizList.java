@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ public class QuizList {
     @Enumerated(EnumType.STRING)
     private QuizType quizType;
     @OneToMany(mappedBy = "quizList", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 10)
     private List<Quiz> quizzes = new ArrayList<>();
     @Enumerated(EnumType.STRING)
     private LearningLevel level;

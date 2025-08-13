@@ -25,7 +25,7 @@ public class Quiz {
     @ElementCollection
     @CollectionTable(name = "quiz_option", joinColumns = @JoinColumn(name = "quiz_id"))
     @Column(name = "option_text")
-    @BatchSize(size = 5)
+    @BatchSize(size = 50)
     private List<String> optionList = new ArrayList<>(4);
 
     private int answer;

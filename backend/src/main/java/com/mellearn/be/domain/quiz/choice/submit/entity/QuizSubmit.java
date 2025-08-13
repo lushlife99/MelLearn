@@ -25,6 +25,7 @@ public class QuizSubmit {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_list_id")
+    @BatchSize(size = 5)
     private QuizList quizList;
 
     @ManyToOne(fetch = FetchType.LAZY)

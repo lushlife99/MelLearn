@@ -6,9 +6,11 @@ import com.mellearn.be.domain.quiz.listening.submit.dto.ListeningSubmitDto;
 import com.mellearn.be.domain.quiz.speaking.dto.SpeakingSubmitDto;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 public interface QuizSubmitRepositoryCustom {
 
-    Page<QuizSubmitDto> findSubmitWithPaging(long memberId, QuizType quizType, int pageNumber, int pageSize);
-    Page<ListeningSubmitDto> findListeningSubmitWithPaging(long memberId, int pageNumber, int pageSize);
-    Page<SpeakingSubmitDto> findSpeakingSubmitWithPaging(long memberId, int pageNumber, int pageSize);
+    List<QuizSubmitDto> findSubmitWithPaging(long memberId, QuizType quizType, Long lastSeenId, int pageSize);
+    List<ListeningSubmitDto> findListeningSubmitWithPaging(long memberId, Long lastSeenId, int pageSize);
+    List<SpeakingSubmitDto> findSpeakingSubmitWithPaging(long memberId, Long lastSeenId, int pageSize);
 }

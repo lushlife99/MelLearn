@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,6 +34,7 @@ public class ListeningQuiz {
     @ElementCollection
     @CollectionTable(name = "listening_quiz_answer", joinColumns = @JoinColumn(name = "listening_quiz_id"))
     @Column(name = "answer")
+    @BatchSize(size = 450)
     private List<String> answerList;
 
     private LocalDateTime createdTime;
