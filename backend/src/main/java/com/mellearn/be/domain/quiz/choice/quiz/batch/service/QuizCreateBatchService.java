@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Service
@@ -29,6 +30,7 @@ public class QuizCreateBatchService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final QuizListRepository quizListRepository;
     private final ListeningQuizRepository listeningQuizRepository;
+    private final Executor schedulerExecutor;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void createQuizList() {
@@ -45,7 +47,7 @@ public class QuizCreateBatchService {
                     redisTemplate.delete(key); // 생성 후 키 삭제
                     System.out.println(quiz);
                     return quiz;
-                }))
+                }, schedulerExecutor))
                 .toList();
 
         List<QuizList> choiceQuizzes = futures.stream()
@@ -64,7 +66,7 @@ public class QuizCreateBatchService {
                     redisTemplate.delete(key); // 생성 후 키 삭제
                     System.out.println(quiz);
                     return quiz;
-                }))
+                }, schedulerExecutor))
                 .toList();
 
         List<ListeningQuiz> listeningQuizzes = futures.stream()
