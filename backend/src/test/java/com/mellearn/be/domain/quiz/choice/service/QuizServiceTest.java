@@ -146,7 +146,7 @@ class QuizServiceTest {
 
     @Test
     @DisplayName("일반 퀴즈 목록 조회 테스트 - 퀴즈가 존재하지 않으면 큐에 추가 후 Not Found Exception 발생")
-    void getQuizList_CreateNewQuiz() throws Exception {
+    void getQuizList_CreateNewQuiz() {
         // 캐시 mock
         Cache mockCache = mock(Cache.class);
         when(cacheManager.getCache("quizListCache")).thenReturn(mockCache);
@@ -171,10 +171,9 @@ class QuizServiceTest {
 
     @Test
     @DisplayName("듣기 퀴즈 조회 테스트 - 퀴즈가 존재하지 않으면 큐에 추가한 뒤 Not Found Exception이 발생해야 한다.")
-    void getListeningQuiz_CreateNewQuiz() throws Exception {
+    void getListeningQuiz_CreateNewQuiz() {
         // given
         quizRequest.setQuizType(QuizType.LISTENING);
-        ListeningQuizDto expectedDto = new ListeningQuizDto(listeningQuiz);
 
         when(listeningQuizRepository.findByMusicIdAndLevel(
                 eq("test-music"),
