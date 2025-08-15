@@ -1,6 +1,7 @@
 package com.mellearn.be.domain.quiz.listening.quiz.entity;
 
 import com.mellearn.be.domain.member.enums.LearningLevel;
+import com.mellearn.be.domain.quiz.choice.quiz.dto.request.QuizRequest;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -49,11 +50,11 @@ public class ListeningQuiz {
         this.id = id;
     }
 
-    public static ListeningQuiz create(String blankedText, String musicId, LearningLevel level, List<String> answerList) {
+    public static ListeningQuiz create(String blankedText, QuizRequest quizRequest, List<String> answerList) {
         return ListeningQuiz.builder()
                 .blankedText(blankedText)
-                .musicId(musicId)
-                .level(level)
+                .musicId(quizRequest.getMusicId())
+                .level(quizRequest.getLearningLevel())
                 .answerList(answerList)
                 .build();
     }

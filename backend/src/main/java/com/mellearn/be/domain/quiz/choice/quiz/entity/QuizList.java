@@ -1,6 +1,7 @@
 package com.mellearn.be.domain.quiz.choice.quiz.entity;
 
 import com.mellearn.be.domain.member.enums.LearningLevel;
+import com.mellearn.be.domain.quiz.choice.quiz.dto.request.QuizRequest;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.response.chatmodel.QuizListResponseDto;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.response.chatmodel.QuizResponseDto;
 import com.mellearn.be.domain.quiz.choice.submit.entity.QuizSubmit;
@@ -57,11 +58,11 @@ public class QuizList {
         this.id = id;
     }
 
-    public static QuizList create(QuizType quizType, QuizListResponseDto quizListDto, LearningLevel level, String musicId) {
+    public static QuizList create(QuizRequest quizRequest, QuizListResponseDto quizListDto) {
         QuizList quizList = QuizList.builder()
-                .quizType(quizType)
-                .level(level)
-                .musicId(musicId)
+                .quizType(quizRequest.getQuizType())
+                .level(quizRequest.getLearningLevel())
+                .musicId(quizRequest.getMusicId())
                 .build();
 
         for (QuizResponseDto dto : quizListDto.quizzes()) {

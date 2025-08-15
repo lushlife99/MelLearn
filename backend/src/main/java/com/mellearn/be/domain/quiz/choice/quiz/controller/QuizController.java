@@ -5,6 +5,8 @@ import com.mellearn.be.domain.quiz.choice.quiz.dto.request.QuizRequest;
 import com.mellearn.be.domain.quiz.choice.quiz.service.QuizService;
 import com.mellearn.be.domain.quiz.listening.quiz.dto.ListeningQuizDto;
 import com.mellearn.be.global.auth.jwt.service.JwtTokenProvider;
+import com.mellearn.be.global.error.CustomException;
+import com.mellearn.be.global.error.enums.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -32,8 +34,17 @@ public class QuizController {
             @ApiResponse(responseCode = "404", description = "퀴즈가 존재하지 않음. 퀴즈 생성 큐에 추가."),
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
-    public QuizListDto getQuizList(QuizRequest quizRequest) throws InterruptedException, ExecutionException {
-        return quizService.getQuizList(quizRequest).get();
+    public QuizListDto getQuizList(QuizRequest quizRequest) {
+        try {
+            return quizService.getQuizList(quizRequest).get();
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof CustomException ce) {
+                throw ce; // GlobalExceptionHandler로 전달
+            }
+            throw new RuntimeException(e.getCause());
+        } catch (InterruptedException e) {
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
     @PostMapping("/listening")
     @Operation(summary = "퀴즈 조회", description = "듣기 퀴즈 조회")
@@ -42,8 +53,17 @@ public class QuizController {
             @ApiResponse(responseCode = "404", description = "퀴즈가 존재하지 않음. 퀴즈 생성 큐에 추가."),
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
-    public ListeningQuizDto getListeningQuiz(QuizRequest quizRequest) throws InterruptedException, ExecutionException {
-        return quizService.getListeningQuiz(quizRequest).get();
+    public ListeningQuizDto getListeningQuiz(QuizRequest quizRequest)  {
+        try {
+            return quizService.getListeningQuiz(quizRequest).get();
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof CustomException ce) {
+                throw ce; // GlobalExceptionHandler로 전달
+            }
+            throw new RuntimeException(e.getCause());
+        } catch (InterruptedException e) {
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }
