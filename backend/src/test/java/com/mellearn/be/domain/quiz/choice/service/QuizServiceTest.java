@@ -145,12 +145,11 @@ class QuizServiceTest {
     }
 
     @Test
-    @DisplayName("일반 퀴즈 목록 조회 테스트 - 퀴즈가 존재하지 않으면 큐에 추가 후 Not Found Exception 발생")
+    @DisplayName("일반 퀴즈 목록 조회 테스트 - 퀴즈가 존재하지 않으면 Redis에 추가 후 Not Found Exception 발생")
     void getQuizList_CreateNewQuiz() {
         // 캐시 mock
         Cache mockCache = mock(Cache.class);
         when(cacheManager.getCache("quizListCache")).thenReturn(mockCache);
-        when(cacheManager.getCache("quizRequestCache")).thenReturn(mockCache);
         when(mockCache.get(anyString(), eq(QuizListDto.class))).thenReturn(null); // 캐시 미스
 
         when(quizListRepository.findByMusicIdAndLevelAndQuizType(
@@ -159,20 +158,24 @@ class QuizServiceTest {
                 eq(LearningLevel.Advanced)
         )).thenReturn(Optional.empty());
 
+        // Redis mock
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+
         // when
         CompletableFuture<QuizListDto> future = quizService.getQuizList(quizRequest, LearningLevel.Advanced, Language.ENGLISH);
 
-        // then CompletableFuture.get() 호출 시 CustomException 발생 확인
+        // then
         ExecutionException exception = assertThrows(ExecutionException.class, future::get);
         assertInstanceOf(CustomException.class, exception.getCause());
         assertEquals(ErrorCode.QUIZ_NOT_FOUND, ((CustomException) exception.getCause()).getErrorCode());
+
+        // Redis에 저장됐는지 검증
+        verify(valueOperations).set(anyString(), eq(quizRequest), anyLong(), any());
     }
 
-
     @Test
-    @DisplayName("듣기 퀴즈 조회 테스트 - 퀴즈가 존재하지 않으면 큐에 추가한 뒤 Not Found Exception이 발생해야 한다.")
+    @DisplayName("듣기 퀴즈 조회 테스트 - 퀴즈가 존재하지 않으면 Redis에 추가 후 Not Found Exception 발생")
     void getListeningQuiz_CreateNewQuiz() {
-        // given
         quizRequest.setQuizType(QuizType.LISTENING);
 
         when(listeningQuizRepository.findByMusicIdAndLevel(
@@ -180,18 +183,24 @@ class QuizServiceTest {
                 eq(LearningLevel.Advanced)
         )).thenReturn(Optional.empty());
 
-        // 캐시 mock 설정
+        // 캐시 mock
         Cache mockCache = mock(Cache.class);
         when(cacheManager.getCache("quizListCache")).thenReturn(mockCache);
-        when(cacheManager.getCache("quizRequestCache")).thenReturn(mockCache);
         when(mockCache.get(anyString(), eq(ListeningQuizDto.class))).thenReturn(null);
+
+        // Redis mock
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         // when
         CompletableFuture<ListeningQuizDto> future = quizService.getListeningQuiz(quizRequest, LearningLevel.Advanced, Language.ENGLISH);
 
-        // then CompletableFuture.get() 호출 시 CustomException 발생 확인
+        // then
         ExecutionException exception = assertThrows(ExecutionException.class, future::get);
         assertInstanceOf(CustomException.class, exception.getCause());
         assertEquals(ErrorCode.QUIZ_NOT_FOUND, ((CustomException) exception.getCause()).getErrorCode());
+
+        // Redis에 저장됐는지 검증
+        verify(valueOperations).set(anyString(), eq(quizRequest), anyLong(), any());
     }
+
 }
