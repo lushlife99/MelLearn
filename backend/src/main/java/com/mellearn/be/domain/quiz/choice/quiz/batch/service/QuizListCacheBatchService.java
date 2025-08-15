@@ -42,15 +42,11 @@ public class QuizListCacheBatchService {
 
                         if (quizType == QuizType.LISTENING) {
                             future = quizService.getListeningQuiz(
-                                    new QuizRequest(musicId, quizType, popularMusicMap.get(musicId)),
-                                    learningLevel,
-                                    language
+                                    new QuizRequest(musicId, quizType, popularMusicMap.get(musicId), learningLevel, language)
                             );
                         } else {
                             future = quizService.getQuizList(
-                                    new QuizRequest(musicId, quizType, popularMusicMap.get(musicId)),
-                                    learningLevel,
-                                    language
+                                    new QuizRequest(musicId, quizType, popularMusicMap.get(musicId), learningLevel, language)
                             );
                         }
 

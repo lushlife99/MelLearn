@@ -183,28 +183,36 @@ public class ComprehensiveQuizService {
                             .quizType(QuizType.LISTENING)
                             .lyric(quizRequest.getLyric())
                             .musicId(quizRequest.getMusicId())
-                            .build(), learningLevel, language);
+                            .learningLevel(learningLevel)
+                            .language(language)
+                            .build());
 
             CompletableFuture<QuizListDto> readingQuiz = quizService.getQuizList(
                     QuizRequest.builder()
                             .quizType(QuizType.READING)
                             .lyric(quizRequest.getLyric())
                             .musicId(quizRequest.getMusicId())
-                            .build(), learningLevel, language);
+                            .learningLevel(learningLevel)
+                            .language(language)
+                            .build());
 
             CompletableFuture<QuizListDto> vocaQuiz = quizService.getQuizList(
                     QuizRequest.builder()
                             .quizType(QuizType.VOCABULARY)
                             .lyric(quizRequest.getLyric())
                             .musicId(quizRequest.getMusicId())
-                            .build(), learningLevel, language);
+                            .learningLevel(learningLevel)
+                            .language(language)
+                            .build());
 
             CompletableFuture<QuizListDto> grammarQuiz = quizService.getQuizList(
                     QuizRequest.builder()
                             .quizType(QuizType.GRAMMAR)
                             .lyric(quizRequest.getLyric())
                             .musicId(quizRequest.getMusicId())
-                            .build(), learningLevel, language);
+                            .learningLevel(learningLevel)
+                            .language(language)
+                            .build());
 
             // 모든 작업이 완료될 때까지 대기
             CompletableFuture.allOf(listeningQuiz, readingQuiz, vocaQuiz, grammarQuiz)

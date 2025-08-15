@@ -1,8 +1,6 @@
 package com.mellearn.be.domain.quiz.choice.quiz.service;
 
 import com.mellearn.be.domain.member.entity.Member;
-import com.mellearn.be.domain.member.enums.Language;
-import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.member.repository.MemberRepository;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.QuizListDto;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.request.QuizRequest;
@@ -70,14 +68,14 @@ public class QuizService {
      */
     @Async("taskExecutor")
     @Transactional(readOnly = true)
-    public CompletableFuture<QuizListDto> getQuizList(QuizRequest quizRequest, LearningLevel learningLevel, Language language) {
+    public CompletableFuture<QuizListDto> getQuizList(QuizRequest quizRequest) {
 
         // 1. 캐시에서 값 조회
         String quizListKey = String.join("_",
                 quizRequest.getMusicId(),
                 quizRequest.getQuizType().name(),
-                learningLevel.name(),
-                language.name()
+                quizRequest.getLearningLevel().name(),
+                quizRequest.getLanguage().name()
         );
 
         Cache quizListCache = cacheManager.getCache(QUIZ_LIST_CACHE_KEY);
@@ -91,7 +89,7 @@ public class QuizService {
         Optional<QuizList> optionalQuiz = quizListRepository.findByMusicIdAndLevelAndQuizType(
                 quizRequest.getMusicId(),
                 quizRequest.getQuizType(),
-                learningLevel
+                quizRequest.getLearningLevel()
         );
 
         if (optionalQuiz.isPresent()) {
@@ -110,10 +108,10 @@ public class QuizService {
 
     @Async("taskExecutor")
     @Transactional(readOnly = true)
-    public CompletableFuture<ListeningQuizDto> getListeningQuiz(QuizRequest quizRequest, LearningLevel learningLevel, Language language) {
+    public CompletableFuture<ListeningQuizDto> getListeningQuiz(QuizRequest quizRequest) {
 
         // 1. 캐시에서 값 조회
-        String quizListKey = quizRequest.getMusicId() + "_" + quizRequest.getQuizType().name() + "_" + learningLevel.name() + "_" + language.name();
+        String quizListKey = quizRequest.getMusicId() + "_" + quizRequest.getQuizType().name() + "_" + quizRequest.getLearningLevel().name() + "_" + quizRequest.getLanguage().name();
         Cache quizListCache = cacheManager.getCache(QUIZ_LIST_CACHE_KEY);
 
         ListeningQuizDto cachedDto = quizListCache != null ? quizListCache.get(quizListKey, ListeningQuizDto.class) : null;
@@ -124,7 +122,7 @@ public class QuizService {
         // 2. DB에서 값 조회
         Optional<ListeningQuiz> optionalQuiz = listeningQuizRepository.findByMusicIdAndLevel(
                 quizRequest.getMusicId(),
-                learningLevel
+                quizRequest.getLearningLevel()
         );
 
         if (optionalQuiz.isPresent()) {
@@ -134,7 +132,7 @@ public class QuizService {
         // 3. QuizRequest 캐시에 추가 및 반환
         return CompletableFuture.supplyAsync(() -> {
             // Redis에 저장
-            String redisKey = "quizRequest:" + quizListKey;
+            String redisKey = "listeningQuizRequest:" + quizListKey;
             redisTemplate.opsForValue().set(redisKey, quizRequest, 3, TimeUnit.HOURS);
 
             // 예외 발생
