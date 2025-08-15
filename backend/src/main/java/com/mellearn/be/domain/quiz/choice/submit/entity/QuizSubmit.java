@@ -48,9 +48,10 @@ public class QuizSubmit {
     private LocalDateTime createdTime;
 
     @Builder
-    public QuizSubmit(QuizList quizList, Member member, List<Integer> submitAnswerList, int score) {
+    public QuizSubmit(QuizList quizList, Member member, List<Integer> submitAnswerList, QuizType quizType, int score) {
         this.quizList = quizList;
         this.member = member;
+        this.quizType = quizType;
         this.submitAnswerList = submitAnswerList;
         this.score = score;
         this.createdTime = LocalDateTime.now();
@@ -60,6 +61,7 @@ public class QuizSubmit {
         return QuizSubmit.builder()
                 .quizList(quizList)
                 .member(member)
+                .quizType(quizList.getQuizType())
                 .submitAnswerList(submitAnswerList)
                 .score(calculateScore(submitAnswerList, quizList.getQuizzes()))
                 .build();
