@@ -19,7 +19,7 @@ public class CacheConfig {
 
     @Bean
     public CacheManager cacheManager(Caffeine<Object, Object> caffeine) {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager("quizRequestCache");
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager("quizListCache");
         cacheManager.setCaffeine(caffeine);
         cacheManager.setAsyncCacheMode(true);
         return cacheManager;
