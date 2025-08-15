@@ -222,10 +222,10 @@ class ComprehensiveQuizServiceTest {
         QuizListDto vocaQuizListDto = new QuizListDto(testQuizList);
         QuizListDto readingQuizListDto = new QuizListDto(testQuizList);
 
-        when(quizService.getQuizList(any(), any(), any())).thenReturn(CompletableFuture.completedFuture(grammarQuizListDto))
+        when(quizService.getQuizList(any())).thenReturn(CompletableFuture.completedFuture(grammarQuizListDto))
                 .thenReturn(CompletableFuture.completedFuture(vocaQuizListDto))
                 .thenReturn(CompletableFuture.completedFuture(readingQuizListDto));
-        when(quizService.getListeningQuiz(any(), any(), any())).thenReturn(CompletableFuture.completedFuture(listeningQuizDto));
+        when(quizService.getListeningQuiz(any())).thenReturn(CompletableFuture.completedFuture(listeningQuizDto));
 
         // when
         ComprehensiveQuizDto result = comprehensiveQuizService.get(testQuizRequest, testMember.getLevel(), testMember.getLangType());

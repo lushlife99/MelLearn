@@ -69,9 +69,13 @@ class QuizServiceTest {
 
     @BeforeEach
     void setUp() {
-        quizRequest = new QuizRequest();
-        quizRequest.setMusicId("test-music");
-        quizRequest.setQuizType(QuizType.READING);
+        quizRequest = new QuizRequest(
+                "test-music",
+                QuizType.READING,
+                "test-lyric",
+                LearningLevel.Advanced,
+                Language.ENGLISH
+        );
 
         memberId = "test-member";
         member = Member.builder()
@@ -112,7 +116,7 @@ class QuizServiceTest {
         )).thenReturn(Optional.of(quizList));
 
         CompletableFuture<QuizListDto> result =
-                quizService.getQuizList(quizRequest, LearningLevel.Advanced, Language.ENGLISH);
+                quizService.getQuizList(quizRequest);
 
         assertNotNull(result);
         assertEquals(quizList.getId(), result.get().getId());
@@ -131,7 +135,7 @@ class QuizServiceTest {
         )).thenReturn(Optional.of(listeningQuiz));
 
         // when
-        CompletableFuture<ListeningQuizDto> result = quizService.getListeningQuiz(quizRequest, LearningLevel.Advanced, Language.ENGLISH);
+        CompletableFuture<ListeningQuizDto> result = quizService.getListeningQuiz(quizRequest);
 
         // then
         assertNotNull(result);
@@ -162,7 +166,7 @@ class QuizServiceTest {
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         // when
-        CompletableFuture<QuizListDto> future = quizService.getQuizList(quizRequest, LearningLevel.Advanced, Language.ENGLISH);
+        CompletableFuture<QuizListDto> future = quizService.getQuizList(quizRequest);
 
         // then
         ExecutionException exception = assertThrows(ExecutionException.class, future::get);
@@ -192,7 +196,7 @@ class QuizServiceTest {
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         // when
-        CompletableFuture<ListeningQuizDto> future = quizService.getListeningQuiz(quizRequest, LearningLevel.Advanced, Language.ENGLISH);
+        CompletableFuture<ListeningQuizDto> future = quizService.getListeningQuiz(quizRequest);
 
         // then
         ExecutionException exception = assertThrows(ExecutionException.class, future::get);
