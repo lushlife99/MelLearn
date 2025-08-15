@@ -3,6 +3,7 @@ package com.mellearn.be.domain.quiz.choice.submit.entity;
 import com.mellearn.be.domain.member.entity.Member;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.Quiz;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.QuizList;
+import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -22,6 +23,9 @@ public class QuizSubmit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Enumerated(EnumType.STRING)
+    private QuizType quizType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_list_id")

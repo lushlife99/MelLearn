@@ -1,6 +1,5 @@
 package com.mellearn.be.domain.quiz.choice.submit.repository.querydsl.impl;
 
-import com.mellearn.be.domain.quiz.choice.quiz.entity.QQuizList;
 import com.mellearn.be.domain.quiz.choice.submit.entity.QuizSubmit;
 import com.mellearn.be.domain.quiz.choice.submit.repository.querydsl.QuizSubmitRepositoryCustom;
 import com.mellearn.be.domain.quiz.listening.submit.dto.ListeningSubmitDto;
@@ -10,12 +9,10 @@ import com.mellearn.be.domain.quiz.speaking.dto.SpeakingSubmitDto;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLTemplates;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,11 +29,9 @@ import static com.mellearn.be.domain.quiz.speaking.entity.QSpeakingSubmit.speaki
 public class QuizSubmitRepositoryImpl implements QuizSubmitRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
-    private final EntityManager em;
 
     public QuizSubmitRepositoryImpl(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(JPQLTemplates.DEFAULT, em);
-        this.em = em;
     }
 
     @Transactional(readOnly = true)
@@ -46,16 +41,16 @@ public class QuizSubmitRepositoryImpl implements QuizSubmitRepositoryCustom {
                 ? quizSubmit.id.lt(lastSeenId)
                 : quizSubmit.id.lt(Long.MAX_VALUE);
 
-//         1. 페이징 쿼리로 submit id 가져오기
+        // 1. 페이징 쿼리로 submit id 가져오기
         List<Long> ids = queryFactory
                 .select(quizSubmit.id)
                 .from(quizSubmit)
                 .where(
-                        quizSubmit.quizList.quizType.eq(quizType),
                         quizSubmit.member.id.eq(memberId),
+                        quizSubmit.quizType.eq(quizType),
                         idPredicate
                 )
-                .orderBy(quizSubmit.createdTime.desc())
+                .orderBy(quizSubmit.id.desc())
                 .limit(pageSize)
                 .fetch();
 
@@ -96,7 +91,7 @@ public class QuizSubmitRepositoryImpl implements QuizSubmitRepositoryCustom {
                 .select(listeningSubmit.id)
                 .from(listeningSubmit)
                 .where(listeningSubmit.member.id.eq(memberId), idPredicate)
-                .orderBy(listeningSubmit.createdTime.desc())
+                .orderBy(listeningSubmit.id.desc())
                 .limit(pageSize)
                 .fetch();
 
