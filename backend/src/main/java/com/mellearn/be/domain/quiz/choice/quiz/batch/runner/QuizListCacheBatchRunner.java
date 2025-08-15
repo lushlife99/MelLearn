@@ -1,9 +1,7 @@
 package com.mellearn.be.domain.quiz.choice.quiz.batch.runner;
 
 import com.mellearn.be.domain.member.enums.Language;
-import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.quiz.choice.quiz.batch.service.QuizListCacheBatchService;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
