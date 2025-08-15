@@ -9,7 +9,6 @@ import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -30,13 +29,13 @@ public class QuizSubmitController {
     @PostMapping({"/grammar", "/reading", "/vocabulary"})
     @Operation(summary = "퀴즈 답안지 제출", description = "퀴즈 답안지 제출")
     public QuizSubmitDto submit(@RequestBody QuizSubmitRequest quizSubmitRequest, Authentication authentication) throws ExecutionException, InterruptedException {
-        return quizService.submit(quizSubmitRequest, authentication.getName()).get();
+        return quizService.submitQuiz(quizSubmitRequest, authentication.getName()).get();
     }
 
     @PostMapping("/listening")
     @Operation(summary = "퀴즈 답안지 제출", description = "퀴즈 답안지 제출")
     public ListeningSubmitDto listeningSubmit(@RequestBody ListeningSubmitRequest submitRequest, Authentication authentication) throws ExecutionException, InterruptedException {
-        return quizService.listeningSubmit(submitRequest, authentication.getName()).get();
+        return quizService.submitListeningQuiz(submitRequest, authentication.getName()).get();
     }
 
     @GetMapping

@@ -47,28 +47,28 @@ public class ComprehensiveQuizService {
         try {
             Member member = findMember(memberId);
 
-            CompletableFuture<QuizSubmitDto> grammarSubmit = quizService.submit(
+            CompletableFuture<QuizSubmitDto> grammarSubmit = quizService.submitQuiz(
                     QuizSubmitRequest.builder()
                             .quizType(QuizType.GRAMMAR)
                             .answers(quizSubmitRequest.getGrammarSubmit())
                             .musicId(quizSubmitRequest.getMusicId())
                             .build(), memberId);
 
-            CompletableFuture<QuizSubmitDto> vocaSubmit = quizService.submit(
+            CompletableFuture<QuizSubmitDto> vocaSubmit = quizService.submitQuiz(
                     QuizSubmitRequest.builder()
                             .quizType(QuizType.VOCABULARY)
                             .answers(quizSubmitRequest.getVocabularySubmit())
                             .musicId(quizSubmitRequest.getMusicId())
                             .build(), memberId);
 
-            CompletableFuture<QuizSubmitDto> readingSubmit = quizService.submit(
+            CompletableFuture<QuizSubmitDto> readingSubmit = quizService.submitQuiz(
                     QuizSubmitRequest.builder()
                             .quizType(QuizType.READING)
                             .answers(quizSubmitRequest.getReadingSubmit())
                             .musicId(quizSubmitRequest.getMusicId())
                             .build(), memberId);
 
-            CompletableFuture<ListeningSubmitDto> listeningSubmit = quizService.listeningSubmit(
+            CompletableFuture<ListeningSubmitDto> listeningSubmit = quizService.submitListeningQuiz(
                     ListeningSubmitRequest.builder()
                             .submitWordList(quizSubmitRequest.getListeningSubmit())
                             .musicId(quizSubmitRequest.getMusicId())
@@ -117,28 +117,28 @@ public class ComprehensiveQuizService {
                             .lyricList(quizSubmitRequest.getLrcLyricList())
                             .build(), quizSubmitRequest.getMusicId(), memberId);
 
-            CompletableFuture<QuizSubmitDto> grammarSubmit = quizService.submit(
+            CompletableFuture<QuizSubmitDto> grammarSubmit = quizService.submitQuiz(
                     QuizSubmitRequest.builder()
                             .quizType(QuizType.GRAMMAR)
                             .answers(quizSubmitRequest.getGrammarSubmit())
                             .musicId(quizSubmitRequest.getMusicId())
                             .build(), memberId);
 
-            CompletableFuture<QuizSubmitDto> vocaSubmit = quizService.submit(
+            CompletableFuture<QuizSubmitDto> vocaSubmit = quizService.submitQuiz(
                     QuizSubmitRequest.builder()
                             .quizType(QuizType.VOCABULARY)
                             .answers(quizSubmitRequest.getVocabularySubmit())
                             .musicId(quizSubmitRequest.getMusicId())
                             .build(), memberId);
 
-            CompletableFuture<QuizSubmitDto> readingSubmit = quizService.submit(
+            CompletableFuture<QuizSubmitDto> readingSubmit = quizService.submitQuiz(
                     QuizSubmitRequest.builder()
                             .quizType(QuizType.READING)
                             .answers(quizSubmitRequest.getReadingSubmit())
                             .musicId(quizSubmitRequest.getMusicId())
                             .build(), memberId);
 
-            CompletableFuture<ListeningSubmitDto> listeningSubmit = quizService.listeningSubmit(
+            CompletableFuture<ListeningSubmitDto> listeningSubmit = quizService.submitListeningQuiz(
                     ListeningSubmitRequest.builder()
                             .submitWordList(quizSubmitRequest.getListeningSubmit())
                             .musicId(quizSubmitRequest.getMusicId())

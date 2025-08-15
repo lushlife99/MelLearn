@@ -21,20 +21,17 @@ import com.mellearn.be.domain.quiz.choice.submit.service.QuizSubmitService;
 import com.mellearn.be.global.error.CustomException;
 import com.mellearn.be.global.error.enums.ErrorCode;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.data.domain.Page;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -42,18 +39,18 @@ import java.util.concurrent.TimeUnit;
 public class QuizService {
 
     private static final String QUIZ_LIST_CACHE_KEY = "quizListCache";
+    private static final String QUIZ_REQUEST_CACHE_KEY = "quizRequestCache";
     private static final int PAGE_SIZE = 10;
 
     private final QuizSubmitService quizSubmitService;
-    private final RedisTemplate<String, Object> redisTemplate;
     private final QuizSubmitRepository quizSubmitRepository;
-    private final QuizCreateService quizCreateService;
     private final QuizListRepository quizListRepository;
     private final ListeningQuizRepository listeningQuizRepository;
     private final MemberRepository memberRepository;
 
     private final CacheManager cacheManager;
 
+    @Transactional(readOnly = true)
     public List<?> getSubmitList(QuizType quizType, Long lastSeenId, String memberId) {
         Member member = findMember(memberId);
 
@@ -70,18 +67,25 @@ public class QuizService {
      * redis - 이미 생성되고 있는 퀴즈를 확인하는 로직에서 동시성 제어 안됨.
      */
     @Async("taskExecutor")
-    @Transactional
+    @Transactional(readOnly = true)
     public CompletableFuture<QuizListDto> getQuizList(QuizRequest quizRequest, LearningLevel learningLevel, Language language) {
 
-        // 캐시에서 값 조회
-        String key = quizRequest.getMusicId() + "_" + quizRequest.getQuizType().name() + "_" + learningLevel.name() + "_" + language.name();
-        Cache cache = cacheManager.getCache(QUIZ_LIST_CACHE_KEY);
+        // 1. 캐시에서 값 조회
+        String quizListKey = String.join("_",
+                quizRequest.getMusicId(),
+                quizRequest.getQuizType().name(),
+                learningLevel.name(),
+                language.name()
+        );
 
-        QuizListDto cachedDto = cache != null ? cache.get(key, QuizListDto.class) : null;
+        Cache quizListCache = cacheManager.getCache(QUIZ_LIST_CACHE_KEY);
+
+        QuizListDto cachedDto = quizListCache != null ? quizListCache.get(quizListKey, QuizListDto.class) : null;
         if (cachedDto != null) {
             return CompletableFuture.completedFuture(cachedDto);
         }
 
+        // 2. DB에서 값 조회
         Optional<QuizList> optionalQuiz = quizListRepository.findByMusicIdAndLevelAndQuizType(
                 quizRequest.getMusicId(),
                 quizRequest.getQuizType(),
@@ -92,101 +96,60 @@ public class QuizService {
             return CompletableFuture.completedFuture(new QuizListDto(optionalQuiz.get()));
         }
 
-        String redisKey = getRedisKey(quizRequest, learningLevel);
-        if (redisTemplate.hasKey(redisKey)) {
-            throw new CustomException(ErrorCode.CREATING_OTHER_REQUEST);
-        }
+        // 3. QuizRequest 캐시에 추가 및 반환
+        Cache quizRequestCache = cacheManager.getCache(QUIZ_REQUEST_CACHE_KEY);
+        quizRequestCache.put(quizListKey, quizRequest);
 
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                redisTemplate.opsForValue().set(redisKey, "true", 1, TimeUnit.MINUTES);
-                return quizCreateService.createChoiceQuiz(quizRequest, learningLevel, language);
-            } finally {
-                redisTemplate.delete(redisKey);
-            }
-        });
+        throw new CustomException(ErrorCode.QUIZ_NOT_FOUND);
     }
 
     @Async("taskExecutor")
-    @Transactional
+    @Transactional(readOnly = true)
     public CompletableFuture<ListeningQuizDto> getListeningQuiz(QuizRequest quizRequest, LearningLevel learningLevel, Language language) {
-        try {
 
-            String key = quizRequest.getMusicId() + "_" + quizRequest.getQuizType().name() + "_" + learningLevel.name() + "_" + language.name();
-            Cache cache = cacheManager.getCache(QUIZ_LIST_CACHE_KEY);
+        // 1. 캐시에서 값 조회
+        String quizListKey = quizRequest.getMusicId() + "_" + quizRequest.getQuizType().name() + "_" + learningLevel.name() + "_" + language.name();
+        Cache quizListCache = cacheManager.getCache(QUIZ_LIST_CACHE_KEY);
 
-            ListeningQuizDto cachedDto = cache != null ? cache.get(key, ListeningQuizDto.class) : null;
-            if (cachedDto != null) {
-                return CompletableFuture.completedFuture(cachedDto);
-            }
-
-            Optional<ListeningQuiz> optionalQuiz = fetchListeningQuiz(quizRequest, learningLevel);
-            String redisKey = getRedisKey(quizRequest, learningLevel);
-
-            if (redisTemplate.hasKey(redisKey)) {
-                throw new CustomException(ErrorCode.CREATING_OTHER_REQUEST);
-            }
-
-            if (optionalQuiz.isEmpty()) {
-                redisTemplate.opsForValue().set(redisKey, "true", 1, TimeUnit.MINUTES);
-
-                return CompletableFuture.supplyAsync(() -> {
-                    try {
-                        return quizCreateService.createListeningQuiz(quizRequest, learningLevel, language);
-                    } finally {
-                        redisTemplate.delete(redisKey);
-                    }
-                });
-            }
-            return CompletableFuture.completedFuture(new ListeningQuizDto(optionalQuiz.get()));
-        } catch (Exception e) {
-            log.error("Error in getListeningQuiz: {}", e.getMessage());
-            return CompletableFuture.failedFuture(e);
+        ListeningQuizDto cachedDto = quizListCache != null ? quizListCache.get(quizListKey, ListeningQuizDto.class) : null;
+        if (cachedDto != null) {
+            return CompletableFuture.completedFuture(cachedDto);
         }
+
+        // 2. DB에서 값 조회
+        Optional<ListeningQuiz> optionalQuiz = listeningQuizRepository.findByMusicIdAndLevel(
+                quizRequest.getMusicId(),
+                learningLevel
+        );
+
+        if (optionalQuiz.isPresent()) {
+            return CompletableFuture.completedFuture(new ListeningQuizDto(optionalQuiz.get()));
+        }
+
+        // 3. QuizRequest 캐시에 추가 및 반환
+        Cache quizRequestCache = cacheManager.getCache(QUIZ_REQUEST_CACHE_KEY);
+        quizRequestCache.put(quizListKey, quizRequest);
+
+        throw new CustomException(ErrorCode.QUIZ_NOT_FOUND);
     }
 
     @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<QuizSubmitDto> submit(QuizSubmitRequest submitRequest, String memberId) {
+    public CompletableFuture<QuizSubmitDto> submitQuiz(QuizSubmitRequest submitRequest, String memberId) {
         Member member = findMember(memberId);
         return CompletableFuture.supplyAsync(() -> quizSubmitService.submitQuiz(submitRequest, member));
     }
 
     @Async("taskExecutor")
     @Transactional
-    public CompletableFuture<ListeningSubmitDto> listeningSubmit(ListeningSubmitRequest submitRequest, String memberId) {
+    public CompletableFuture<ListeningSubmitDto> submitListeningQuiz(ListeningSubmitRequest submitRequest, String memberId) {
         Member member = findMember(memberId);
         return CompletableFuture.supplyAsync(() -> quizSubmitService.submitListeningQuiz(submitRequest, member));
-    }
-
-    private Optional<ListeningQuiz> fetchListeningQuiz(QuizRequest quizRequest, LearningLevel learningLevel) {
-        return listeningQuizRepository.findByMusicIdAndLevel(
-                quizRequest.getMusicId(),
-                learningLevel
-        );
-    }
-
-    private String getRedisKey(QuizRequest quizRequest, LearningLevel learningLevel) {
-        return String.format("%s:%s:%s",
-                quizRequest.getMusicId(),
-                quizRequest.getQuizType(),
-                learningLevel
-        );
     }
 
     private Member findMember(String memberId) {
         return memberRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
-    }
-
-    public QuizSubmitDto submitQuiz(QuizSubmitRequest submitRequest, String memberId) {
-        Member member = findMember(memberId);
-        return quizSubmitService.submitQuiz(submitRequest, member);
-    }
-
-    public ListeningSubmitDto submitListeningQuiz(ListeningSubmitRequest submitRequest, String memberId) {
-        Member member = findMember(memberId);
-        return quizSubmitService.submitListeningQuiz(submitRequest, member);
     }
 
     private double calCorrectRate(QuizSubmitRequest submitRequest, QuizList quizList) {

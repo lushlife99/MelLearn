@@ -7,14 +7,12 @@ import com.mellearn.be.domain.quiz.choice.quiz.dto.QuizListDto;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.request.QuizRequest;
 import com.mellearn.be.domain.quiz.choice.quiz.service.QuizService;
 import com.mellearn.be.global.auth.jwt.service.JwtTokenProvider;
-import com.mellearn.be.global.error.CustomException;
-import com.mellearn.be.global.error.enums.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +30,12 @@ public class QuizController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping({"/reading", "/vocabulary", "/grammar"})
+    @Operation(summary = "퀴즈 조회", description = "선택형 퀴즈 조회")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "퀴즈 조회 성공"),
+            @ApiResponse(responseCode = "404", description = "퀴즈가 존재하지 않음. 퀴즈 생성 큐에 추가."),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청")
+    })
     public QuizListDto getQuizList(@RequestBody QuizRequest quizRequest, HttpServletRequest request) throws InterruptedException, ExecutionException {
         String token = jwtTokenProvider.resolveToken(request);
         LearningLevel learningLevel = jwtTokenProvider.getLearningLevelFromToken(token);
@@ -40,7 +44,12 @@ public class QuizController {
         return quizService.getQuizList(quizRequest, learningLevel, language).get();
     }
     @PostMapping("/listening")
-    @Operation(summary = "퀴즈 조회", description = "퀴즈 조회")
+    @Operation(summary = "퀴즈 조회", description = "듣기 퀴즈 조회")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "퀴즈 조회 성공"),
+            @ApiResponse(responseCode = "404", description = "퀴즈가 존재하지 않음. 퀴즈 생성 큐에 추가."),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청")
+    })
     public ListeningQuizDto getListeningQuiz(@RequestBody QuizRequest quizRequest, HttpServletRequest request) throws InterruptedException, ExecutionException {
         String token = jwtTokenProvider.resolveToken(request);
         LearningLevel learningLevel = jwtTokenProvider.getLearningLevelFromToken(token);

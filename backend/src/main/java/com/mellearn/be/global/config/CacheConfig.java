@@ -7,7 +7,6 @@ import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-
 @Configuration
 @EnableCaching
 public class CacheConfig {
@@ -20,7 +19,10 @@ public class CacheConfig {
 
     @Bean
     public CacheManager cacheManager(Caffeine<Object, Object> caffeine) {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager("quizListCache");
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager(
+                "quizListCache",
+                "quizRequestCache"
+        );
         cacheManager.setCaffeine(caffeine);
         cacheManager.setAsyncCacheMode(true);
         return cacheManager;
