@@ -97,10 +97,14 @@ public class QuizService {
         }
 
         // 3. QuizRequest 캐시에 추가 및 반환
-        Cache quizRequestCache = cacheManager.getCache(QUIZ_REQUEST_CACHE_KEY);
-        quizRequestCache.put(quizListKey, quizRequest);
+        return CompletableFuture.supplyAsync(() -> {
+            // 기존 로직
+            Cache quizRequestCache = cacheManager.getCache(QUIZ_REQUEST_CACHE_KEY);
+            quizRequestCache.put(quizListKey, quizRequest);
 
-        throw new CustomException(ErrorCode.QUIZ_NOT_FOUND);
+            // 예외 발생
+            throw new CustomException(ErrorCode.QUIZ_NOT_FOUND);
+        });
     }
 
     @Async("taskExecutor")
@@ -127,10 +131,14 @@ public class QuizService {
         }
 
         // 3. QuizRequest 캐시에 추가 및 반환
-        Cache quizRequestCache = cacheManager.getCache(QUIZ_REQUEST_CACHE_KEY);
-        quizRequestCache.put(quizListKey, quizRequest);
+        return CompletableFuture.supplyAsync(() -> {
+            // 기존 로직
+            Cache quizRequestCache = cacheManager.getCache(QUIZ_REQUEST_CACHE_KEY);
+            quizRequestCache.put(quizListKey, quizRequest);
 
-        throw new CustomException(ErrorCode.QUIZ_NOT_FOUND);
+            // 예외 발생
+            throw new CustomException(ErrorCode.QUIZ_NOT_FOUND);
+        });
     }
 
     @Async("taskExecutor")
