@@ -45,7 +45,6 @@ public class QuizCreateBatchService {
                     QuizRequest qr = (QuizRequest) redisTemplate.opsForValue().get(key);
                     QuizList quiz = quizCreateService.createChoiceQuiz(qr);
                     redisTemplate.delete(key); // 생성 후 키 삭제
-                    System.out.println(quiz);
                     return quiz;
                 }, schedulerExecutor))
                 .toList();
@@ -64,7 +63,6 @@ public class QuizCreateBatchService {
                     QuizRequest qr = (QuizRequest) redisTemplate.opsForValue().get(key);
                     ListeningQuiz quiz = quizCreateService.createListeningQuiz(qr);
                     redisTemplate.delete(key); // 생성 후 키 삭제
-                    System.out.println(quiz);
                     return quiz;
                 }, schedulerExecutor))
                 .toList();
