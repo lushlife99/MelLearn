@@ -1,17 +1,16 @@
 package com.mellearn.be.api.feign.openai.service;
 
-import com.mellearn.be.api.feign.openai.dto.request.ChatGPTRequest;
-import com.mellearn.be.api.feign.openai.dto.request.ChatRequest;
-import com.mellearn.be.api.feign.openai.dto.request.Message;
-import com.mellearn.be.api.feign.openai.dto.request.WhisperTranscriptionRequest;
+import com.mellearn.be.api.feign.openai.client.OpenAIClient;
+import com.mellearn.be.api.feign.openai.config.OpenAIClientConfig;
+import com.mellearn.be.api.feign.openai.dto.request.*;
+import com.mellearn.be.api.feign.openai.dto.response.BatchResponse;
 import com.mellearn.be.api.feign.openai.dto.response.ChatGPTResponse;
 import com.mellearn.be.api.feign.openai.dto.response.WhisperTranscriptionResponse;
-import com.mellearn.be.api.feign.openai.OpenAIClient;
-import com.mellearn.be.api.feign.openai.OpenAIClientConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -112,5 +111,26 @@ public class OpenAIService {
                 .build();
 
         return openAIClient.chat(chatGPTRequest);
+    }
+
+    public BatchResponse createBatch(BatchRequest batchRequest) {
+        return openAIClient.createBatch(batchRequest);
+    }
+
+    public BatchResponse retrieveBatch(String batchId) {
+        return openAIClient.retrieveBatch(batchId);
+    }
+
+    public BatchResponse cancelBatch(String batchId) {
+        return openAIClient.cancelBatch(batchId);
+    }
+
+    public BatchResponse listBatches() {
+        return openAIClient.listBatches();
+    }
+
+    public String getBatchResult(String fileId) {
+        byte[] fileContent = openAIClient.downloadFile(fileId);
+        return new String(fileContent, StandardCharsets.UTF_8);
     }
 }

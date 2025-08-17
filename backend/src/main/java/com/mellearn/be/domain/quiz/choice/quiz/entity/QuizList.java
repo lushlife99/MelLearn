@@ -31,7 +31,7 @@ public class QuizList {
     @Enumerated(EnumType.STRING)
     private QuizType quizType;
     @OneToMany(mappedBy = "quizList", cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size = 10)
+    @BatchSize(size = 1000)
     private List<Quiz> quizzes = new ArrayList<>();
     @Enumerated(EnumType.STRING)
     private LearningLevel level;
