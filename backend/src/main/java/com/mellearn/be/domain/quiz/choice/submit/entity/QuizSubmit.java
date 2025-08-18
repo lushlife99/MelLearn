@@ -3,6 +3,7 @@ package com.mellearn.be.domain.quiz.choice.submit.entity;
 import com.mellearn.be.domain.member.entity.Member;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.Quiz;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.QuizList;
+import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -23,8 +24,12 @@ public class QuizSubmit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    private QuizType quizType;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_list_id")
+    @BatchSize(size = 5)
     private QuizList quizList;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -43,9 +48,10 @@ public class QuizSubmit {
     private LocalDateTime createdTime;
 
     @Builder
-    public QuizSubmit(QuizList quizList, Member member, List<Integer> submitAnswerList, int score) {
+    public QuizSubmit(QuizList quizList, Member member, List<Integer> submitAnswerList, QuizType quizType, int score) {
         this.quizList = quizList;
         this.member = member;
+        this.quizType = quizType;
         this.submitAnswerList = submitAnswerList;
         this.score = score;
         this.createdTime = LocalDateTime.now();
@@ -55,6 +61,7 @@ public class QuizSubmit {
         return QuizSubmit.builder()
                 .quizList(quizList)
                 .member(member)
+                .quizType(quizList.getQuizType())
                 .submitAnswerList(submitAnswerList)
                 .score(calculateScore(submitAnswerList, quizList.getQuizzes()))
                 .build();

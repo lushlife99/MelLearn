@@ -1,6 +1,8 @@
 package com.mellearn.be.global.auth.service;
 
 import com.mellearn.be.domain.member.entity.Member;
+import com.mellearn.be.domain.member.entity.role.MemberRole;
+import com.mellearn.be.domain.member.entity.role.MemberRoleId;
 import com.mellearn.be.domain.member.enums.Language;
 import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.member.repository.MemberRepository;
@@ -12,6 +14,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +34,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+
+/**
+ * 25.08.08
+ * login 처리를 spring security 모듈에서 처리하도록 변경
+ * - 관련 테스트 주석처리
+ */
 
 @Transactional
 @ExtendWith(MockitoExtension.class)
@@ -70,13 +79,15 @@ class AuthServiceTest {
         testAuthRequest.setName("Test User");
 
         testMember = Member.builder()
+                .id(1L)
                 .memberId("testMemberId")
                 .name("Test User")
                 .password("encodedPassword")
                 .level(LearningLevel.Beginner)
                 .langType(Language.ENGLISH)
-                .roles(Collections.singletonList("ROLE_USER"))
                 .build();
+
+        testMember.addRole(new MemberRole(new MemberRoleId(1L, "ROLE_USER"), testMember));
 
         testTokenInfo = TokenInfo.builder()
                 .grantType("Bearer")
@@ -119,6 +130,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @Disabled
     @DisplayName("로그인 테스트 - 성공")
     void login_Success() {
         // given
@@ -137,6 +149,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @Disabled
     @DisplayName("로그인 테스트 - 존재하지 않는 회원")
     void login_NonExistingMember_ShouldThrowException() {
         // given
@@ -149,6 +162,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @Disabled
     @DisplayName("로그인 테스트 - 비밀번호 불일치")
     void login_MismatchedPassword_ShouldThrowException() {
         // given

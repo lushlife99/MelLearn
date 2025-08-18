@@ -1,6 +1,8 @@
 package com.mellearn.be.global.auth.service;
 
 import com.mellearn.be.domain.member.entity.Member;
+import com.mellearn.be.domain.member.entity.role.MemberRole;
+import com.mellearn.be.domain.member.entity.role.MemberRoleId;
 import com.mellearn.be.domain.member.enums.Language;
 import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.member.repository.MemberRepository;
@@ -18,8 +20,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
@@ -31,38 +34,39 @@ public class AuthService {
     private final AuthenticationManager authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
 
+    @Transactional
     public void join(AuthRequest joinRequest) {
         Optional<Member> user = memberRepository.findByMemberId(joinRequest.getMemberId());
-        if(user.isPresent()) {
+        if (user.isPresent()) {
             throw new CustomException(ErrorCode.ALREADY_EXIST_USERID);
         }
 
-        Member joinMember = Member.create(
-            joinRequest.getMemberId(),
-            encoder.encode(joinRequest.getPassword()),
-            joinRequest.getName(),
-            LearningLevel.Beginner,
-            Language.ENGLISH,
-            Collections.singletonList("ROLE_USER")
+        Member member = Member.create(
+                joinRequest.getMemberId(),
+                encoder.encode(joinRequest.getPassword()),
+                joinRequest.getName(),
+                LearningLevel.Beginner,
+                Language.ENGLISH,
+                new ArrayList<>()
         );
-        
-        memberRepository.save(joinMember);
+
+        memberRepository.save(member);
+        MemberRoleId roleId = new MemberRoleId(member.getId(), "ROLE_USER");
+        MemberRole role = MemberRole.builder()
+                .id(roleId)
+                .member(member)
+                .build();
+
+        member.addRole(role);
     }
 
+    @Transactional(readOnly = true)
     public TokenInfo login(AuthRequest loginRequest, HttpServletResponse response) {
-        Member member = memberRepository.findByMemberId(loginRequest.getMemberId())
-            .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED));
-            
-        if(!encoder.matches(loginRequest.getPassword(), member.getPassword())){
-            throw new CustomException(ErrorCode.MISMATCHED_PASSWORD);
-        }
-        
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-            loginRequest.getMemberId(), 
-            loginRequest.getPassword()
-        );
-        
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(loginRequest.getMemberId(), loginRequest.getPassword());
+
         Authentication authentication = authenticationManagerBuilder.authenticate(authenticationToken);
+
         return jwtTokenProvider.generateToken(authentication, response);
     }
 

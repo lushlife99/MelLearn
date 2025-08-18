@@ -81,6 +81,12 @@ dependencies {
 	// MySQL
 	runtimeOnly 'com.mysql:mysql-connector-j:8.0.32'
 
+	// p6spy
+	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
+
+	// Caffeine Cache
+	implementation 'com.github.ben-manes.caffeine:caffeine:3.1.6'
+
 	// lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'

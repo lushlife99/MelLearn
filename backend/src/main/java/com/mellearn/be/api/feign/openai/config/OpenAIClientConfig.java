@@ -1,4 +1,4 @@
-package com.mellearn.be.api.feign.openai;
+package com.mellearn.be.api.feign.openai.config;
 
 import feign.Logger;
 import feign.Request;

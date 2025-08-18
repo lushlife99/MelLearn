@@ -1,7 +1,5 @@
 package com.mellearn.be.global.prompt.service;
 
-import com.mellearn.be.domain.member.entity.Member;
-import com.mellearn.be.domain.member.enums.Language;
 import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.request.QuizRequest;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
@@ -47,14 +45,13 @@ public class PromptFetchService {
     @Value("classpath:/prompt/VOCABULARY/user/vocabulary-user-message.st")
     private Resource vocabularyUserMessageTemplate;
 
-    public Prompt fetch(QuizRequest request, Member member, String responseFormat) {
-        LearningLevel level = member.getLevel();
-        Language langType = member.getLangType();
+    public Prompt fetch(QuizRequest request, String responseFormat) {
+
         Resource userPrompt = null;
         SystemPromptTemplate systemPrompt = null;
 
         if (request.getQuizType().equals(QuizType.VOCABULARY)) {
-            systemPrompt = getVocabularySystemPrompt(level);
+            systemPrompt = getVocabularySystemPrompt(request.getLearningLevel());
             userPrompt = vocabularyUserMessageTemplate;
         } else if (request.getQuizType().equals(QuizType.GRAMMAR)) {
             systemPrompt = getGrammarSystemPrompt();
@@ -70,7 +67,7 @@ public class PromptFetchService {
             userPrompt = listeningUserMessageTemplate;
         }
 
-        String renderedMessage = render(userPrompt, request, level, langType, responseFormat);
+        String renderedMessage = render(userPrompt, request, responseFormat);
         UserMessage userMessage = new UserMessage(renderedMessage);
 
         return new Prompt(List.of(systemPrompt.createMessage(), userMessage));
@@ -99,7 +96,7 @@ public class PromptFetchService {
         return new SystemPromptTemplate(grammarSystemMessageTemplate);
     }
 
-    private String render(Resource resource, QuizRequest request, LearningLevel level, Language language, String responseFormat) {
+    private String render(Resource resource, QuizRequest request, String responseFormat) {
         PromptTemplate promptTemplate = PromptTemplate.builder()
                 .renderer(StTemplateRenderer.builder().startDelimiterToken('{').endDelimiterToken('}').build())
                 .resource(resource)
@@ -107,14 +104,14 @@ public class PromptFetchService {
 
         if (request.getQuizType().equals(QuizType.VOCABULARY)) {
             return promptTemplate.render(Map.of(
-                    "lang", language.getIso639Value(),
+                    "lang", request.getLanguage().getIso639Value(),
                     "text", request.getLyric(),
                     "format", responseFormat));
         }
 
         return promptTemplate.render(Map.of(
-                "level", level.getValue(),
-                "lang", language.getIso639Value(),
+                "level", request.getLearningLevel().getValue(),
+                "lang", request.getLanguage().getIso639Value(),
                 "text", request.getLyric(),
                 "format", responseFormat));
     }

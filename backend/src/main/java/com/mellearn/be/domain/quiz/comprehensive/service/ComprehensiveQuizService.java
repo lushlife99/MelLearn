@@ -1,5 +1,7 @@
 package com.mellearn.be.domain.quiz.comprehensive.service;
 
+import com.mellearn.be.domain.member.enums.Language;
+import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.quiz.listening.quiz.dto.ListeningQuizDto;
 import com.mellearn.be.domain.quiz.listening.submit.dto.ListeningSubmitDto;
 import com.mellearn.be.domain.quiz.listening.submit.dto.request.ListeningSubmitRequest;
@@ -45,28 +47,28 @@ public class ComprehensiveQuizService {
         try {
             Member member = findMember(memberId);
 
-            CompletableFuture<QuizSubmitDto> grammarSubmit = quizService.submit(
+            CompletableFuture<QuizSubmitDto> grammarSubmit = quizService.submitQuiz(
                     QuizSubmitRequest.builder()
                             .quizType(QuizType.GRAMMAR)
                             .answers(quizSubmitRequest.getGrammarSubmit())
                             .musicId(quizSubmitRequest.getMusicId())
                             .build(), memberId);
 
-            CompletableFuture<QuizSubmitDto> vocaSubmit = quizService.submit(
+            CompletableFuture<QuizSubmitDto> vocaSubmit = quizService.submitQuiz(
                     QuizSubmitRequest.builder()
                             .quizType(QuizType.VOCABULARY)
                             .answers(quizSubmitRequest.getVocabularySubmit())
                             .musicId(quizSubmitRequest.getMusicId())
                             .build(), memberId);
 
-            CompletableFuture<QuizSubmitDto> readingSubmit = quizService.submit(
+            CompletableFuture<QuizSubmitDto> readingSubmit = quizService.submitQuiz(
                     QuizSubmitRequest.builder()
                             .quizType(QuizType.READING)
                             .answers(quizSubmitRequest.getReadingSubmit())
                             .musicId(quizSubmitRequest.getMusicId())
                             .build(), memberId);
 
-            CompletableFuture<ListeningSubmitDto> listeningSubmit = quizService.listeningSubmit(
+            CompletableFuture<ListeningSubmitDto> listeningSubmit = quizService.submitListeningQuiz(
                     ListeningSubmitRequest.builder()
                             .submitWordList(quizSubmitRequest.getListeningSubmit())
                             .musicId(quizSubmitRequest.getMusicId())
@@ -115,28 +117,28 @@ public class ComprehensiveQuizService {
                             .lyricList(quizSubmitRequest.getLrcLyricList())
                             .build(), quizSubmitRequest.getMusicId(), memberId);
 
-            CompletableFuture<QuizSubmitDto> grammarSubmit = quizService.submit(
+            CompletableFuture<QuizSubmitDto> grammarSubmit = quizService.submitQuiz(
                     QuizSubmitRequest.builder()
                             .quizType(QuizType.GRAMMAR)
                             .answers(quizSubmitRequest.getGrammarSubmit())
                             .musicId(quizSubmitRequest.getMusicId())
                             .build(), memberId);
 
-            CompletableFuture<QuizSubmitDto> vocaSubmit = quizService.submit(
+            CompletableFuture<QuizSubmitDto> vocaSubmit = quizService.submitQuiz(
                     QuizSubmitRequest.builder()
                             .quizType(QuizType.VOCABULARY)
                             .answers(quizSubmitRequest.getVocabularySubmit())
                             .musicId(quizSubmitRequest.getMusicId())
                             .build(), memberId);
 
-            CompletableFuture<QuizSubmitDto> readingSubmit = quizService.submit(
+            CompletableFuture<QuizSubmitDto> readingSubmit = quizService.submitQuiz(
                     QuizSubmitRequest.builder()
                             .quizType(QuizType.READING)
                             .answers(quizSubmitRequest.getReadingSubmit())
                             .musicId(quizSubmitRequest.getMusicId())
                             .build(), memberId);
 
-            CompletableFuture<ListeningSubmitDto> listeningSubmit = quizService.listeningSubmit(
+            CompletableFuture<ListeningSubmitDto> listeningSubmit = quizService.submitListeningQuiz(
                     ListeningSubmitRequest.builder()
                             .submitWordList(quizSubmitRequest.getListeningSubmit())
                             .musicId(quizSubmitRequest.getMusicId())
@@ -173,7 +175,7 @@ public class ComprehensiveQuizService {
         }
     }
 
-    public ComprehensiveQuizDto get(QuizRequest quizRequest, String memberId) throws InterruptedException, ExecutionException {
+    public ComprehensiveQuizDto get(QuizRequest quizRequest, LearningLevel learningLevel, Language language) throws InterruptedException, ExecutionException {
         try {
             // 모든 비동기 작업을 병렬로 실행
             CompletableFuture<ListeningQuizDto> listeningQuiz = quizService.getListeningQuiz(
@@ -181,28 +183,36 @@ public class ComprehensiveQuizService {
                             .quizType(QuizType.LISTENING)
                             .lyric(quizRequest.getLyric())
                             .musicId(quizRequest.getMusicId())
-                            .build(), memberId);
+                            .learningLevel(learningLevel)
+                            .language(language)
+                            .build());
 
             CompletableFuture<QuizListDto> readingQuiz = quizService.getQuizList(
                     QuizRequest.builder()
                             .quizType(QuizType.READING)
                             .lyric(quizRequest.getLyric())
                             .musicId(quizRequest.getMusicId())
-                            .build(), memberId);
+                            .learningLevel(learningLevel)
+                            .language(language)
+                            .build());
 
             CompletableFuture<QuizListDto> vocaQuiz = quizService.getQuizList(
                     QuizRequest.builder()
                             .quizType(QuizType.VOCABULARY)
                             .lyric(quizRequest.getLyric())
                             .musicId(quizRequest.getMusicId())
-                            .build(), memberId);
+                            .learningLevel(learningLevel)
+                            .language(language)
+                            .build());
 
             CompletableFuture<QuizListDto> grammarQuiz = quizService.getQuizList(
                     QuizRequest.builder()
                             .quizType(QuizType.GRAMMAR)
                             .lyric(quizRequest.getLyric())
                             .musicId(quizRequest.getMusicId())
-                            .build(), memberId);
+                            .learningLevel(learningLevel)
+                            .language(language)
+                            .build());
 
             // 모든 작업이 완료될 때까지 대기
             CompletableFuture.allOf(listeningQuiz, readingQuiz, vocaQuiz, grammarQuiz)

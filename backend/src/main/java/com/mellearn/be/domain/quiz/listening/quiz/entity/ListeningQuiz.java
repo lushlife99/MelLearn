@@ -1,11 +1,13 @@
 package com.mellearn.be.domain.quiz.listening.quiz.entity;
 
 import com.mellearn.be.domain.member.enums.LearningLevel;
+import com.mellearn.be.domain.quiz.choice.quiz.dto.request.QuizRequest;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,6 +35,7 @@ public class ListeningQuiz {
     @ElementCollection
     @CollectionTable(name = "listening_quiz_answer", joinColumns = @JoinColumn(name = "listening_quiz_id"))
     @Column(name = "answer")
+    @BatchSize(size = 450)
     private List<String> answerList;
 
     private LocalDateTime createdTime;
@@ -47,11 +50,11 @@ public class ListeningQuiz {
         this.id = id;
     }
 
-    public static ListeningQuiz create(String blankedText, String musicId, LearningLevel level, List<String> answerList) {
+    public static ListeningQuiz create(String blankedText, QuizRequest quizRequest, List<String> answerList) {
         return ListeningQuiz.builder()
                 .blankedText(blankedText)
-                .musicId(musicId)
-                .level(level)
+                .musicId(quizRequest.getMusicId())
+                .level(quizRequest.getLearningLevel())
                 .answerList(answerList)
                 .build();
     }

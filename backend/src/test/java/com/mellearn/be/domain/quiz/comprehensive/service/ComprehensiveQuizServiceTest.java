@@ -180,11 +180,11 @@ class ComprehensiveQuizServiceTest {
 
         when(speakingServiceV1.submit(any(), anyString(), anyString()))
                 .thenReturn(CompletableFuture.completedFuture(speakingSubmitDto));
-        when(quizService.submit(any(), anyString()))
+        when(quizService.submitQuiz(any(), anyString()))
                 .thenReturn(CompletableFuture.completedFuture(grammarSubmitDto))
                 .thenReturn(CompletableFuture.completedFuture(vocaSubmitDto))
                 .thenReturn(CompletableFuture.completedFuture(readingSubmitDto));
-        when(quizService.listeningSubmit(any(), anyString()))
+        when(quizService.submitListeningQuiz(any(), anyString()))
                 .thenReturn(CompletableFuture.completedFuture(listeningSubmitDto));
 
         // when
@@ -222,13 +222,13 @@ class ComprehensiveQuizServiceTest {
         QuizListDto vocaQuizListDto = new QuizListDto(testQuizList);
         QuizListDto readingQuizListDto = new QuizListDto(testQuizList);
 
-        when(quizService.getQuizList(any(), anyString())).thenReturn(CompletableFuture.completedFuture(grammarQuizListDto))
+        when(quizService.getQuizList(any())).thenReturn(CompletableFuture.completedFuture(grammarQuizListDto))
                 .thenReturn(CompletableFuture.completedFuture(vocaQuizListDto))
                 .thenReturn(CompletableFuture.completedFuture(readingQuizListDto));
-        when(quizService.getListeningQuiz(any(), anyString())).thenReturn(CompletableFuture.completedFuture(listeningQuizDto));
+        when(quizService.getListeningQuiz(any())).thenReturn(CompletableFuture.completedFuture(listeningQuizDto));
 
         // when
-        ComprehensiveQuizDto result = comprehensiveQuizService.get(testQuizRequest, "testMemberId");
+        ComprehensiveQuizDto result = comprehensiveQuizService.get(testQuizRequest, testMember.getLevel(), testMember.getLangType());
 
         // then
         assertThat(result).isNotNull();

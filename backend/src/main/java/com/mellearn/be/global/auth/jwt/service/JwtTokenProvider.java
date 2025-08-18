@@ -1,10 +1,11 @@
 package com.mellearn.be.global.auth.jwt.service;
 
 import com.mellearn.be.domain.member.entity.Member;
+import com.mellearn.be.domain.member.enums.Language;
+import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.member.repository.MemberRepository;
 import com.mellearn.be.global.auth.jwt.dto.TokenInfo;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,11 +21,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -32,22 +31,22 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenProvider {
 
+    private static final String AUTHORITIES_KEY = "auth";
+    private static final String LEVEL_KEY = "level";
+    private static final String LANGUAGE_KEY = "language";
+
     private final RedisTemplate<String, Object> redisTemplate;
     private final Key key;
-    private static final String AUTHORITIES_KEY = "auth";
     private final int accessExpirationTime;
-
     private final int refreshExpirationTime;
     private final MemberRepository memberRepository;
-
-
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey,
                             @Value("${jwt.access-expiration-time}") int accessExpirationTime,
                             @Value("${jwt.refresh-expiration-time}") int refreshExpirationTime,
                             RedisTemplate<String, Object> redisTemplate,
                             MemberRepository memberRepository) {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.redisTemplate = redisTemplate;
         this.accessExpirationTime = accessExpirationTime;
@@ -78,8 +77,10 @@ public class JwtTokenProvider {
 
         // Redis 저장
         String redisKey = "refresh:" + username;
-        redisTemplate.opsForHash().put(redisKey, "token", refreshToken);
-        redisTemplate.opsForHash().put(redisKey, "auth", authorities);
+        Map<String, String> redisValue = new HashMap<>();
+        redisValue.put("token", refreshToken);
+        redisValue.put("auth", authorities);
+        redisTemplate.opsForHash().putAll(redisKey, redisValue);
         redisTemplate.expire(redisKey, refreshExpirationTime, TimeUnit.MILLISECONDS);
 
         return TokenInfo.builder()
@@ -96,11 +97,15 @@ public class JwtTokenProvider {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
+        Member member = (Member) authentication.getPrincipal();
+
         Date now = new Date();
         Date accessTokenExpiresIn = new Date(now.getTime() + accessExpirationTime);
         return Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim(AUTHORITIES_KEY, authorities)
+                .claim(LEVEL_KEY, member.getLevel())
+                .claim(LANGUAGE_KEY, member.getLangType())
                 .setExpiration(accessTokenExpiresIn)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
@@ -192,6 +197,18 @@ public class JwtTokenProvider {
         return generateToken(authentication, response);
     }
 
+    public LearningLevel getLearningLevelFromToken(String token) {
+        Claims claims = parseClaims(token);
+        String levelStr = claims.get(LEVEL_KEY, String.class);
+        return levelStr != null ? LearningLevel.valueOf(levelStr) : null;
+    }
+
+    public Language getLanguageFromToken(String token) {
+        Claims claims = parseClaims(token);
+        String langStr = claims.get(LANGUAGE_KEY, String.class);
+        return langStr != null ? Language.valueOf(langStr) : null;
+    }
+
     private Claims parseClaims(String token) {
         try {
             return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
@@ -200,4 +217,5 @@ public class JwtTokenProvider {
             return e.getClaims();
         }
     }
+
 }
