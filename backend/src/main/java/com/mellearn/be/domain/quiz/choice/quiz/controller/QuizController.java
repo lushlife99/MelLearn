@@ -25,7 +25,6 @@ import java.util.concurrent.ExecutionException;
 public class QuizController {
 
     private final QuizService quizService;
-    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping({"/reading", "/vocabulary", "/grammar"})
     @Operation(summary = "퀴즈 조회", description = "선택형 퀴즈 조회")
@@ -35,17 +34,10 @@ public class QuizController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
     public QuizListDto getQuizList(QuizRequest quizRequest) {
-        try {
-            return quizService.getQuizList(quizRequest).get();
-        } catch (ExecutionException e) {
-            if (e.getCause() instanceof CustomException ce) {
-                throw ce; // GlobalExceptionHandler로 전달
-            }
-            throw new RuntimeException(e.getCause());
-        } catch (InterruptedException e) {
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
-        }
+
+        return quizService.getQuizList(quizRequest);
     }
+
     @PostMapping("/listening")
     @Operation(summary = "퀴즈 조회", description = "듣기 퀴즈 조회")
     @ApiResponses(value = {
@@ -53,17 +45,8 @@ public class QuizController {
             @ApiResponse(responseCode = "404", description = "퀴즈가 존재하지 않음. 퀴즈 생성 큐에 추가."),
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
-    public ListeningQuizDto getListeningQuiz(QuizRequest quizRequest)  {
-        try {
-            return quizService.getListeningQuiz(quizRequest).get();
-        } catch (ExecutionException e) {
-            if (e.getCause() instanceof CustomException ce) {
-                throw ce; // GlobalExceptionHandler로 전달
-            }
-            throw new RuntimeException(e.getCause());
-        } catch (InterruptedException e) {
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
-        }
+    public ListeningQuizDto getListeningQuiz(QuizRequest quizRequest) {
+        return quizService.getListeningQuiz(quizRequest);
     }
 
 }

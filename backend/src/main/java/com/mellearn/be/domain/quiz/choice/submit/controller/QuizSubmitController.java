@@ -28,14 +28,14 @@ public class QuizSubmitController {
 
     @PostMapping({"/grammar", "/reading", "/vocabulary"})
     @Operation(summary = "퀴즈 답안지 제출", description = "퀴즈 답안지 제출")
-    public QuizSubmitDto submit(@RequestBody QuizSubmitRequest quizSubmitRequest, Authentication authentication) throws ExecutionException, InterruptedException {
-        return quizService.submitQuiz(quizSubmitRequest, authentication.getName()).get();
+    public QuizSubmitDto submit(@RequestBody QuizSubmitRequest quizSubmitRequest, Authentication authentication) {
+        return quizService.submitQuiz(quizSubmitRequest, authentication.getName());
     }
 
     @PostMapping("/listening")
     @Operation(summary = "퀴즈 답안지 제출", description = "퀴즈 답안지 제출")
-    public ListeningSubmitDto listeningSubmit(@RequestBody ListeningSubmitRequest submitRequest, Authentication authentication) throws ExecutionException, InterruptedException {
-        return quizService.submitListeningQuiz(submitRequest, authentication.getName()).get();
+    public ListeningSubmitDto listeningSubmit(@RequestBody ListeningSubmitRequest submitRequest, Authentication authentication) {
+        return quizService.submitListeningQuiz(submitRequest, authentication.getName());
     }
 
     @GetMapping
