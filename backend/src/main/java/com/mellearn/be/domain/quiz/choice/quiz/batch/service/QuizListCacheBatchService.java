@@ -5,6 +5,7 @@ import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.request.QuizRequest;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import com.mellearn.be.domain.quiz.choice.quiz.service.QuizService;
+import com.mellearn.be.domain.quiz.choice.quiz.service.async.QuizAsyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
@@ -37,32 +38,24 @@ public class QuizListCacheBatchService {
         for (String musicId : popularMusicMap.keySet()) {
             for (LearningLevel learningLevel : learningLevels) {
                 for (QuizType quizType : quizTypes) {
-                    try {
-                        CompletableFuture<?> future;
 
-                        if (quizType == QuizType.LISTENING) {
-                            future = quizService.getListeningQuiz(
-                                    new QuizRequest(musicId, quizType, popularMusicMap.get(musicId), learningLevel, language)
-                            );
-                        } else {
-                            future = quizService.getQuizList(
-                                    new QuizRequest(musicId, quizType, popularMusicMap.get(musicId), learningLevel, language)
-                            );
-                        }
+                    Object dto;
 
-                        // 비동기 결과 기다림
-                        Object dto = future.get();
-
-                        // 캐시 저장
-                        String key = musicId + "_" + quizType.name() + "_" + learningLevel.name() + "_" + language.name();
-                        cache.put(key, dto);
-
-                        log.info("Cached quiz list for key: {}", key);
-
-                    } catch (Exception e) {
-                        log.error("Failed to cache quiz list for musicId: {}, learningLevel: {}, quizType: {}", musicId, learningLevel, quizType);
-                        e.printStackTrace();
+                    if (quizType == QuizType.LISTENING) {
+                        dto = quizService.getListeningQuiz(
+                                new QuizRequest(musicId, quizType, popularMusicMap.get(musicId), learningLevel, language)
+                        );
+                    } else {
+                        dto = quizService.getQuizList(
+                                new QuizRequest(musicId, quizType, popularMusicMap.get(musicId), learningLevel, language)
+                        );
                     }
+
+                    // 캐시 저장
+                    String key = musicId + "_" + quizType.name() + "_" + learningLevel.name() + "_" + language.name();
+                    cache.put(key, dto);
+
+                    log.info("Cached quiz list for key: {}", key);
                 }
             }
         }

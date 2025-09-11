@@ -55,15 +55,10 @@ class QuizServiceTest {
     @Mock
     private CacheManager cacheManager;
 
-    @Mock
-    private QuizCreateService quizCreateService;
-
     @InjectMocks
     private QuizService quizService;
 
     private QuizRequest quizRequest;
-    private String memberId;
-    private Member member;
     private QuizList quizList;
     private ListeningQuiz listeningQuiz;
 
@@ -76,13 +71,6 @@ class QuizServiceTest {
                 LearningLevel.Advanced,
                 Language.ENGLISH
         );
-
-        memberId = "test-member";
-        member = Member.builder()
-                .id(1L)
-                .memberId(memberId)
-                .level(LearningLevel.Advanced)
-                .build();
 
         quizList = QuizList.builder()
                 .id(1L)
@@ -102,12 +90,11 @@ class QuizServiceTest {
     }
 
     @Test
-    @DisplayName("일반 퀴즈 목록 조회 테스트 - 기존 퀴즈")
-    void getQuizList_ExistingQuiz() throws Exception {
-        // 캐시 mock
+    @DisplayName("동기 퀴즈 목록 조회 - 기존 퀴즈")
+    void getQuizList_ExistingQuiz() {
         Cache mockCache = mock(Cache.class);
         when(cacheManager.getCache("quizListCache")).thenReturn(mockCache);
-        when(mockCache.get(anyString(), eq(QuizListDto.class))).thenReturn(null); // 캐시 미스
+        when(mockCache.get(anyString(), eq(QuizListDto.class))).thenReturn(null);
 
         when(quizListRepository.findByMusicIdAndLevelAndQuizType(
                 eq("test-music"),
@@ -115,33 +102,26 @@ class QuizServiceTest {
                 eq(LearningLevel.Advanced)
         )).thenReturn(Optional.of(quizList));
 
-        CompletableFuture<QuizListDto> result =
-                quizService.getQuizList(quizRequest);
+        QuizListDto result = quizService.getQuizList(quizRequest);
 
         assertNotNull(result);
-        assertEquals(quizList.getId(), result.get().getId());
+        assertEquals(quizList.getId(), result.getId());
     }
 
-
-
     @Test
-    @DisplayName("듣기 퀴즈 조회 테스트 - 기존 퀴즈")
-    void getListeningQuiz_ExistingQuiz() throws Exception {
-        // given
+    @DisplayName("동기 듣기 퀴즈 조회 - 기존 퀴즈")
+    void getListeningQuiz_ExistingQuiz() {
         quizRequest.setQuizType(QuizType.LISTENING);
+
         when(listeningQuizRepository.findByMusicIdAndLevel(
                 eq("test-music"),
                 eq(LearningLevel.Advanced)
         )).thenReturn(Optional.of(listeningQuiz));
 
-        // when
-        CompletableFuture<ListeningQuizDto> result = quizService.getListeningQuiz(quizRequest);
+        ListeningQuizDto result = quizService.getListeningQuiz(quizRequest);
 
-        // then
         assertNotNull(result);
-        ListeningQuizDto listeningQuizDto = result.get();
-        assertNotNull(listeningQuizDto);
-        assertEquals(listeningQuiz.getId(), listeningQuizDto.getId());
+        assertEquals(listeningQuiz.getId(), result.getId());
         verify(listeningQuizRepository).findByMusicIdAndLevel(
                 eq("test-music"),
                 eq(LearningLevel.Advanced)
@@ -149,12 +129,11 @@ class QuizServiceTest {
     }
 
     @Test
-    @DisplayName("일반 퀴즈 목록 조회 테스트 - 퀴즈가 존재하지 않으면 Redis에 추가 후 Not Found Exception 발생")
-    void getQuizList_CreateNewQuiz() {
-        // 캐시 mock
+    @DisplayName("동기 퀴즈 목록 조회 - 퀴즈가 없으면 Redis에 저장 후 예외")
+    void getQuizList_QuizNotFound() {
         Cache mockCache = mock(Cache.class);
         when(cacheManager.getCache("quizListCache")).thenReturn(mockCache);
-        when(mockCache.get(anyString(), eq(QuizListDto.class))).thenReturn(null); // 캐시 미스
+        when(mockCache.get(anyString(), eq(QuizListDto.class))).thenReturn(null);
 
         when(quizListRepository.findByMusicIdAndLevelAndQuizType(
                 eq("test-music"),
@@ -162,24 +141,19 @@ class QuizServiceTest {
                 eq(LearningLevel.Advanced)
         )).thenReturn(Optional.empty());
 
-        // Redis mock
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
-        // when
-        CompletableFuture<QuizListDto> future = quizService.getQuizList(quizRequest);
+        CustomException exception = assertThrows(CustomException.class,
+                () -> quizService.getQuizList(quizRequest));
 
-        // then
-        ExecutionException exception = assertThrows(ExecutionException.class, future::get);
-        assertInstanceOf(CustomException.class, exception.getCause());
-        assertEquals(ErrorCode.QUIZ_NOT_FOUND, ((CustomException) exception.getCause()).getErrorCode());
+        assertEquals(ErrorCode.QUIZ_NOT_FOUND, exception.getErrorCode());
 
-        // Redis에 저장됐는지 검증
         verify(valueOperations).set(anyString(), eq(quizRequest), anyLong(), any());
     }
 
     @Test
-    @DisplayName("듣기 퀴즈 조회 테스트 - 퀴즈가 존재하지 않으면 Redis에 추가 후 Not Found Exception 발생")
-    void getListeningQuiz_CreateNewQuiz() {
+    @DisplayName("동기 듣기 퀴즈 조회 - 퀴즈가 없으면 Redis에 저장 후 예외")
+    void getListeningQuiz_QuizNotFound() {
         quizRequest.setQuizType(QuizType.LISTENING);
 
         when(listeningQuizRepository.findByMusicIdAndLevel(
@@ -187,24 +161,18 @@ class QuizServiceTest {
                 eq(LearningLevel.Advanced)
         )).thenReturn(Optional.empty());
 
-        // 캐시 mock
         Cache mockCache = mock(Cache.class);
         when(cacheManager.getCache("quizListCache")).thenReturn(mockCache);
         when(mockCache.get(anyString(), eq(ListeningQuizDto.class))).thenReturn(null);
 
-        // Redis mock
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
-        // when
-        CompletableFuture<ListeningQuizDto> future = quizService.getListeningQuiz(quizRequest);
+        CustomException exception = assertThrows(CustomException.class,
+                () -> quizService.getListeningQuiz(quizRequest));
 
-        // then
-        ExecutionException exception = assertThrows(ExecutionException.class, future::get);
-        assertInstanceOf(CustomException.class, exception.getCause());
-        assertEquals(ErrorCode.QUIZ_NOT_FOUND, ((CustomException) exception.getCause()).getErrorCode());
+        assertEquals(ErrorCode.QUIZ_NOT_FOUND, exception.getErrorCode());
 
-        // Redis에 저장됐는지 검증
         verify(valueOperations).set(anyString(), eq(quizRequest), anyLong(), any());
     }
-
 }
+

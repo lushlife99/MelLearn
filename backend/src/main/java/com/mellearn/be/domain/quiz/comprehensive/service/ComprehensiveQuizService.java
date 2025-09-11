@@ -2,6 +2,7 @@ package com.mellearn.be.domain.quiz.comprehensive.service;
 
 import com.mellearn.be.domain.member.enums.Language;
 import com.mellearn.be.domain.member.enums.LearningLevel;
+import com.mellearn.be.domain.quiz.choice.quiz.service.async.QuizAsyncService;
 import com.mellearn.be.domain.quiz.listening.quiz.dto.ListeningQuizDto;
 import com.mellearn.be.domain.quiz.listening.submit.dto.ListeningSubmitDto;
 import com.mellearn.be.domain.quiz.listening.submit.dto.request.ListeningSubmitRequest;
@@ -36,7 +37,7 @@ import java.util.concurrent.CompletionException;
 @Slf4j
 public class ComprehensiveQuizService {
 
-    private final QuizService quizService;
+    private final QuizAsyncService quizService;
     private final SpeakingService speakingService;
     private final MemberRepository memberRepository;
 
