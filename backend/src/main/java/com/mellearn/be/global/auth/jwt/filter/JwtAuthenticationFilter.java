@@ -23,16 +23,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         String token = jwtTokenProvider.resolveToken(request);
 
-        // 토큰이 비어있어도 필터 처리
-        if (StringUtils.isBlank(token)) {
-            filterChain.doFilter(request, response);
+        if (token == null || token.isBlank()) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing or empty JWT token");
             return;
         }
 
-        if (jwtTokenProvider.validateToken(token)) {
-            Authentication auth = jwtTokenProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(auth);
+        if (!jwtTokenProvider.validateToken(token)) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired JWT token");
+            return;
         }
+
+        Authentication auth = jwtTokenProvider.getAuthentication(token);
+        SecurityContextHolder.getContext().setAuthentication(auth);
 
         filterChain.doFilter(request, response);
     }
