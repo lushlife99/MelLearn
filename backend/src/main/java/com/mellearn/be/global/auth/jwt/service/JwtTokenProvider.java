@@ -40,6 +40,7 @@ public class JwtTokenProvider {
     private final int accessExpirationTime;
     private final int refreshExpirationTime;
     private final MemberRepository memberRepository;
+    private final JwtParser jwtParser;
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey,
                             @Value("${jwt.access-expiration-time}") int accessExpirationTime,
@@ -52,6 +53,7 @@ public class JwtTokenProvider {
         this.accessExpirationTime = accessExpirationTime;
         this.refreshExpirationTime = refreshExpirationTime;
         this.memberRepository = memberRepository;
+        this.jwtParser = Jwts.parserBuilder().setSigningKey(key).build();
     }
 
     public Optional<Member> getMember(HttpServletRequest request) {
@@ -153,7 +155,7 @@ public class JwtTokenProvider {
     // 토큰 정보를 검증하는 메서드
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            jwtParser.parseClaimsJws(token);
             return true;
         } catch (SecurityException e) {
             log.warn("Invalid JWT signature: {}", e.getMessage());
@@ -211,7 +213,7 @@ public class JwtTokenProvider {
 
     private Claims parseClaims(String token) {
         try {
-            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+            return jwtParser.parseClaimsJws(token).getBody();
         } catch (ExpiredJwtException e) {
             log.info(e.getMessage());
             return e.getClaims();
