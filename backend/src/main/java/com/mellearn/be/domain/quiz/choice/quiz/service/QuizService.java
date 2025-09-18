@@ -49,7 +49,6 @@ public class QuizService {
     private final CacheManager cacheManager;
     private final RedisTemplate<String, Object> redisTemplate;
 
-    @Transactional(readOnly = true)
     public QuizListDto getQuizList(QuizRequest quizRequest) {
         String key = String.join("_",
                 quizRequest.getMusicId(),
@@ -66,7 +65,7 @@ public class QuizService {
                         quizRequest.getQuizType(),
                         quizRequest.getLearningLevel())
                 .map(QuizListDto::new)
-                .orElseGet(() -> {
+                .orElseThrow(() -> {
                     redisTemplate.opsForValue().set("quizRequest:" + key, quizRequest, 3, TimeUnit.HOURS);
                     throw new CustomException(ErrorCode.QUIZ_NOT_FOUND);
                 });
@@ -85,8 +84,8 @@ public class QuizService {
                         quizRequest.getMusicId(),
                         quizRequest.getLearningLevel())
                 .map(ListeningQuizDto::new)
-                .orElseGet(() -> {
-                    redisTemplate.opsForValue().set("listeningQuizRequest:" + key, quizRequest, 3, TimeUnit.HOURS);
+                .orElseThrow(() -> {
+                    redisTemplate.opsForValue().set("quizRequest:" + key, quizRequest, 3, TimeUnit.HOURS);
                     throw new CustomException(ErrorCode.QUIZ_NOT_FOUND);
                 });
     }
