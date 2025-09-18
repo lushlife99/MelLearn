@@ -2,6 +2,7 @@ package com.mellearn.be.domain.quiz.choice.submit.repository.querydsl;
 
 import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import com.mellearn.be.domain.quiz.choice.submit.dto.QuizSubmitDto;
+import com.mellearn.be.domain.quiz.choice.submit.entity.QuizSubmit;
 import com.mellearn.be.domain.quiz.listening.submit.dto.ListeningSubmitDto;
 import com.mellearn.be.domain.quiz.speaking.dto.SpeakingSubmitDto;
 import org.springframework.data.domain.Page;

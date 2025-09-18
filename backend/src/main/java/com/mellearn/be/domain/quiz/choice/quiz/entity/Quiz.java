@@ -37,18 +37,12 @@ public class Quiz {
     @JoinColumn(name = "quiz_list_id")
     private QuizList quizList;
 
-    private int submitCount;
-
-    private int correctCount;
-
     @Builder
     public Quiz(String question, List<String> optionList, int answer, String comment, Long id) {
         this.question = question;
         this.optionList = optionList;
         this.answer = answer;
         this.comment = comment;
-        this.submitCount = 0;
-        this.correctCount = 0;
         this.id = id;
     }
 
@@ -63,13 +57,5 @@ public class Quiz {
 
     public void setQuizList(QuizList quizList) {
         this.quizList = quizList;
-    }
-
-    public void incrementSubmitCount() {
-        this.submitCount++;
-    }
-
-    public void incrementCorrectCount() {
-        this.correctCount++;
     }
 }

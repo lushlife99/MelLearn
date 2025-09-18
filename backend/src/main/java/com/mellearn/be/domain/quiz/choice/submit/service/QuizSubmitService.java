@@ -21,6 +21,7 @@ import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -31,12 +32,15 @@ import java.util.List;
 @Slf4j
 public class QuizSubmitService {
 
+    private static final String QUIZ_TOTAL_SUBMIT_KEY = "quiz:submitCount:";
+    private static final String QUIZ_CORRECT_SUBMIT_KEY = "quiz:correctCount:";
+
     private final ListeningQuizRepository listeningQuizRepository;
     private final ListeningSubmitRepository listeningSubmitRepository;
     private final QuizListRepository quizListRepository;
     private final QuizSubmitRepository quizSubmitRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
-    private static final int QUIZ_COUNT = 4;
 
     @Transactional
     public ListeningSubmitDto submitListeningQuiz(ListeningSubmitRequest submitRequest, Member member) {
@@ -55,8 +59,15 @@ public class QuizSubmitService {
         QuizList quizList = findQuizList(submitRequest.getMusicId(), submitRequest.getQuizType(), member.getLevel());
         double score = calculateQuizScore(submitRequest, quizList);
         
-        QuizSubmit quizSubmit = createQuizSubmit(quizList, submitRequest.getAnswers(), member, score);
-        return new QuizSubmitDto(quizSubmitRepository.save(quizSubmit));
+        QuizSubmit quizSubmit = QuizSubmit.builder()
+                .quizList(quizList)
+                .member(member)
+                .score((int) score)
+                .build();
+
+
+        QuizSubmit savedQuizSubmit = quizSubmitRepository.save(quizSubmit);
+        return quizSubmitRepository.bulkSaveQuizSubmitAnswer(savedQuizSubmit, submitRequest.getAnswers());
     }
 
     private ListeningQuiz findListeningQuiz(String musicId, LearningLevel level) {
@@ -109,29 +120,18 @@ public class QuizSubmitService {
 
         for (int i = 0; i < quizzes.size(); i++) {
             Quiz quiz = quizzes.get(i);
-            updateQuizStats(quiz, submitAnswers.get(i));
+
+            String submitKey = QUIZ_TOTAL_SUBMIT_KEY + quiz.getId();
+            String correctKey = QUIZ_CORRECT_SUBMIT_KEY + quiz.getId();
+
+            redisTemplate.opsForValue().increment(submitKey, 1);
             if (quiz.getAnswer() == submitAnswers.get(i)) {
+                redisTemplate.opsForValue().increment(correctKey, 1);
                 totalCorrectCount++;
             }
         }
 
         return calculateScore(totalCorrectCount, quizzes.size());
-    }
-
-    private void updateQuizStats(Quiz quiz, int submittedAnswer) {
-        quiz.incrementSubmitCount();
-        if (quiz.getAnswer() == submittedAnswer) {
-            quiz.incrementCorrectCount();
-        }
-    }
-
-    private QuizSubmit createQuizSubmit(QuizList quizList, List<Integer> submitAnswers, Member member, double score) {
-        return QuizSubmit.builder()
-                .quizList(quizList)
-                .submitAnswerList(submitAnswers)
-                .member(member)
-                .score((int) score)
-                .build();
     }
 
     private double calculateScore(int correctCount, int totalCount) {

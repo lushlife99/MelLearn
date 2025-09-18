@@ -39,6 +39,7 @@ public class QuizSubmit {
     @ElementCollection
     @CollectionTable(name = "quiz_submit_answer", joinColumns = @JoinColumn(name = "quiz_submit_id"))
     @Column(name = "answer")
+    @OrderColumn(name = "answer_order")
     @BatchSize(size = 5)
     private List<Integer> submitAnswerList;
 
@@ -51,7 +52,7 @@ public class QuizSubmit {
     public QuizSubmit(QuizList quizList, Member member, List<Integer> submitAnswerList, QuizType quizType, int score) {
         this.quizList = quizList;
         this.member = member;
-        this.quizType = quizType;
+        this.quizType = quizList.getQuizType();
         this.submitAnswerList = submitAnswerList;
         this.score = score;
         this.createdTime = LocalDateTime.now();
