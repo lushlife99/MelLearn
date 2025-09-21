@@ -66,7 +66,7 @@ public class QuizSubmitRepositoryImpl implements QuizSubmitRepositoryCustom {
                 .join(quizSubmit.quizList, quizList).fetchJoin()
                 .join(quizSubmit.submitAnswerList).fetchJoin()
                 .where(quizSubmit.id.in(ids))
-                .orderBy(quizSubmit.createdTime.desc())
+                .orderBy(quizSubmit.id.desc())
                 .fetch();
 
 
@@ -106,7 +106,7 @@ public class QuizSubmitRepositoryImpl implements QuizSubmitRepositoryCustom {
                 .selectFrom(listeningSubmit)
                 .join(listeningSubmit.listeningQuiz, listeningQuiz).fetchJoin()
                 .where(listeningSubmit.id.in(ids))
-                .orderBy(listeningSubmit.createdTime.desc())
+                .orderBy(listeningSubmit.id.desc())
                 .fetch();
 
         // 3. submitAnswerList 따로 초기화 (MultipleBagFetchException 방지)
