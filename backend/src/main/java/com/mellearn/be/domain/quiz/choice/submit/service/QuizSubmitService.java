@@ -21,7 +21,8 @@ import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -39,7 +40,7 @@ public class QuizSubmitService {
     private final ListeningSubmitRepository listeningSubmitRepository;
     private final QuizListRepository quizListRepository;
     private final QuizSubmitRepository quizSubmitRepository;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final StringRedisTemplate redisTemplate;
 
 
     @Transactional
@@ -57,6 +58,9 @@ public class QuizSubmitService {
     @Transactional
     public QuizSubmitDto submitQuiz(QuizSubmitRequest submitRequest, Member member) {
         QuizList quizList = findQuizList(submitRequest.getMusicId(), submitRequest.getQuizType(), member.getLevel());
+        if (submitRequest.getAnswers().size() != quizList.getQuizzes().size()) {
+            throw new CustomException(ErrorCode.REQUEST_ARRAY_SIZE_NOT_MATCHED);
+        }
         double score = calculateQuizScore(submitRequest, quizList);
         
         QuizSubmit quizSubmit = QuizSubmit.builder()
@@ -116,22 +120,28 @@ public class QuizSubmitService {
     private double calculateQuizScore(QuizSubmitRequest submitRequest, QuizList quizList) {
         List<Integer> submitAnswers = submitRequest.getAnswers();
         List<Quiz> quizzes = quizList.getQuizzes();
-        int totalCorrectCount = 0;
+        final int[] totalCorrectCount = new int[1];
 
-        for (int i = 0; i < quizzes.size(); i++) {
-            Quiz quiz = quizzes.get(i);
+        final var stringSerializer = redisTemplate.getStringSerializer();
+        final byte[] totalSubmitField = stringSerializer.serialize("totalSubmit");
+        final byte[] correctSubmitField = stringSerializer.serialize("correctSubmit");
 
-            String submitKey = QUIZ_TOTAL_SUBMIT_KEY + quiz.getId();
-            String correctKey = QUIZ_CORRECT_SUBMIT_KEY + quiz.getId();
+        redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+            for (int i = 0; i < quizzes.size(); i++) {
+                Quiz quiz = quizzes.get(i);
+                byte[] key = stringSerializer.serialize("quiz:" + quiz.getId());
 
-            redisTemplate.opsForValue().increment(submitKey, 1);
-            if (quiz.getAnswer() == submitAnswers.get(i)) {
-                redisTemplate.opsForValue().increment(correctKey, 1);
-                totalCorrectCount++;
+                connection.hIncrBy(key, totalSubmitField, 1);
+
+                if (quiz.getAnswer() == submitAnswers.get(i)) {
+                    connection.hIncrBy(key, correctSubmitField, 1);
+                    totalCorrectCount[0]++;
+                }
             }
-        }
+            return null;
+        });
 
-        return calculateScore(totalCorrectCount, quizzes.size());
+        return calculateScore(totalCorrectCount[0], quizzes.size());
     }
 
     private double calculateScore(int correctCount, int totalCount) {

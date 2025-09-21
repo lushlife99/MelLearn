@@ -9,6 +9,7 @@ import com.mellearn.be.domain.quiz.choice.quiz.repository.querydsl.QuizListRepos
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import org.hibernate.Hibernate;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
