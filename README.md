@@ -104,7 +104,7 @@
 ## 📊 시스템 아키텍처
 
 <div align="center">
-  <img src="https://github.com/lushlife99/MelLearn/assets/101994803/6293c00f-5ee8-45c0-a801-020c50fcc12e" alt="System Architecture" width="80%">
+  <img width="1124" height="616" alt="image" src="https://github.com/user-attachments/assets/83c2e217-65f3-4e15-8277-3016463cf893" />
 </div>
 
 ## 🗃️ ERD
