@@ -104,7 +104,7 @@
 ## 📊 시스템 아키텍처
 
 <div align="center">
-  <img width="1124" height="616" alt="image" src="https://github.com/user-attachments/assets/83c2e217-65f3-4e15-8277-3016463cf893" />
+  <img width="1071" height="568" alt="image" src="https://github.com/user-attachments/assets/e76f7ad1-f4be-43e4-a70c-82c2f011e64e" />
 </div>
 
 ## 🗃️ ERD
