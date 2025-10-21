@@ -1,15 +1,10 @@
 package com.mellearn.be.domain.member.entity;
 
 import com.mellearn.be.domain.member.entity.role.MemberRole;
-import com.mellearn.be.domain.quiz.listening.submit.entity.ListeningSubmit;
 import com.mellearn.be.domain.member.enums.Language;
 import com.mellearn.be.domain.member.enums.LearningLevel;
-import com.mellearn.be.domain.quiz.choice.submit.entity.QuizSubmit;
-import com.mellearn.be.domain.quiz.speaking.entity.SpeakingSubmit;
-import com.mellearn.be.domain.word.entity.WordList;
 import jakarta.persistence.*;
 import lombok.*;
-import org.checkerframework.common.aliasing.qual.Unique;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -46,18 +41,6 @@ public class Member implements UserDetails {
     private Language langType;
 
     private String spotifyAccountId;
-
-    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-    private List<WordList> wordLists = new ArrayList<>();
-
-    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-    private List<SpeakingSubmit> speakingSubmitList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-    private List<QuizSubmit> quizSubmitList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
-    private List<ListeningSubmit> listeningSubmitList = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<MemberRole> roles = new ArrayList<>();

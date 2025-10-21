@@ -9,7 +9,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -29,7 +28,6 @@ public class QuizSubmit {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_list_id")
-    @BatchSize(size = 5)
     private QuizList quizList;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -40,7 +38,6 @@ public class QuizSubmit {
     @CollectionTable(name = "quiz_submit_answer", joinColumns = @JoinColumn(name = "quiz_submit_id"))
     @Column(name = "answer")
     @OrderColumn(name = "answer_order")
-    @BatchSize(size = 5)
     private List<Integer> submitAnswerList;
 
     private int score;

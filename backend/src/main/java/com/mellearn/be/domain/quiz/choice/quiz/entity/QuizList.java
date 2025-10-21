@@ -4,14 +4,13 @@ import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.request.QuizRequest;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.response.chatmodel.QuizListResponseDto;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.response.chatmodel.QuizResponseDto;
-import com.mellearn.be.domain.quiz.choice.submit.entity.QuizSubmit;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
+import com.mellearn.be.domain.quiz.choice.submit.entity.QuizSubmit;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -31,7 +30,6 @@ public class QuizList {
     @Enumerated(EnumType.STRING)
     private QuizType quizType;
     @OneToMany(mappedBy = "quizList", cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size = 1000)
     private List<Quiz> quizzes = new ArrayList<>();
     @Enumerated(EnumType.STRING)
     private LearningLevel level;
