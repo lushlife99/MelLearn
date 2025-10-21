@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -22,7 +23,8 @@ public class QuizSubmitDto {
 
     private Long id;
     private QuizListDto quizList;
-    private List<Integer> submitAnswerList;
+    @Builder.Default
+    private List<Integer> submitAnswerList = new ArrayList<>();
     private double score;
     private LocalDateTime createdTime;
 
@@ -32,6 +34,11 @@ public class QuizSubmitDto {
         this.submitAnswerList = quizSubmit.getSubmitAnswerList();
         this.score = quizSubmit.getScore();
         this.createdTime = quizSubmit.getCreatedTime();
+    }
+
+    public QuizSubmitDto(QuizSubmit quizSubmit, List<Integer> submitAnswerList) {
+        this(quizSubmit);
+        this.submitAnswerList = submitAnswerList;
     }
 
     @QueryProjection

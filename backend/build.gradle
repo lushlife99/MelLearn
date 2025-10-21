@@ -82,7 +82,9 @@ dependencies {
 	runtimeOnly 'com.mysql:mysql-connector-j:8.0.32'
 
 	// p6spy
-	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
+//	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
+
+	implementation 'org.apache.commons:commons-pool2'
 
 	// Caffeine Cache
 	implementation 'com.github.ben-manes.caffeine:caffeine:3.1.6'

@@ -33,6 +33,7 @@ public class QuizListDto {
         for (Quiz quiz : quizList.getQuizzes()) {
             quizzes.add(new QuizDto(quiz));
         }
+        this.quizType = quizList.getQuizType();
         this.musicId = quizList.getMusicId();
         this.level = quizList.getLevel().getValue();
         this.createdTime = quizList.getCreatedTime();

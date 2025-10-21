@@ -10,8 +10,6 @@ import com.mellearn.be.domain.quiz.listening.submit.dto.ListeningSubmitDto;
 import com.mellearn.be.domain.quiz.listening.submit.dto.request.ListeningSubmitRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

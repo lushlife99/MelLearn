@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,7 +34,7 @@ public class QuizController {
             @ApiResponse(responseCode = "404", description = "퀴즈가 존재하지 않음. 퀴즈 생성 큐에 추가."),
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
-    public QuizListDto getQuizList(QuizRequest quizRequest) {
+    public QuizListDto getQuizList(@RequestBody QuizRequest quizRequest) {
 
         return quizService.getQuizList(quizRequest);
     }
@@ -45,7 +46,7 @@ public class QuizController {
             @ApiResponse(responseCode = "404", description = "퀴즈가 존재하지 않음. 퀴즈 생성 큐에 추가."),
             @ApiResponse(responseCode = "400", description = "잘못된 요청")
     })
-    public ListeningQuizDto getListeningQuiz(QuizRequest quizRequest) {
+    public ListeningQuizDto getListeningQuiz(@RequestBody QuizRequest quizRequest) {
         return quizService.getListeningQuiz(quizRequest);
     }
 

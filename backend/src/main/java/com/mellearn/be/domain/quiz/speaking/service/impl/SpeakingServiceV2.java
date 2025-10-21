@@ -12,6 +12,8 @@ import com.mellearn.be.domain.quiz.speaking.service.SpeakingService;
 import com.mellearn.be.domain.support.service.SupportService;
 import com.mellearn.be.global.error.CustomException;
 import com.mellearn.be.global.error.enums.ErrorCode;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import lombok.RequiredArgsConstructor;
@@ -128,7 +130,7 @@ public class SpeakingServiceV2 implements SpeakingService {
     private SpeakingSubmitDto grade(String musicId, List<LrcLyric> answerLyrics, Member member, List<String> segments) {
 
         Properties props = new Properties();
-        props.setProperty("annotators", "tokenize, ssplit");
+        props.setProperty("annotators", "tokenize, ssplit, pos");
         double allTokenSize = 0;
         double wrongTokenSize = 0;
         StringBuilder answerSheet = new StringBuilder();
@@ -138,28 +140,38 @@ public class SpeakingServiceV2 implements SpeakingService {
             StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
             CoreDocument doc = new CoreDocument(lrcLyricLine.getText());
             pipeline.annotate(doc);
+
             Set<String> allTokens = new HashSet<>();
-            doc.tokens().forEach(token -> allTokens.add(token.word()));
+            for (CoreLabel token : doc.tokens()) {
+                String word = token.word();
+                String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
+
+                // 수사(CD), 감탄사(UH) 제외
+                if (!"CD".equals(pos) && !"UH".equals(pos)) {
+                    allTokens.add(word);
+                }
+            }
+
             allTokenSize += allTokens.size();
             String lyricLineText = lrcLyricLine.getText();
 
             if (i < segments.size()) {
+                List<String> wrongWords = gradeByLine(lrcLyricLine.getText(), segments.get(i))
+                        .stream()
+                        .filter(wrong -> allTokens.contains(wrong)) // 수사/감탄사 제외
+                        .collect(Collectors.toList());
 
-                List<String> wrongWords = gradeByLine(lrcLyricLine.getText(), segments.get(i));
                 wrongTokenSize += wrongWords.size();
 
                 for (String wrongWord : wrongWords) {
                     lyricLineText = lyricLineText.replaceAll("(?i)\\b" + wrongWord + "\\b", "__" + wrongWord);
                 }
-                answerSheet.append(lyricLineText + "\n");
-
+                answerSheet.append(lyricLineText).append("\n");
             } else {
                 answerSheet.append(lyricLineText.replaceAll("\\b(\\w+)", "__$1"));
             }
-
-            // 사전에 등재되어 있지 않은 단어나 수사, 감탄사 로직 추가. (아직 사전 api 허가 못받음)
-
         }
+
 
         String result = segments.stream()
                 .map(s -> s.replaceAll("\\. ", ".\n")) // 각 문장 내에서 ". " → ".\n"

@@ -12,7 +12,9 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPQLTemplates;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,7 +66,7 @@ public class QuizSubmitRepositoryImpl implements QuizSubmitRepositoryCustom {
                 .join(quizSubmit.quizList, quizList).fetchJoin()
                 .join(quizSubmit.submitAnswerList).fetchJoin()
                 .where(quizSubmit.id.in(ids))
-                .orderBy(quizSubmit.createdTime.desc())
+                .orderBy(quizSubmit.id.desc())
                 .fetch();
 
 
@@ -104,7 +106,7 @@ public class QuizSubmitRepositoryImpl implements QuizSubmitRepositoryCustom {
                 .selectFrom(listeningSubmit)
                 .join(listeningSubmit.listeningQuiz, listeningQuiz).fetchJoin()
                 .where(listeningSubmit.id.in(ids))
-                .orderBy(listeningSubmit.createdTime.desc())
+                .orderBy(listeningSubmit.id.desc())
                 .fetch();
 
         // 3. submitAnswerList 따로 초기화 (MultipleBagFetchException 방지)
@@ -144,4 +146,5 @@ public class QuizSubmitRepositoryImpl implements QuizSubmitRepositoryCustom {
                 .limit(pageSize)
                 .fetch();
     }
+
 }
