@@ -1,8 +1,8 @@
-package com.mellearn.be.domain.quiz.speaking.service;
+package com.mellearn.be.domain.quiz.speaking.service.impl;
 
-import com.mellearn.be.api.feign.openai.service.OpenAIService;
 import com.mellearn.be.api.feign.openai.dto.response.WhisperSegment;
 import com.mellearn.be.api.feign.openai.dto.response.WhisperTranscriptionResponse;
+import com.mellearn.be.api.feign.openai.service.OpenAIService;
 import com.mellearn.be.domain.member.entity.Member;
 import com.mellearn.be.domain.member.repository.MemberRepository;
 import com.mellearn.be.domain.music.dto.LrcLyric;
@@ -11,6 +11,7 @@ import com.mellearn.be.domain.quiz.speaking.dto.SpeakingSubmitDto;
 import com.mellearn.be.domain.quiz.speaking.dto.SpeakingSubmitRequest;
 import com.mellearn.be.domain.quiz.speaking.entity.SpeakingSubmit;
 import com.mellearn.be.domain.quiz.speaking.repository.SpeakingSubmitRepository;
+import com.mellearn.be.domain.quiz.speaking.service.SpeakingService;
 import com.mellearn.be.domain.support.service.SupportService;
 import com.mellearn.be.global.error.CustomException;
 import com.mellearn.be.global.error.enums.ErrorCode;
@@ -26,8 +27,14 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.sound.sampled.*;
-import java.io.*;
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.io.SequenceInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;

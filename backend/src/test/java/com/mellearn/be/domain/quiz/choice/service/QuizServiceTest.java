@@ -1,6 +1,5 @@
 package com.mellearn.be.domain.quiz.choice.service;
 
-import com.mellearn.be.domain.member.entity.Member;
 import com.mellearn.be.domain.member.enums.Language;
 import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.QuizListDto;
@@ -8,7 +7,6 @@ import com.mellearn.be.domain.quiz.choice.quiz.dto.request.QuizRequest;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.QuizList;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import com.mellearn.be.domain.quiz.choice.quiz.repository.QuizListRepository;
-import com.mellearn.be.domain.quiz.choice.quiz.service.QuizCreateService;
 import com.mellearn.be.domain.quiz.choice.quiz.service.QuizService;
 import com.mellearn.be.domain.quiz.listening.quiz.dto.ListeningQuizDto;
 import com.mellearn.be.domain.quiz.listening.quiz.entity.ListeningQuiz;
@@ -29,8 +27,6 @@ import org.springframework.data.redis.core.ValueOperations;
 
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;

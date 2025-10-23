@@ -3,11 +3,8 @@ package com.mellearn.be.domain.quiz.choice.quiz.service;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.request.QuizRequest;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.response.chatmodel.QuizListResponseDto;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.QuizList;
-import com.mellearn.be.domain.quiz.choice.quiz.repository.QuizListRepository;
-import com.mellearn.be.domain.quiz.choice.quiz.repository.QuizRepository;
 import com.mellearn.be.domain.quiz.listening.quiz.dto.response.chatmodel.ListeningQuizResponseDto;
 import com.mellearn.be.domain.quiz.listening.quiz.entity.ListeningQuiz;
-import com.mellearn.be.domain.quiz.listening.quiz.repository.ListeningQuizRepository;
 import com.mellearn.be.global.prompt.service.PromptFetchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +24,6 @@ import java.util.Objects;
 public class QuizCreateService {
 
     private final ChatModel chatModel;
-    private final QuizListRepository quizListRepository;
-    private final QuizRepository quizRepository;
-    private final ListeningQuizRepository listeningQuizRepository;
     private final PromptFetchService promptFetchService;
 
 

@@ -1,23 +1,23 @@
 package com.mellearn.be.domain.quiz.choice.submit.service;
 
+import com.mellearn.be.domain.member.entity.Member;
+import com.mellearn.be.domain.member.enums.LearningLevel;
+import com.mellearn.be.domain.quiz.choice.quiz.entity.Quiz;
+import com.mellearn.be.domain.quiz.choice.quiz.entity.QuizList;
+import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
+import com.mellearn.be.domain.quiz.choice.quiz.repository.QuizListRepository;
+import com.mellearn.be.domain.quiz.choice.submit.dto.QuizSubmitDto;
+import com.mellearn.be.domain.quiz.choice.submit.dto.QuizSubmitRequest;
+import com.mellearn.be.domain.quiz.choice.submit.entity.QuizSubmit;
+import com.mellearn.be.domain.quiz.choice.submit.repository.QuizSubmitRepository;
 import com.mellearn.be.domain.quiz.listening.quiz.entity.ListeningQuiz;
 import com.mellearn.be.domain.quiz.listening.quiz.repository.ListeningQuizRepository;
 import com.mellearn.be.domain.quiz.listening.submit.dto.ListeningSubmitDto;
 import com.mellearn.be.domain.quiz.listening.submit.dto.request.ListeningSubmitRequest;
 import com.mellearn.be.domain.quiz.listening.submit.entity.ListeningSubmit;
 import com.mellearn.be.domain.quiz.listening.submit.repository.ListeningSubmitRepository;
-import com.mellearn.be.domain.member.entity.Member;
-import com.mellearn.be.domain.member.enums.LearningLevel;
-import com.mellearn.be.domain.quiz.choice.quiz.entity.Quiz;
-import com.mellearn.be.domain.quiz.choice.quiz.entity.QuizList;
-import com.mellearn.be.domain.quiz.choice.quiz.repository.QuizListRepository;
-import com.mellearn.be.domain.quiz.choice.submit.dto.QuizSubmitDto;
-import com.mellearn.be.domain.quiz.choice.submit.dto.QuizSubmitRequest;
-import com.mellearn.be.domain.quiz.choice.submit.entity.QuizSubmit;
-import com.mellearn.be.domain.quiz.choice.submit.repository.QuizSubmitRepository;
 import com.mellearn.be.global.error.CustomException;
 import com.mellearn.be.global.error.enums.ErrorCode;
-import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +33,8 @@ import java.util.List;
 @Slf4j
 public class QuizSubmitService {
 
-    private static final String QUIZ_TOTAL_SUBMIT_KEY = "quiz:submitCount:";
-    private static final String QUIZ_CORRECT_SUBMIT_KEY = "quiz:correctCount:";
+    private static final String QUIZ_TOTAL_SUBMIT_KEY = "totalSubmit:";
+    private static final String QUIZ_CORRECT_SUBMIT_KEY = "correctSubmit:";
 
     private final ListeningQuizRepository listeningQuizRepository;
     private final ListeningSubmitRepository listeningSubmitRepository;
@@ -123,18 +123,19 @@ public class QuizSubmitService {
         final int[] totalCorrectCount = new int[1];
 
         final var stringSerializer = redisTemplate.getStringSerializer();
-        final byte[] totalSubmitField = stringSerializer.serialize("totalSubmit");
-        final byte[] correctSubmitField = stringSerializer.serialize("correctSubmit");
 
+        // Redis Pipeline을 사용하여 여러 incr 명령을 한 번에 전송해 RTT를 최소화
         redisTemplate.executePipelined((RedisCallback<Object>) connection -> {
             for (int i = 0; i < quizzes.size(); i++) {
                 Quiz quiz = quizzes.get(i);
-                byte[] key = stringSerializer.serialize("quiz:" + quiz.getId());
 
-                connection.hIncrBy(key, totalSubmitField, 1);
+                byte[] totalKey = stringSerializer.serialize(QUIZ_TOTAL_SUBMIT_KEY + quiz.getId());
+                byte[] correctKey = stringSerializer.serialize(QUIZ_CORRECT_SUBMIT_KEY + quiz.getId());
+
+                connection.incr(totalKey);
 
                 if (quiz.getAnswer() == submitAnswers.get(i)) {
-                    connection.hIncrBy(key, correctSubmitField, 1);
+                    connection.incr(correctKey);
                     totalCorrectCount[0]++;
                 }
             }

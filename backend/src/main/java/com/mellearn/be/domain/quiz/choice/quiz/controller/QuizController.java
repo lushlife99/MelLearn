@@ -4,9 +4,6 @@ import com.mellearn.be.domain.quiz.choice.quiz.dto.QuizListDto;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.request.QuizRequest;
 import com.mellearn.be.domain.quiz.choice.quiz.service.QuizService;
 import com.mellearn.be.domain.quiz.listening.quiz.dto.ListeningQuizDto;
-import com.mellearn.be.global.auth.jwt.service.JwtTokenProvider;
-import com.mellearn.be.global.error.CustomException;
-import com.mellearn.be.global.error.enums.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -16,8 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequiredArgsConstructor

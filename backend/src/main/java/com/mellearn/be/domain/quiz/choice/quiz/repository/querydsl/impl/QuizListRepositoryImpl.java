@@ -1,19 +1,15 @@
 package com.mellearn.be.domain.quiz.choice.quiz.repository.querydsl.impl;
 
 import com.mellearn.be.domain.member.enums.LearningLevel;
-import com.mellearn.be.domain.quiz.choice.quiz.dto.QuizListDto;
-import com.mellearn.be.domain.quiz.choice.quiz.entity.Quiz;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.QuizList;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import com.mellearn.be.domain.quiz.choice.quiz.repository.querydsl.QuizListRepositoryCustom;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import org.hibernate.Hibernate;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 import static com.mellearn.be.domain.quiz.choice.quiz.entity.QQuiz.quiz;

@@ -5,7 +5,6 @@ import com.mellearn.be.domain.member.repository.MemberRepository;
 import com.mellearn.be.domain.quiz.ranking.dto.RankingDto;
 import com.mellearn.be.domain.quiz.ranking.entity.Ranking;
 import com.mellearn.be.domain.quiz.ranking.repository.RankingRepository;
-import com.mellearn.be.domain.quiz.ranking.service.RankingService;
 import com.mellearn.be.domain.quiz.speaking.entity.SpeakingSubmit;
 import com.mellearn.be.domain.quiz.speaking.repository.SpeakingSubmitRepository;
 import com.mellearn.be.global.error.CustomException;
