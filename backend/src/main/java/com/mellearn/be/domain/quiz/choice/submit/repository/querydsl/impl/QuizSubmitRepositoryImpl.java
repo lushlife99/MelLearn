@@ -1,25 +1,29 @@
 package com.mellearn.be.domain.quiz.choice.submit.repository.querydsl.impl;
 
+import com.mellearn.be.domain.member.enums.LearningLevel;
+import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
+import com.mellearn.be.domain.quiz.choice.submit.dto.MusicQuizSubmit;
+import com.mellearn.be.domain.quiz.choice.submit.dto.QMusicQuizSubmit;
+import com.mellearn.be.domain.quiz.choice.submit.dto.QuizSubmitDto;
 import com.mellearn.be.domain.quiz.choice.submit.entity.QuizSubmit;
 import com.mellearn.be.domain.quiz.choice.submit.repository.querydsl.QuizSubmitRepositoryCustom;
 import com.mellearn.be.domain.quiz.listening.submit.dto.ListeningSubmitDto;
-import com.mellearn.be.domain.quiz.choice.submit.dto.QuizSubmitDto;
 import com.mellearn.be.domain.quiz.listening.submit.entity.ListeningSubmit;
 import com.mellearn.be.domain.quiz.speaking.dto.SpeakingSubmitDto;
-import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPQLTemplates;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 
+import static com.mellearn.be.domain.member.entity.QMember.member;
 import static com.mellearn.be.domain.quiz.choice.quiz.entity.QQuizList.quizList;
 import static com.mellearn.be.domain.quiz.choice.submit.entity.QQuizSubmit.quizSubmit;
 import static com.mellearn.be.domain.quiz.listening.quiz.entity.QListeningQuiz.listeningQuiz;
@@ -36,8 +40,31 @@ public class QuizSubmitRepositoryImpl implements QuizSubmitRepositoryCustom {
         this.queryFactory = new JPAQueryFactory(JPQLTemplates.DEFAULT, em);
     }
 
+    @Override
     @Transactional(readOnly = true)
-    public List<QuizSubmitDto> findSubmitWithPaging(long memberId, QuizType quizType, Long lastSeenId, int pageSize) {
+    public List<MusicQuizSubmit> findSubmitPage(LearningLevel level, LocalDateTime lastSeen) {
+
+        return queryFactory
+                .select(new QMusicQuizSubmit(
+                        quizSubmit.quizType,
+                        quizSubmit.quizList.id,
+                        quizSubmit.score,
+                        quizSubmit.createdTime,
+                        quizSubmit.member.name
+                ))
+                .from(quizSubmit)
+                .join(quizSubmit.member, member)
+                .where(
+                        lastSeen != null ? quizSubmit.createdTime.lt(lastSeen) : null,
+                        quizSubmit.level.eq(level)
+                )
+                .orderBy(quizSubmit.createdTime.desc())
+                .limit(50)
+                .fetch();
+    }
+
+    @Transactional(readOnly = true)
+    public List<QuizSubmitDto> findHistoryPage(long memberId, QuizType quizType, Long lastSeenId, int pageSize) {
 
         BooleanExpression idPredicate = lastSeenId != null
                 ? quizSubmit.id.lt(lastSeenId)
@@ -78,7 +105,7 @@ public class QuizSubmitRepositoryImpl implements QuizSubmitRepositoryCustom {
     }
 
     @Transactional(readOnly = true)
-    public List<ListeningSubmitDto> findListeningSubmitWithPaging(
+    public List<ListeningSubmitDto> findListeningHistoryPage(
             long memberId,
             Long lastSeenId,
             int pageSize

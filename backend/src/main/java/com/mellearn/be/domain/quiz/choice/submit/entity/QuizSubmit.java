@@ -1,6 +1,7 @@
 package com.mellearn.be.domain.quiz.choice.submit.entity;
 
 import com.mellearn.be.domain.member.entity.Member;
+import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.Quiz;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.QuizList;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
@@ -26,6 +27,9 @@ public class QuizSubmit {
     @Enumerated(EnumType.STRING)
     private QuizType quizType;
 
+    @Enumerated(EnumType.STRING)
+    private LearningLevel level;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_list_id")
     private QuizList quizList;
@@ -46,11 +50,12 @@ public class QuizSubmit {
     private LocalDateTime createdTime;
 
     @Builder
-    public QuizSubmit(QuizList quizList, Member member, List<Integer> submitAnswerList, QuizType quizType, int score) {
+    public QuizSubmit(QuizList quizList, Member member, List<Integer> submitAnswerList, QuizType quizType, LearningLevel level, int score) {
         this.quizList = quizList;
         this.member = member;
-        this.quizType = quizList.getQuizType();
+        this.quizType = quizType;
         this.submitAnswerList = submitAnswerList;
+        this.level = level;
         this.score = score;
         this.createdTime = LocalDateTime.now();
     }
@@ -60,6 +65,7 @@ public class QuizSubmit {
                 .quizList(quizList)
                 .member(member)
                 .quizType(quizList.getQuizType())
+                .level(quizList.getLevel())
                 .submitAnswerList(submitAnswerList)
                 .score(calculateScore(submitAnswerList, quizList.getQuizzes()))
                 .build();

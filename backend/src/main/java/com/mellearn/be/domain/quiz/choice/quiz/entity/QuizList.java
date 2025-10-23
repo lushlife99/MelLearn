@@ -29,6 +29,7 @@ public class QuizList {
     private Long id;
     @Enumerated(EnumType.STRING)
     private QuizType quizType;
+
     @OneToMany(mappedBy = "quizList", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Quiz> quizzes = new ArrayList<>();
     @Enumerated(EnumType.STRING)

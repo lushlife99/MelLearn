@@ -1,19 +1,18 @@
 package com.mellearn.be.domain.quiz.choice.quiz.service;
 
 import com.mellearn.be.domain.member.entity.Member;
+import com.mellearn.be.domain.member.enums.LearningLevel;
 import com.mellearn.be.domain.member.repository.MemberRepository;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.QuizListDto;
 import com.mellearn.be.domain.quiz.choice.quiz.dto.request.QuizRequest;
-import com.mellearn.be.domain.quiz.choice.quiz.entity.Quiz;
-import com.mellearn.be.domain.quiz.choice.quiz.entity.QuizList;
 import com.mellearn.be.domain.quiz.choice.quiz.entity.enums.QuizType;
 import com.mellearn.be.domain.quiz.choice.quiz.repository.QuizListRepository;
+import com.mellearn.be.domain.quiz.choice.submit.dto.MusicQuizSubmit;
 import com.mellearn.be.domain.quiz.choice.submit.dto.QuizSubmitDto;
 import com.mellearn.be.domain.quiz.choice.submit.dto.QuizSubmitRequest;
 import com.mellearn.be.domain.quiz.choice.submit.repository.QuizSubmitRepository;
 import com.mellearn.be.domain.quiz.choice.submit.service.QuizSubmitService;
 import com.mellearn.be.domain.quiz.listening.quiz.dto.ListeningQuizDto;
-import com.mellearn.be.domain.quiz.listening.quiz.entity.ListeningQuiz;
 import com.mellearn.be.domain.quiz.listening.quiz.repository.ListeningQuizRepository;
 import com.mellearn.be.domain.quiz.listening.submit.dto.ListeningSubmitDto;
 import com.mellearn.be.domain.quiz.listening.submit.dto.request.ListeningSubmitRequest;
@@ -24,13 +23,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -103,15 +100,20 @@ public class QuizService {
     }
 
     @Transactional(readOnly = true)
-    public List<?> getSubmitList(QuizType quizType, Long lastSeenId, String memberId) {
+    public List<?> getHistory(QuizType quizType, Long lastSeenId, String memberId) {
         Member member = findMember(memberId);
         if (quizType.equals(QuizType.LISTENING)) {
-            return quizSubmitRepository.findListeningSubmitWithPaging(member.getId(), lastSeenId, PAGE_SIZE);
+            return quizSubmitRepository.findListeningHistoryPage(member.getId(), lastSeenId, PAGE_SIZE);
         } else if (quizType.equals(QuizType.SPEAKING)) {
             return quizSubmitRepository.findSpeakingSubmitWithPaging(member.getId(), lastSeenId, PAGE_SIZE);
         } else {
-            return quizSubmitRepository.findSubmitWithPaging(member.getId(), quizType, lastSeenId, PAGE_SIZE);
+            return quizSubmitRepository.findHistoryPage(member.getId(), quizType, lastSeenId, PAGE_SIZE);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<MusicQuizSubmit> getSubmitPage(LearningLevel level, LocalDateTime lastSeen) {
+        return quizSubmitRepository.findSubmitPage(level, lastSeen);
     }
 
     private Member findMember(String memberId) {
