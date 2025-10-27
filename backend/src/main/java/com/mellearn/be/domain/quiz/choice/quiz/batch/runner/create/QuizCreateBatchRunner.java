@@ -1,4 +1,4 @@
-package com.mellearn.be.domain.quiz.choice.quiz.batch.runner;
+package com.mellearn.be.domain.quiz.choice.quiz.batch.runner.create;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mellearn.be.domain.quiz.choice.quiz.batch.service.QuizCreateBatchService;

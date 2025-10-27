@@ -20,8 +20,6 @@ import com.mellearn.be.global.error.CustomException;
 import com.mellearn.be.global.error.enums.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +33,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class QuizService {
 
-    private static final String QUIZ_LIST_CACHE_KEY = "quizListCache";
     private static final int PAGE_SIZE = 10;
 
     private final QuizSubmitService quizSubmitService;
@@ -43,18 +40,17 @@ public class QuizService {
     private final QuizListRepository quizListRepository;
     private final ListeningQuizRepository listeningQuizRepository;
     private final MemberRepository memberRepository;
-    private final CacheManager cacheManager;
     private final RedisTemplate<String, Object> redisTemplate;
 
+    @Transactional(readOnly = true)
     public QuizListDto getQuizList(QuizRequest quizRequest) {
-        String key = String.join("_",
+        String key = String.format("cache:quiz:%s:%s:%s:%s",
                 quizRequest.getMusicId(),
                 quizRequest.getQuizType().name(),
                 quizRequest.getLearningLevel().name(),
                 quizRequest.getLanguage().name());
 
-        Cache cache = cacheManager.getCache(QUIZ_LIST_CACHE_KEY);
-        QuizListDto cached = cache != null ? cache.get(key, QuizListDto.class) : null;
+        QuizListDto cached = (QuizListDto) redisTemplate.opsForValue().get(key);
         if (cached != null) return cached;
 
         return quizListRepository.findByMusicIdAndLevelAndQuizType(
@@ -63,18 +59,21 @@ public class QuizService {
                         quizRequest.getLearningLevel())
                 .map(QuizListDto::new)
                 .orElseThrow(() -> {
-                    redisTemplate.opsForValue().set("quizRequest:" + key, quizRequest, 3, TimeUnit.HOURS);
+                    redisTemplate.opsForValue().set("quizRequest:" + key, quizRequest, 1, TimeUnit.DAYS);
                     throw new CustomException(ErrorCode.QUIZ_NOT_FOUND);
                 });
     }
 
     @Transactional(readOnly = true)
     public ListeningQuizDto getListeningQuiz(QuizRequest quizRequest) {
-        String key = quizRequest.getMusicId() + "_" + quizRequest.getQuizType().name() + "_" +
-                quizRequest.getLearningLevel().name() + "_" + quizRequest.getLanguage().name();
+        String key = String.format("cache:quiz:%s:%s:%s:%s",
+                quizRequest.getMusicId(),
+                quizRequest.getQuizType().name(),
+                quizRequest.getLearningLevel().name(),
+                quizRequest.getLanguage().name());
 
-        Cache cache = cacheManager.getCache(QUIZ_LIST_CACHE_KEY);
-        ListeningQuizDto cached = cache != null ? cache.get(key, ListeningQuizDto.class) : null;
+
+        ListeningQuizDto cached = (ListeningQuizDto) redisTemplate.opsForValue().get(key);
         if (cached != null) return cached;
 
         return listeningQuizRepository.findByMusicIdAndLevel(
@@ -82,7 +81,7 @@ public class QuizService {
                         quizRequest.getLearningLevel())
                 .map(ListeningQuizDto::new)
                 .orElseThrow(() -> {
-                    redisTemplate.opsForValue().set("quizRequest:" + key, quizRequest, 3, TimeUnit.HOURS);
+                    redisTemplate.opsForValue().set("quizRequest:" + key, quizRequest, 1, TimeUnit.DAYS);
                     throw new CustomException(ErrorCode.QUIZ_NOT_FOUND);
                 });
     }

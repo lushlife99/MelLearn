@@ -3,10 +3,12 @@ package com.mellearn.be.domain.quiz.listening.quiz.dto;
 import com.mellearn.be.domain.quiz.listening.quiz.entity.ListeningQuiz;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class ListeningQuizDto {
 
     private Long id;

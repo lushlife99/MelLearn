@@ -1,4 +1,4 @@
-package com.mellearn.be.api.feign.naver.cloud;
+package com.mellearn.be.api.feign.spotify;
 
 import feign.RequestInterceptor;
 import lombok.Data;
@@ -10,20 +10,15 @@ import org.springframework.stereotype.Indexed;
 @Indexed
 @Data
 @Slf4j
-public class NaverCloudConfig {
+public class SpotifyConfig {
 
-    @Value("${naver.cloud.api.key-id}")
-    private String clientId;
-
-    @Value("${naver.cloud.api.key}")
+    @Value("${spotify.key}")
     private String apiKey;
-
 
     @Bean
     public RequestInterceptor requestInterceptor() {
         return requestTemplate -> {
-            requestTemplate.header("X-NCP-APIGW-API-KEY-ID", clientId);
-            requestTemplate.header("X-NCP-APIGW-API-KEY", apiKey);
+            requestTemplate.header("x-rapidapi-key", apiKey);
         };
     }
 }
